@@ -86,11 +86,12 @@ rules-as-checks/
 │   ├── sgconfig.yml
 │   ├── rules/*.yml
 │   └── rule-tests/*-test.yml
-├── example_app/                      # "healthy" code: the scan passes
-│   ├── domain/
-│   ├── infra/
-│   └── api/
-├── demo/violations/                  # code with deliberate mistakes: the scan MUST fail
+├── fixtures/
+│   ├── valid/                        # "healthy" code: the scan passes
+│   │   ├── domain/
+│   │   ├── infra/
+│   │   └── api/
+│   └── invalid/<rule>/               # deliberate mistakes, one folder per .mdc rule: the scan MUST fail
 ├── scripts/
 │   ├── check_rule_coverage.py
 │   ├── check_exceptions.py
@@ -142,26 +143,26 @@ rules-as-checks/
    - `setup`: `uv sync`, `pre-commit install` and `scripts/install_skills.sh`.
    - `lint-rules`: the single command (see Phase 3). **Hooks, pre-commit and CI call this target and nothing else.**
    - `lint-rules-changed`: the same, only over files changed relative to `origin/main`.
-   - `demo`: runs the scan over `demo/violations/` and **expects it to fail**.
+   - `demo`: runs the scan over `fixtures/invalid/` and **expects it to fail**.
    - `rules-table`: regenerates `docs/rules-table.md`.
 
 **Acceptance:** `make setup` runs cleanly and `ast-grep --version` works inside the environment.
 
 ## Phase 1: Example project and prose rules
 
-1. `example_app/` with three minimal layers:
+1. `fixtures/valid/` with three minimal layers:
    - `domain/` with Pydantic models and pure logic.
    - `infra/` with an in-memory repository and logging.
    - `api/` with one orchestrating function.
 
    About 100 lines in total. It must pass every rule.
-2. `demo/violations/`: one file per rule, each with the concrete violation (plus a variant per file where relevant). Examples: `dataclass_model.py`, `print_debug.py`, `bare_except.py` and `domain_imports_infra.py`.
+2. `fixtures/invalid/<rule>/`: one folder per `.mdc` rule, with one file per check holding the concrete violation (plus a variant per file where relevant). Examples: `logging/print_debug.py`, `error-handling/bare_except.py` and `architecture-layers/domain_imports_infra.py`.
 3. Write the rules in `.cursor/rules/` with Cursor frontmatter (`description`, `globs`, `alwaysApply`) **[VERIFY the current .mdc format]**. Each ends with its `## Checks` section, in the format from `docs/design.md`:
 
 | File | Prose rule | Type | Check |
 | --- | --- | --- | --- |
-| `python-models.mdc` | Data models are `pydantic.BaseModel`, never `@dataclass` or classes whose `__init__` only assigns attributes | Pattern | `prefer-pydantic-over-dataclass`, `no-manual-init-boilerplate` |
-| `logging.mdc` | No `print` in `example_app/`; use `logging.getLogger(__name__)` | Pattern | `no-print-in-app` |
+| `python-models.mdc` | Prefer `pydantic.BaseModel` (`@dataclass` allowed when required); no classes whose `__init__` only assigns attributes | Pattern | `no-manual-init-boilerplate` |
+| `logging.mdc` | No `print` in `fixtures/valid/`; use `logging.getLogger(__name__)` | Pattern | `no-print-in-app` |
 | `error-handling.mdc` | No untyped `except:` and no `except Exception: pass` | Pattern | `no-bare-except`, `no-swallowed-exception` |
 | `architecture-layers.mdc` | `domain` does not import from `infra` or `api` | Architecture | import-linter contract `domain-is-pure` |
 | `naming.mdc` | Descriptive names; single-purpose functions | Judgment | `enforcement: llm-review` |
@@ -172,20 +173,19 @@ rules-as-checks/
 
 1. `lint-rules/sgconfig.yml` with `ruleDirs` and `testConfigs`, as in `docs/design.md`.
 2. One YAML per check in `lint-rules/rules/`. All of them have `id`, `language: Python`, `severity`, `message` (what to use instead), `note` (why), `metadata.source` (path to the `.mdc`) and, where useful, `files` / `ignores` for scope.
-   - `prefer-pydantic-over-dataclass`: the exact YAML is in `docs/design.md`.
-   - `no-print-in-app`: `pattern: print($$$ARGS)`, scoped to `example_app/**`.
+   - `no-print-in-app`: `pattern: print($$$ARGS)`, scoped to `fixtures/valid/**`.
    - `no-bare-except`: an `except_clause` without a type. **[VERIFY the node names with `ast-grep run --debug-query`]**.
    - `no-swallowed-exception`: `except Exception:` whose body is only `pass`.
    - `no-manual-init-boilerplate`: a class whose `__init__` only contains `self.$A = $A`. This is the hardest one. If ast-grep cannot express it well, record it in `docs/decisions.md` as a Fixit candidate, ship it as `warning`, or drop it. Do not force it at the cost of false positives.
-3. One test per check in `lint-rules/rule-tests/<id>-test.yml`: at least 2 `valid` and 2 `invalid` cases. **One of the invalid cases must be the same code as in `demo/violations/`**, following `correct`'s principle that every check must fail on a real mistake.
-4. `.importlinter` with the `domain-is-pure` contract: `example_app.domain` does not import `example_app.infra` or `example_app.api`.
+3. One test per check in `lint-rules/rule-tests/<id>-test.yml`: at least 2 `valid` and 2 `invalid` cases. **One of the invalid cases must be the same code as in `fixtures/invalid/`**, following `correct`'s principle that every check must fail on a real mistake.
+4. `.importlinter` with the `domain-is-pure` contract: `fixtures.valid.domain` does not import `fixtures.valid.infra` or `fixtures.valid.api`.
 5. Run `ast-grep test -c lint-rules/sgconfig.yml` and iterate until everything passes.
 
 **Acceptance:**
 - `ast-grep test` passes.
-- `ast-grep scan` over `example_app/` reports 0 errors.
-- Over `demo/violations/` it reports at least one violation per file.
-- `lint-imports` passes on `example_app` and fails if `demo/violations/domain_imports_infra.py` is placed inside `domain/`. Test this with a test that copies the file in temporarily.
+- `ast-grep scan` over `fixtures/valid/` reports 0 errors.
+- Over `fixtures/invalid/` it reports at least one violation per file.
+- `lint-imports` passes on `fixtures/valid` and fails if `fixtures/invalid/architecture-layers/domain_imports_infra.py` is placed inside `domain/`. Test this with a test that copies the file in temporarily.
 
 ## Phase 3: Traceability, exceptions, guards and the single command
 
@@ -199,7 +199,7 @@ rules-as-checks/
 2. `scripts/check_exceptions.py`. Exceptions follow `correct`'s format: reason, expiry and human approval. Convention:
    ```python
    # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-   # ast-grep-ignore: prefer-pydantic-over-dataclass
+   # ast-grep-ignore: no-print-in-app
    ```
    The script fails if an `ast-grep-ignore` has no `rule-exception` directly above it, if a field is missing, or if `expires` is in the past. **[VERIFY the exact `ast-grep-ignore` syntax for Python]**.
 3. `scripts/rules_table.py`: generates `docs/rules-table.md` (rule → check → severity → active exceptions) and inserts it between `<!-- rules-table:start -->` / `<!-- rules-table:end -->` markers in `CLAUDE.md` / `AGENTS.md`, if they exist. This is `correct`'s "rule table", generated instead of maintained by hand.
@@ -210,7 +210,7 @@ rules-as-checks/
    - Flags any match in the generated files (YAML, tests, `.mdc`), along with URLs, hosts, emails and strings that look like secrets.
    - Exits non-zero if it finds anything, listing each finding with file and line.
 
-   It is a safety net, not a replacement for operating rule 1: it can produce false positives, and the skill decides how to rewrite. Test it by feeding it a generated YAML that deliberately includes a name from `example_app`.
+   It is a safety net, not a replacement for operating rule 1: it can produce false positives, and the skill decides how to rewrite. Test it by feeding it a generated YAML that deliberately includes a name from `fixtures/valid`.
 6. `scripts/check_language.py <files>`: a heuristic for principle 1. It flags lines with Spanish-specific characters (`ñ`, `¿`, `¡`, accented vowels) and files whose ratio of common Spanish stopwords exceeds a threshold. It exits non-zero with file and line for each finding. Test it with one Spanish `.mdc` (must fail) and the repo's English rules (must pass).
 7. `make lint-rules` runs, in order:
    - `ast-grep test`;
@@ -229,7 +229,7 @@ rules-as-checks/
 - Deleting an `enforced-by` line makes the coverage check fail.
 - An `ast-grep-ignore` without justification, or with an expired one, makes the exceptions check fail.
 - `make rules-table` produces the table.
-- `check_no_domain_leak.py` catches an `example_app` name inserted on purpose into a YAML, and passes on the example YAMLs.
+- `check_no_domain_leak.py` catches a `fixtures/valid` name inserted on purpose into a YAML, and passes on the example YAMLs.
 - `check_language.py` fails on a Spanish `.mdc` and passes on the repo's rules.
 
 ## Phase 4: Integration (pre-commit, CI and agent hooks)
@@ -245,9 +245,9 @@ rules-as-checks/
 4. **Cursor hook** (`.cursor/hooks.json`): the equivalent using `afterFileEdit` and `scripts/hooks/cursor_after_edit.sh`. **[VERIFY that the hook exists and whether its output reaches the agent]**. If it does not, record that in `docs/decisions.md` and fall back to an `alwaysApply` `.mdc` rule asking the agent to run `make lint-rules-changed` before finishing.
 
 **Acceptance:**
-- A commit with a `print` in `example_app/` is rejected by pre-commit.
+- A commit with a `print` in `fixtures/valid/` is rejected by pre-commit.
 - The workflow passes on a clean PR and fails on one with a violation (test with `act` if available; otherwise document it).
-- Editing a file with Claude Code to introduce a `@dataclass` triggers the hook and shows the rule's message.
+- Editing a file with Claude Code to introduce a `print` triggers the hook and shows the rule's message.
 
 ## Phase 5: Skills
 
@@ -380,14 +380,14 @@ Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 
 Run each scenario and record the result in `docs/e2e-results.md`:
 
-1. **sync-rules, new rule**: add `.cursor/rules/http-client.mdc` ("use `httpx`, not `requests`") and a demo file that uses `requests`. Run `sync-rules`. Expected: a new YAML with tests, the Checks section updated, the demo caught, and `make lint-rules` green on `example_app/`.
+1. **sync-rules, new rule**: add `.cursor/rules/http-client.mdc` ("use `httpx`, not `requests`") and an invalid fixture that uses `requests`. Run `sync-rules`. Expected: a new YAML with tests, the Checks section updated, the demo caught, and `make lint-rules` green on `fixtures/valid/`.
 2. **sync-rules, orphan**: create a YAML with no `.mdc`. Expected: the skill proposes writing the rule in prose.
 3. **sync-rules `--check`**: with drift, it exits non-zero without writing anything.
 4. **sync-rules, non-English rule**: add an `.mdc` written in Spanish. Expected: the generated check is entirely in English, and the skill proposes translating the `.mdc`.
 5. **reflect-rules**: in a session, write code with `datetime.now()` and correct it ("always `datetime.now(tz=UTC)`"). Run `reflect-rules`. Expected: it proposes the `.mdc` and the check, waits for approval and, once approved, creates them with a synthetic invalid case.
 6. **correct-rules**: seed the history with 2 commits fixing the same mistake (for example `except Exception: pass`) and one with a workaround comment. Expected: it detects the class, picks lint, the test fails on a synthetic version of the original code, and it leaves one commit with the rule, the check and the `.mdc`.
 7. **Full loop**: pre-commit rejects the violation, the Claude Code hook shows it on edit, CI fails on a PR with a violation, and `demo-must-fail` passes.
-8. **No domain leak**: add to `example_app` a module with invented business names (for example `InvoiceLedger` and `apply_partner_rebate`) containing a practice mistake (`except Exception: pass`). Run `correct-rules` and `reflect-rules`. Expected:
+8. **No domain leak**: add to `fixtures/valid` a module with invented business names (for example `InvoiceLedger` and `apply_partner_rebate`) containing a practice mistake (`except Exception: pass`). Run `correct-rules` and `reflect-rules`. Expected:
    - the generated rule talks only about the practice;
    - the tests use generic names;
    - `check_no_domain_leak.py` passes on the generated output;
@@ -401,8 +401,8 @@ Run each scenario and record the result in `docs/e2e-results.md`:
 
 `scripts/install_user_rules.sh` copies the `user-level/` template to `$MY_RULES_HOME` (default `~/.config/my-rules/`). **Only if it does not exist**: it never overwrites an existing set. Contents:
 
-- `sgconfig.yml`, `rules/` and `rule-tests/`, with 2 example rules prefixed `my-` (for example `my-no-print` and `my-prefer-pydantic`) and their tests.
-- `ignore-paths.txt`: one glob per line, optionally followed by a rule id (`~/work/legacy-repo/** my-prefer-pydantic`). It replaces `ast-grep-ignore` for the personal set, because no comments are written into other people's repos.
+- `sgconfig.yml`, `rules/` and `rule-tests/`, with 2 example rules prefixed `my-` (for example `my-no-print` and `my-no-bare-except`) and their tests.
+- `ignore-paths.txt`: one glob per line, optionally followed by a rule id (`~/work/legacy-repo/** my-no-bare-except`). It replaces `ast-grep-ignore` for the personal set, because no comments are written into other people's repos.
 - `bin/my-rules-check <files...>`, the single command for the personal set:
   - filters by the rules' languages;
   - drops anything matching `ignore-paths.txt`;
@@ -467,7 +467,7 @@ Run in a temporary directory, with `HOME` pointing at a test folder so your real
 4. **Repo C, with a local `commit-msg`**: the local hook still runs through the chain.
 5. **Repo D, with husky**: it is documented that the personal git hook does not run, while the agent hooks do.
 6. **`ignore-paths.txt`**: an ignored path reports nothing; the rest still reports.
-7. **Claude Code**: editing any repo to introduce a `@dataclass` triggers the user hook with `my-prefer-pydantic`'s message.
+7. **Claude Code**: editing any repo to introduce a bare `except:` triggers the user hook with `my-no-bare-except`'s message.
 8. **`sync-rules --user`**: adding `~/.cursor/rules/my-http.mdc` generates `my-http-client` with its tests in `$MY_RULES_HOME`, without touching the current repo.
 9. **`reflect-rules`**: a correction marked as a personal preference ends up in the personal set, and a team convention ends up in the repo.
 10. **`sync-rules --user --from-conventions`**: point `$CONVENTIONS_HOME` at a copy of `~/.dev_brain/conventions/`. Expected:

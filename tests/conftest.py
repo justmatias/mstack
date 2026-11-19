@@ -39,7 +39,13 @@ def scan_findings():
 
 @pytest.fixture
 def import_linter_sandbox(tmp_path: Path) -> Path:
-    shutil.copytree(REPOSITORY_ROOT / "example_app", tmp_path / "example_app")
+    shutil.copytree(
+        REPOSITORY_ROOT / "fixtures" / "valid", tmp_path / "fixtures" / "valid"
+    )
+    shutil.copy(
+        REPOSITORY_ROOT / "fixtures" / "__init__.py",
+        tmp_path / "fixtures" / "__init__.py",
+    )
     shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
     return tmp_path
 

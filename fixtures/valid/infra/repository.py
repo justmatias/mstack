@@ -1,6 +1,6 @@
 import logging
 
-from example_app.domain import Order
+from fixtures.valid.domain import Order
 
 logger = logging.getLogger(__name__)
 

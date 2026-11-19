@@ -8,7 +8,7 @@ source "$repository_root/scripts/hooks/lib.sh"
 
 file="$(hook_file_path)"
 if [[ "$file" != *.py || ! -f "$file" ]]; then echo '{}'; exit 0; fi
-case "$file" in "$repository_root"/demo/*|demo/*) echo '{}'; exit 0 ;; esac
+case "$file" in "$repository_root"/fixtures/invalid/*|fixtures/invalid/*) echo '{}'; exit 0 ;; esac
 
 if output="$(scan_file "$repository_root" "$file" 2>&1)"; then
   echo '{}'

@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 import sys
@@ -7,15 +8,14 @@ import pytest
 
 from tests.conftest import REPOSITORY_ROOT
 
-SCRIPTS = REPOSITORY_ROOT / "scripts"
-
 
 @pytest.fixture
-def run_script():
-    def run(script: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
+def run_guard():
+    def run(guard: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
         return subprocess.run(
-            [sys.executable, str(SCRIPTS / script), *arguments],
+            [sys.executable, "-m", f"scripts.guards.{guard}", *arguments],
             cwd=working_directory,
+            env={**os.environ, "PYTHONPATH": str(REPOSITORY_ROOT)},
             capture_output=True,
             text=True,
             check=False,
@@ -36,9 +36,9 @@ def rules_sandbox(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def _delete_enforced_by_line(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / ".cursor" / "rules" / "python-models.mdc"
+    mdc = rules_sandbox / ".cursor" / "rules" / "error-handling.mdc"
     mdc.write_text(
-        mdc.read_text().replace("- enforced-by: no-manual-init-boilerplate\n", "")
+        mdc.read_text().replace("- enforced-by: no-swallowed-exception\n", "")
     )
 
 
@@ -65,8 +65,8 @@ def exception_file(tmp_path: Path):
     def write(header: str) -> Path:
         path = tmp_path / "module.py"
         path.write_text(
-            f"{header}# ast-grep-ignore: prefer-pydantic-over-dataclass\n"
-            "@dataclass\nclass Foo:\n    name: str\n"
+            f"{header}# ast-grep-ignore: no-manual-init-boilerplate\n"
+            "class Foo:\n    def __init__(self, name):\n        self.name = name\n"
         )
         return path
 

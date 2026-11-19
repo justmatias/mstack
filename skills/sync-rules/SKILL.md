@@ -45,7 +45,7 @@ When a rule sits on the border, prefer the kind whose check has no false positiv
 Run the mechanical part:
 
 ```bash
-uv run python <toolkit>/scripts/check_rule_coverage.py --json
+uv run python <toolkit>/scripts/guards/check_rule_coverage.py --json
 ```
 
 It reports `missing-checks-section`, `unknown-check`, `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
@@ -83,7 +83,7 @@ One commit per synced rule (YAML, tests and `.mdc` together), with a Conventiona
 
 ```bash
 make lint-rules
-make demo          # when the repo has demo/violations/
+make demo          # when the repo has fixtures/invalid/
 make rules-table
 ```
 
