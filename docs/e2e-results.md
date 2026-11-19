@@ -59,3 +59,17 @@ Every scenario ran with `HOME` pointing at a temporary folder and `GIT_CONFIG_GL
 | How `ruleDirs` resolves when `-c` points outside the current directory | Relative to the config file (decision 34). |
 | User-level hooks and their coexistence with project hooks | Decision 31; scenario 7. |
 | Invoking pre-commit from a chained hook; husky | Decision 32; scenarios 3 and 5. |
+
+## setup-mstack: installing the skills by copy
+
+Run on 2026-11-19 from the `feat/setup-mstack-skill` worktree. `HOME` pointed at an empty temporary folder, so the real `~/.claude/skills/` was never touched. The skill's steps were followed by the agent acting for the user (tools: Claude Code only). Every other case (updates, local edits, collisions, `keep-both`, merges, symlink migration, both tools, duplicates, a corrupt or missing manifest, dry runs, stale plans) is automated in `tests/scripts/skills_cli/` (`make test`).
+
+| Step | Result | Evidence |
+| --- | --- | --- |
+| `skills plan --tools claude` on a clean `HOME` | Pass | `correct-rules`, `reflect-rules`, `sync-rules`: `install`. Target `~/.claude/skills`. `setup-mstack` is not listed. |
+| `skills apply --dry-run` | Pass | Prints "would copy", "would write manifest", "would write toolkit config"; the temporary `HOME` still holds no files. |
+| `skills apply` | Pass | `installed: correct-rules, reflect-rules, sync-rules`, no backups. `~/.claude/skills/` holds the three folders (copies, not symlinks) and `.mstack-manifest.json`. `~/.config/mstack/config.json` has `toolkit_path` and `targets`. |
+| `skills verify --tools claude` | Pass | `problems: []`: frontmatter valid, `../sync-rules/references/` resolves from every skill, config readable. |
+| Second `skills plan` | Pass | Every skill `unchanged`. |
+| `<toolkit>` from an installed copy | Pass | The `# resolve-toolkit` snippet, taken from the installed `authoring-a-check.md` and run with only `HOME` and `PATH` set, prints the checkout path. |
+| Skills show up in a new Claude Code session | Not run | `claude -p` with the temporary `HOME` stops at "Not logged in". Credentials were not copied into the temporary folder. Pending a run on the real `HOME`: `/setup-mstack`, then a new session should list `sync-rules`, `reflect-rules` and `correct-rules`. |
