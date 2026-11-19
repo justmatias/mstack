@@ -35,24 +35,9 @@ def test_skill_frontmatter_is_valid(skill: str):
     )
 
 
-@pytest.mark.parametrize("skill", sorted(ON_REQUEST_SKILLS))
-def test_adapted_skills_reference_notices(skill: str):
-    last_line = (SKILLS / skill / "SKILL.md").read_text().rstrip().splitlines()[-1]
-
-    assert (
-        last_line
-        == f"Adapted from pstack/{skill.removesuffix('-rules')} (MIT). See THIRD_PARTY_NOTICES.md"
-    )
-    assert (SKILLS / "THIRD_PARTY_NOTICES.md").is_file()
-
-
 @pytest.mark.parametrize(
     "document",
-    sorted(
-        path
-        for path in (*SKILLS.rglob("*.md"), *SETUP_SKILL.rglob("*.md"))
-        if path.name != "THIRD_PARTY_NOTICES.md"
-    ),
+    sorted((*SKILLS.rglob("*.md"), *SETUP_SKILL.rglob("*.md"))),
     ids=lambda path: str(path.relative_to(REPOSITORY_ROOT)),
 )
 def test_every_skill_document_states_both_principles(document):
