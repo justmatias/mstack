@@ -15,7 +15,7 @@ Paths and check names are the ones in use when each scenario ran. The repo was r
 
 ## Phase 6: end-to-end scenarios
 
-The skills were executed by the agent following their `SKILL.md`. Approval gates were answered by the agent acting for the user (the user asked not to be consulted on reversible decisions). Reviewer and synthesizer templates for `reflect-rules` were applied inline (`--light` shape, no subagents spawned) to keep the run cheap. Scenarios 2–6 and 8 ran in throwaway clones of the repo, so no seeded history, Spanish input or business-named code entered this repo.
+The skills were executed by the agent following their `SKILL.md`. Approval gates were answered by the agent acting for the user (the user asked not to be consulted on reversible decisions). Reviewer and synthesizer templates for `reflect-rules` were applied inline (single-reviewer shape, no subagents spawned; the default mode since decision 51) to keep the run cheap. Scenarios 2–6 and 8 ran in throwaway clones of the repo, so no seeded history, Spanish input or business-named code entered this repo.
 
 | # | Scenario | Result | Evidence |
 | --- | --- | --- | --- |

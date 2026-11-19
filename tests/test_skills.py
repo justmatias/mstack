@@ -13,9 +13,10 @@ TRIGGER_PHRASES = {
         "--check",
         "--user",
     ],
-    "reflect-rules": ["reflect-rules", "transcript", "personal"],
+    "reflect-rules": ["reflect-rules", "transcript", "personal", "--deep"],
     "correct-rules": ["/correct-rules", "keep repeating", "real past mistake"],
 }
+FRONTMATTER = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 PRINCIPLES_HEADER = re.compile(r"English only.*Practices, not domain", re.DOTALL)
 
 
@@ -33,25 +34,26 @@ def test_skill_frontmatter_is_valid(skill: str):
 
 
 @pytest.mark.parametrize("skill", sorted(ON_REQUEST_SKILLS))
-def test_adapted_skills_reference_notices(skill: str):
-    last_line = (SKILLS / skill / "SKILL.md").read_text().rstrip().splitlines()[-1]
+def test_adapted_skills_credit_pstack_in_frontmatter(skill: str):
+    frontmatter = read_frontmatter(SKILLS / skill / "SKILL.md")
+    metadata = frontmatter["metadata"]
 
-    assert (
-        last_line
-        == f"Adapted from pstack/{skill.removesuffix('-rules')} (MIT). See THIRD_PARTY_NOTICES.md"
+    assert frontmatter["license"] == "MIT"
+    assert metadata["adapted-from"].startswith(
+        f"pstack/skills/{skill.removesuffix('-rules')} in cursor/plugins"
     )
-    assert (SKILLS / "THIRD_PARTY_NOTICES.md").is_file()
+    assert re.fullmatch(r"[0-9a-f]{40}", metadata["upstream-commit"])
+    assert "Copyright (c) 2026 Lauren Tan" in metadata["upstream-license"]
 
 
 @pytest.mark.parametrize(
     "document",
-    sorted(
-        path for path in SKILLS.rglob("*.md") if path.name != "THIRD_PARTY_NOTICES.md"
-    ),
+    sorted(SKILLS.rglob("*.md")),
     ids=lambda path: str(path.relative_to(SKILLS)),
 )
 def test_every_skill_document_states_both_principles(document):
-    head = "\n".join(document.read_text().splitlines()[:12])
+    body = FRONTMATTER.sub("", document.read_text(), count=1)
+    head = "\n".join(body.splitlines()[:12])
 
     assert PRINCIPLES_HEADER.search(head)
 
