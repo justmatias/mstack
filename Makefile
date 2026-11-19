@@ -1,6 +1,9 @@
 SHELL := /usr/bin/env bash
 .SHELLFLAGS := -eu -o pipefail -c
 
+AST_GREP := uv run ast-grep
+SGCONFIG := lint-rules/sgconfig.yml
+
 .PHONY: setup lint lint-rules lint-rules-changed demo rules-table
 
 setup:
@@ -17,8 +20,13 @@ lint-rules:
 lint-rules-changed:
 	@echo "lint-rules-changed: not implemented yet (Phase 3)"
 
+# The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:
-	@echo "demo: not implemented yet (Phase 2)"
+	@if $(AST_GREP) scan -c $(SGCONFIG) fixtures/invalid; then \
+		echo "demo: the scan found no errors in fixtures/invalid/; the checks are broken" >&2; exit 1; \
+	else \
+		echo "demo: OK, the scan failed on fixtures/invalid/ as expected"; \
+	fi
 
 rules-table:
 	@echo "rules-table: not implemented yet (Phase 3)"
