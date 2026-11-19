@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Tooling
+.import_linter_cache/
+.coverage
+htmlcov/
+
+# Generated per-machine symlinks (created by scripts/install_skills.sh)
+.claude/skills/
+.cursor/skills/
+.claude/settings.local.json
