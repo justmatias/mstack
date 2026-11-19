@@ -63,7 +63,7 @@ Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case m
 ## 5. Measure existing violations
 
 ```bash
-uv run ast-grep scan -c lint-rules/sgconfig.yml --filter '^<id>$' --globs '!demo/**' .
+uv run ast-grep scan -c lint-rules/sgconfig.yml --filter '^<id>$' --globs '!fixtures/invalid/**' .
 ```
 
 Count the findings and look at each one: is it a real violation or a false positive? Fix false positives in the rule (back to step 2).
@@ -82,7 +82,7 @@ Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule 
 ## 8. Verify what you generated
 
 ```bash
-uv run python <toolkit>/scripts/check_no_domain_leak.py <every file you generated> --repo .
+uv run python <toolkit>/scripts/guards/check_no_domain_leak.py <every file you generated> --repo .
 ```
 
 In the mstack repo itself, add `--exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
@@ -91,11 +91,11 @@ In the mstack repo itself, add `--exclude scripts --exclude tests` (tooling, not
 
 ```bash
 make lint-rules
-make demo         # only in repos that have demo/violations/
+make demo         # only in repos that have fixtures/invalid/
 make rules-table
 ```
 
-In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `uv run python <toolkit>/scripts/check_rule_coverage.py`, `check_exceptions.py` and `check_no_domain_leak.py`.
+In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage`, `check_exceptions.py` and `check_no_domain_leak.py`.
 
 Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
 
@@ -126,9 +126,9 @@ Checks for your own preferences live outside every repo, in `$MY_RULES_HOME` (de
 
   ```bash
   uv run ast-grep test -c "$MY_RULES_HOME/sgconfig.yml" --skip-snapshot-tests
-  uv run python <toolkit>/scripts/check_rule_coverage.py --rules-dir ~/.cursor/rules \
+  PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage --rules-dir ~/.cursor/rules \
     --config "$MY_RULES_HOME/sgconfig.yml" --glob 'my-*.mdc' --root ~ --importlinter /dev/null
-  uv run python <toolkit>/scripts/check_no_domain_leak.py <generated files> --repo <the repo you were working in>
+  uv run python <toolkit>/scripts/guards/check_no_domain_leak.py <generated files> --repo <the repo you were working in>
   ```
 
 - Check a file by hand with `$MY_RULES_HOME/bin/my-rules-check <files>` (add `--with-repo` to also run the current repo's `lint-rules/`).

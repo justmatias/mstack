@@ -24,18 +24,18 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 make setup        # uv sync, then asks which integrations to install
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
-make demo         # scans demo/violations/ and expects it to fail
+make demo         # scans fixtures/invalid/ and expects it to fail
 make test         # pytest: checks, guards, setup CLI, skills and personal rules
 ```
 
 ## What `make lint-rules` runs
 
 1. `ast-grep test`: every check passes its valid and invalid cases.
-2. `ast-grep scan`: the code follows every check (`demo/` excluded).
+2. `ast-grep scan`: the code follows every check (`fixtures/invalid/` excluded).
 3. `lint-imports`: architecture contracts in `.importlinter`.
-4. `scripts/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
-5. `scripts/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
-6. `scripts/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
+4. `scripts/guards/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
+5. `scripts/guards/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
+6. `scripts/guards/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
 
 `make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main`, and warnings count as errors there.
 
@@ -43,7 +43,7 @@ make test         # pytest: checks, guards, setup CLI, skills and personal rules
 
 ```python
 # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-# ast-grep-ignore: prefer-pydantic-over-dataclass
+# ast-grep-ignore: no-manual-init-boilerplate
 ```
 
 ## Setup options
@@ -76,9 +76,9 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 
 ## CI and branch protection
 
-`.github/workflows/lint-rules.yml` has three jobs: `rules` (`make lint-rules-changed` on pull requests, `make lint-rules` on pushes to `main`), `demo-must-fail` (`make demo`) and `sync-drift` (`check_rule_coverage.py`).
+The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
 
-To make `rules` block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add `rules`, `demo-must-fail`, `sync-drift` and the `ci.yml` static checks as required checks.
+To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
 
 ## Personal rules (every repo, shared with no one)
 

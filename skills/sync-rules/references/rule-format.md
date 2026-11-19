@@ -17,13 +17,12 @@ alwaysApply: false
 
 # Python data models
 
-- Data models are `pydantic.BaseModel` subclasses. Do not use `@dataclass`.
+- Prefer `pydantic.BaseModel` subclasses for data models. Use `@dataclass` only when it is required.
 - Do not write classes whose `__init__` only copies its arguments onto `self`.
 
 Why: one sentence on why the team follows the rule.
 
 ## Checks
-- enforced-by: prefer-pydantic-over-dataclass
 - enforced-by: no-manual-init-boilerplate
 ```
 
@@ -49,19 +48,18 @@ A file may mix both when some bullets are checkable and others are judgment. A r
 Every ast-grep rule points back to its prose rule:
 
 ```yaml
-id: prefer-pydantic-over-dataclass
+id: no-print-in-app
 language: Python
 severity: error
-message: Use pydantic.BaseModel instead of @dataclass   # what to use instead
+message: Use a module logger instead of print            # what to use instead
 note: |                                                  # why
-  Project models use Pydantic for consistent validation and serialization.
+  print output has no level or source and cannot be filtered or routed.
 metadata:
-  source: .cursor/rules/python-models.mdc                # path from the repo root
+  source: .cursor/rules/logging.mdc                      # path from the repo root
 files:                                                   # optional scope, structural globs only
-  - "**/domain/**"
+  - "**/app/**"
 rule:
-  kind: decorator
-  regex: dataclass
+  pattern: print($$$ARGS)
 ```
 
 `check_rule_coverage.py` fails when `metadata.source` is missing or does not exist, or when that `.mdc` does not list the id in its Checks section.
@@ -74,9 +72,8 @@ A legitimate exception goes on the offending line, with a reason, an expiry date
 
 ```python
 # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-# ast-grep-ignore: prefer-pydantic-over-dataclass
-@dataclass
-class Foo: ...
+# ast-grep-ignore: no-print-in-app
+print(banner)
 ```
 
 - `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule and is rejected.

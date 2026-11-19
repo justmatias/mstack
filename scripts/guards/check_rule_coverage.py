@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import configparser
 import json
@@ -7,7 +6,8 @@ import sys
 from pathlib import Path
 
 import yaml
-from conventions_inventory import read_convention
+
+from scripts.guards.conventions_inventory import read_convention
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
 ENFORCED_BY = re.compile(r"^\s*-\s*enforced-by:\s*(?P<check_id>\S+)\s*$")

@@ -42,6 +42,17 @@ jobs:
       - name: Run pre-commit on all files
         run: make lint
 
+      # The pre-commit hook scans staged files only, so on a clean checkout it
+      # scans nothing: scan the whole repo here.
+      - name: Scan the code with the rules
+        run: make lint-rules
+
+      - name: The checks still catch the invalid fixtures
+        run: make demo
+
+      - name: Tests
+        run: make test
+
   security:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest

@@ -152,7 +152,7 @@ def test_claude_user_hook_reports_personal_and_repository_rules(
 
     assert completed.returncode == 2
     assert "my-prefer-pydantic" in completed.stderr
-    assert "prefer-pydantic-over-dataclass" in completed.stderr
+    assert "no-bare-except" in completed.stderr
 
 
 @pytest.mark.usefixtures("_install_personal_set", "_add_project_hook")
@@ -167,7 +167,7 @@ def test_claude_user_hook_skips_repository_set_when_project_hook_exists(
 
     assert completed.returncode == 2
     assert "my-prefer-pydantic" in completed.stderr
-    assert "prefer-pydantic-over-dataclass" not in completed.stderr
+    assert "no-bare-except" not in completed.stderr
 
 
 @pytest.mark.usefixtures("_install_personal_set")
@@ -196,7 +196,8 @@ def test_personal_set_passes_its_own_tests_and_coverage(
     )
     coverage = run(
         "python",
-        str(REPOSITORY_ROOT / "scripts" / "check_rule_coverage.py"),
+        "-m",
+        "scripts.guards.check_rule_coverage",
         "--rules-dir",
         str(home_directory / ".cursor" / "rules"),
         "--config",
@@ -206,6 +207,7 @@ def test_personal_set_passes_its_own_tests_and_coverage(
         "--root",
         str(home_directory),
         cwd=home_directory,
+        extra={"PYTHONPATH": str(REPOSITORY_ROOT)},
     )
 
     assert tests.returncode == 0, tests.stdout + tests.stderr

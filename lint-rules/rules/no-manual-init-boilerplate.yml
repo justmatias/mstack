@@ -1,7 +1,7 @@
 id: no-manual-init-boilerplate
 language: Python
 severity: warning
-message: Declare the fields on a pydantic.BaseModel instead of an __init__ that only copies its arguments
+message: Declare the fields on a pydantic.BaseModel (or a dataclass when required) instead of an __init__ that only copies its arguments
 note: |
   Constructors that only assign self.x = x duplicate the field list
   and drift out of sync with it. Scope: classes whose only method is

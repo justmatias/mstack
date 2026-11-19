@@ -233,6 +233,7 @@ def dataclass_file(repository_with_project_rules: Path) -> Path:
     path = repository_with_project_rules / "model.py"
     path.write_text(
         "from dataclasses import dataclass\n\n\n@dataclass\nclass Foo:\n    name: str\n"
+        "\n\ntry:\n    Foo(name='x')\nexcept:\n    raise\n"
     )
     return path
 
