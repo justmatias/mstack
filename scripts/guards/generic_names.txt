@@ -1,0 +1,77 @@
+# Generic names that check_no_domain_leak.py never reports, even when the analyzed
+# repo defines them. One name per line; lines with a dot are allowed public hosts.
+# Keep this list generic: never add a business, client, product or team name here.
+
+# Placeholder names used in synthetic test cases
+Foo
+Bar
+Baz
+Qux
+Item
+Items
+User
+Users
+Thing
+Widget
+Record
+Service
+Client
+Handler
+Repository
+Error
+do_work
+do_other_work
+build_thing
+callback
+
+# Structural folders and modules
+fixtures
+valid
+invalid
+src
+app
+apps
+lib
+libs
+domain
+infra
+infrastructure
+api
+apis
+adapters
+application
+core
+common
+shared
+utils
+helpers
+models
+schemas
+services
+repositories
+routers
+views
+handlers
+tests
+test
+scripts
+config
+configs
+settings
+main
+cli
+
+# Public documentation hosts that rules and skills may link to
+ast-grep.github.io
+github.com
+docs.python.org
+docs.pydantic.dev
+docs.astral.sh
+pypi.org
+cursor.com
+docs.cursor.com
+code.claude.com
+docs.claude.com
+import-linter.readthedocs.io
+pre-commit.com
+semgrep.dev
