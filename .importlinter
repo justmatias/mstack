@@ -1,0 +1,11 @@
+[importlinter]
+root_package = example_app
+
+[importlinter:contract:domain-is-pure]
+name = domain-is-pure
+type = forbidden
+source_modules =
+    example_app.domain
+forbidden_modules =
+    example_app.infra
+    example_app.api

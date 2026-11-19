@@ -1,0 +1,35 @@
+id: prefer-pydantic-over-dataclass
+valid:
+  - |
+    class User(BaseModel):
+        name: str
+  - |
+    from functools import cache
+
+    @cache
+    def load_user(user_id: int) -> User:
+        return User(name=str(user_id))
+invalid:
+  # Same code as demo/violations/dataclass_model.py
+  - |
+    import dataclasses
+    from dataclasses import dataclass
+
+
+    @dataclass
+    class User:
+        name: str
+
+
+    @dataclasses.dataclass(frozen=True)
+    class Item:
+        name: str
+        quantity: int
+  - |
+    @dataclass
+    class User:
+        name: str
+  - |
+    @dataclasses.dataclass(frozen=True)
+    class User:
+        name: str

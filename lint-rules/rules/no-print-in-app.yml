@@ -1,0 +1,14 @@
+id: no-print-in-app
+language: Python
+severity: error
+message: Use a module logger (logging.getLogger(__name__)) instead of print
+note: |
+  print output has no level or source and cannot be filtered
+  or routed in production.
+metadata:
+  source: .cursor/rules/logging.mdc
+files:
+  - "**/example_app/**"
+  - "**/demo/**"
+rule:
+  pattern: print($$$ARGS)
