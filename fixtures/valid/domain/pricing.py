@@ -1,4 +1,4 @@
-from example_app.domain.models import Order
+from fixtures.valid.domain.models import Order
 
 
 def order_total(order: Order) -> float:

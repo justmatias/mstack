@@ -24,7 +24,7 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 make setup        # uv sync, pre-commit install, install the skills
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
-make demo         # scans demo/violations/ and expects it to fail
+make demo         # scans fixtures/invalid/ and expects it to fail
 ```
 
 ## Static checks and releases
