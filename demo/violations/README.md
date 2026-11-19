@@ -4,7 +4,6 @@ Every file in this folder breaks one rule from `.cursor/rules/` on purpose. `mak
 
 | File | Rule | Check |
 | --- | --- | --- |
-| `dataclass_model.py` | `python-models.mdc` | `prefer-pydantic-over-dataclass` |
 | `manual_init.py` | `python-models.mdc` | `no-manual-init-boilerplate` |
 | `print_debug.py` | `logging.mdc` | `no-print-in-app` |
 | `bare_except.py` | `error-handling.mdc` | `no-bare-except` |
