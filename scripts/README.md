@@ -16,6 +16,7 @@ Scripts are grouped by purpose. Nothing is meant to be called directly: each one
 - `check_rule_coverage.py`: every `.mdc` rule has a `## Checks` section, every check it lists exists, and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it.
 - `check_exceptions.py`: every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver.
 - `check_no_domain_leak.py`: rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets.
+- `conventions_inventory.py`: read-only inventory of the conventions store (name, tags, body hash); `check_rule_coverage.py` uses it to report personal rules whose source convention changed (`stale`) or was deleted (`orphan`).
 - `generic_names.txt`: names and public hosts that `check_no_domain_leak.py` never reports.
 
 ## generate/

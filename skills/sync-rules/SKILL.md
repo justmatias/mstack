@@ -45,7 +45,7 @@ When a rule sits on the border, prefer the kind whose check has no false positiv
 Run the mechanical part:
 
 ```bash
-uv run python <toolkit>/scripts/guards/check_rule_coverage.py --json
+PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage --json
 ```
 
 It reports `missing-checks-section`, `unknown-check`, `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
@@ -116,7 +116,7 @@ Also takes the conventions store (`$CONVENTIONS_HOME`, default `~/.dev_brain/con
 1. Read the store with the inventory script; never parse it by hand and never modify it:
 
    ```bash
-   uv run python <toolkit>/scripts/conventions_inventory.py --json [--dir <dir>]
+   uv run python <toolkit>/scripts/guards/conventions_inventory.py --json [--dir <dir>]
    ```
 
 2. Split each convention into atomic rules and classify each one:
@@ -125,6 +125,6 @@ Also takes the conventions store (`$CONVENTIONS_HOME`, default `~/.dev_brain/con
    - **tooling note**: a workaround for a tool's quirk (linter false positives, autofix pitfalls, pin tools). No check, no `.mdc`. Report `skipped: tooling note`.
    - **non-code**: commits, process, workflow. No ast-grep check. Where a git hook can enforce it (for example a `commit-msg` regex), propose a step in `$MY_RULES_HOME/bin/git-hook-chain`, only with approval. Otherwise report it as skipped.
 3. For each checkable or judgment rule, write `~/.cursor/rules/my-<name>.mdc` in English, with `derived-from: <convention path>` and `derived-sha256: <sha256 from the inventory>` in the frontmatter and the usual `## Checks` section. Never edit files under the store: to change a rule, the user changes the convention and the next run picks it up.
-4. Drift: a convention whose `sha256` no longer matches `derived-sha256` makes its `.mdc` and check `stale`; a deleted convention makes them `orphan`. `check_rule_coverage.py --rules-dir ~/.cursor/rules --config $MY_RULES_HOME/sgconfig.yml --root ~` also fails on a `derived-from` path that does not exist.
+4. Drift: a convention whose `sha256` no longer matches `derived-sha256` makes its `.mdc` and check `stale`; a deleted convention makes them `orphan`. `check_rule_coverage.py --rules-dir ~/.cursor/rules --config $MY_RULES_HOME/sgconfig.yml --glob 'my-*.mdc' --root ~` reports both, and also fails on a `derived-from` path that does not exist.
 5. Conventions may name specific projects or tools. Abstract or drop those details before writing anything, and run `check_no_domain_leak.py` over the generated files.
 6. Show the plan and wait for approval. A second run with an unchanged store reports everything `ok`.

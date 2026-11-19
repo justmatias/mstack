@@ -25,6 +25,7 @@ make setup        # uv sync, then asks which integrations to install
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
+make test         # pytest: checks, guards, setup CLI, skills and personal rules
 ```
 
 ## What `make lint-rules` runs
@@ -78,3 +79,34 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
 
 To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
+
+## Personal rules (every repo, shared with no one)
+
+Your own checks live in `$MY_RULES_HOME` (default `~/.config/my-rules/`), apply in every repo you work in, and write nothing into those repos. They warn in the agent and at commit time; CI is left out on purpose, because it belongs to each team.
+
+```bash
+uv run python scripts/setup.py user              # asks which parts to install
+uv run python scripts/setup.py user --yes --replace-hooks-path
+uv run python scripts/setup.py user --uninstall --yes
+```
+
+| Component | What it does |
+| --- | --- |
+| `rules` | Copies `user-level/` to `$MY_RULES_HOME` **only if it does not exist**, links every git hook name in `githooks/` to `bin/git-hook-chain`, and copies the example prose rules to `~/.cursor/rules/my-*.mdc` |
+| `claude-hook` | Merges a `PostToolUse` (`Edit\|Write`) hook running `bin/claude-post-edit` into `~/.claude/settings.json` |
+| `cursor-hook` | Merges a `postToolUse` (`Write`) hook running `bin/cursor-after-edit` into `~/.cursor/hooks.json` |
+| `git-hooks` | `git config --global core.hooksPath $MY_RULES_HOME/githooks` |
+| `skills` | Links the three skills into `~/.claude/skills/` and `~/.cursor/skills/` |
+
+- `bin/my-rules-check [--with-repo] <files>` is the single command: it filters by the rules' languages, drops anything in `ignore-paths.txt` (`<glob> [rule-id]`), and runs only over the given files, so old mistakes you did not write never show up. `--with-repo` also runs the current repo's `lint-rules/`.
+- The agent hooks run the repo set too, unless the repo already has its own project hook (then only the personal set runs, so nothing runs twice).
+- `MY_RULES_DISABLE=1` turns everything off for one command.
+- Uninstall restores the previous `core.hooksPath`, removes the hook entries (restoring the original bytes of each JSON file), and deletes only the personal-set files you never modified.
+- Optional: `git init` in `$MY_RULES_HOME` to version your set privately. `ignore-paths.txt` is already in its `.gitignore`, because it holds work repo paths.
+
+### Pitfalls of the global git hook
+
+- **`pre-commit install` refuses to run** when a global `core.hooksPath` is set. That is why `git-hook-chain` calls `pre-commit hook-impl` directly, for the hook types the repo would have installed (`default_install_hook_types`, default `pre-commit`).
+- **Repos using husky** set `core.hooksPath` at repo level, which takes precedence over the global one. There the personal git hook does not run; only the agent hooks remain.
+- **An existing global `core.hooksPath`** is never replaced silently: the installer warns and skips unless you pass `--replace-hooks-path`, and the previous value is restored on uninstall.
+- A repo's own `.git/hooks/<name>` still runs through the chain (with the same arguments and stdin), unless pre-commit generated it, in which case pre-commit is called instead.

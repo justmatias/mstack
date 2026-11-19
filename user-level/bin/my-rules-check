@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+# pylint: disable=invalid-name  # an executable on PATH, not an importable module
+# The single command for the personal rule set. Runs $MY_RULES_HOME's checks over
+# specific files only (never a whole repo), honoring ignore-paths.txt.
+# Usage: my-rules-check [--with-repo] <files...>   (MY_RULES_DISABLE=1 turns it off)
+import fnmatch
+import json
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+LANGUAGE_EXTENSIONS = {
+    "python": {".py", ".pyi"},
+    "javascript": {".js", ".mjs", ".cjs", ".jsx"},
+    "typescript": {".ts", ".mts", ".cts"},
+    "tsx": {".tsx"},
+    "go": {".go"},
+    "rust": {".rs"},
+    "java": {".java"},
+    "kotlin": {".kt", ".kts"},
+    "ruby": {".rb"},
+    "bash": {".sh", ".bash"},
+}
+LANGUAGE_LINE = re.compile(r"^language:\s*['\"]?(?P<language>[\w-]+)", re.MULTILINE)
+
+
+def my_rules_home() -> Path:
+    return Path(os.environ.get("MY_RULES_HOME", "~/.config/my-rules")).expanduser()
+
+
+def ast_grep_command() -> list[str]:
+    if configured := os.environ.get("AST_GREP"):
+        return shlex.split(configured)
+    for name in ("ast-grep",):
+        if found := shutil.which(name):
+            return [found]
+    if shutil.which("uvx"):
+        return ["uvx", "--from", "ast-grep-cli", "ast-grep"]
+    sys.exit(
+        "my-rules-check: ast-grep not found (install ast-grep-cli or set AST_GREP)"
+    )
+
+
+def rule_extensions(home: Path) -> set[str]:
+    extensions: set[str] = set()
+    for rule in (home / "rules").glob("*.y*ml"):
+        for match in LANGUAGE_LINE.finditer(rule.read_text(encoding="utf-8")):
+            extensions |= LANGUAGE_EXTENSIONS.get(match["language"].lower(), set())
+    return extensions
+
+
+def load_ignores(home: Path) -> list[tuple[str, str | None]]:
+    path = home / "ignore-paths.txt"
+    if not path.is_file():
+        return []
+    ignores = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        parts = line.split("#", 1)[0].split()
+        if parts:
+            ignores.append((
+                os.path.expanduser(parts[0]),
+                parts[1] if len(parts) > 1 else None,
+            ))
+    return ignores
+
+
+def ignored_rules(file: Path, ignores: list[tuple[str, str | None]]) -> set[str | None]:
+    return {
+        rule_id for pattern, rule_id in ignores if fnmatch.fnmatch(str(file), pattern)
+    }
+
+
+def run_personal_set(files: list[Path], home: Path) -> int:
+    extensions = rule_extensions(home)
+    ignores = load_ignores(home)
+    candidates = []
+    for file in files:
+        ignored = ignored_rules(file, ignores)
+        if file.suffix in extensions and None not in ignored:
+            candidates.append((file, ignored))
+    if not candidates:
+        return 0
+    completed = subprocess.run(
+        [
+            *ast_grep_command(),
+            "scan",
+            "-c",
+            str(home / "sgconfig.yml"),
+            "--json=stream",
+            *(str(file) for file, _ in candidates),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode not in (0, 1) and not completed.stdout:
+        print(completed.stderr, file=sys.stderr)
+        return completed.returncode
+    ignored_by_file = {str(file): ignored for file, ignored in candidates}
+    errors = 0
+    for line in completed.stdout.splitlines():
+        finding = json.loads(line)
+        if finding["ruleId"] in ignored_by_file.get(finding["file"], set()):
+            continue
+        severity = finding.get("severity", "error")
+        errors += severity == "error"
+        start = finding["range"]["start"]
+        print(
+            f"{severity}[{finding['ruleId']}]: {finding['message']}\n"
+            f"  --> {finding['file']}:{start['line'] + 1}:{start['column'] + 1}\n"
+            f"   | {finding['lines'].strip()}",
+            file=sys.stderr,
+        )
+        if finding.get("note"):
+            note = "\n     ".join(
+                line.strip() for line in finding["note"].strip().splitlines()
+            )
+            print(f"   = {note}", file=sys.stderr)
+    return 1 if errors else 0
+
+
+def run_repo_set(files: list[Path]) -> int:
+    completed = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return 0
+    root = Path(completed.stdout.strip())
+    config = root / "lint-rules" / "sgconfig.yml"
+    in_repo = [
+        file
+        for file in files
+        if file.suffix in {".py", ".pyi"} and file.is_relative_to(root)
+    ]
+    if not config.is_file() or not in_repo:
+        return 0
+    relative = [str(file.relative_to(root)) for file in in_repo]
+    result = subprocess.run(
+        [*ast_grep_command(), "scan", "-c", str(config), "--color", "never", *relative],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        print(result.stdout + result.stderr, file=sys.stderr, end="")
+    return result.returncode
+
+
+def main(arguments: list[str]) -> int:
+    if os.environ.get("MY_RULES_DISABLE") == "1":
+        return 0
+    with_repo = "--with-repo" in arguments
+    files = [
+        Path(argument).resolve() for argument in arguments if argument != "--with-repo"
+    ]
+    files = [file for file in files if file.is_file()]
+    home = my_rules_home()
+    if not files or not (home / "sgconfig.yml").is_file():
+        return 0
+    status = run_personal_set(files, home)
+    if with_repo:
+        status = max(status, run_repo_set(files))
+    return status
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

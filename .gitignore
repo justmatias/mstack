@@ -14,7 +14,7 @@ dist/
 .coverage
 htmlcov/
 
-# Generated per-machine symlinks (created by scripts/install_skills.sh)
+# Generated per developer by scripts/setup.py
 .claude/skills/
 .cursor/skills/
 .claude/settings.local.json
