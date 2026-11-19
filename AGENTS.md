@@ -15,5 +15,4 @@
 | `.cursor/rules/logging.mdc` | `no-print-in-app` | ast-grep | error | 0 |
 | `.cursor/rules/naming.mdc` | - | LLM review on the PR | comment only | - |
 | `.cursor/rules/python-models.mdc` | `no-manual-init-boilerplate` | ast-grep | warning | 0 |
-| `.cursor/rules/python-models.mdc` | `prefer-pydantic-over-dataclass` | ast-grep | error | 0 |
 <!-- rules-table:end -->

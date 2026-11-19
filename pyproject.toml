@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "0.0.0"
+version = "1.4.0"
 description = "Logbook of agent skills, rules, hooks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }
@@ -35,8 +35,8 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
-# demo/ holds deliberate violations for the rule checks to catch.
-extend-exclude = ["demo"]
+# fixtures/invalid/ holds deliberate violations for the rule checks to catch.
+extend-exclude = ["fixtures/invalid"]
 preview = true
 fix = true
 format.indent-style = "space"
@@ -49,7 +49,7 @@ format.skip-magic-trailing-comma = false
 ##################################
 
 [tool.pylint]
-ignore-paths = ["^demo/.*$"]
+ignore-paths = ["^fixtures/invalid/.*$"]
 disable = [
   "missing-docstring",
   "missing-module-docstring",
@@ -85,7 +85,7 @@ load-plugins = [
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 python_version = "3.12"
-exclude = ["^demo/"]
+exclude = ["^fixtures/invalid/"]
 disallow_untyped_defs = true
 show_error_codes = true
 no_implicit_optional = true

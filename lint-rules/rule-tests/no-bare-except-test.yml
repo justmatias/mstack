@@ -16,7 +16,7 @@ valid:
     except Exception:
         logger.exception("failed")
 invalid:
-  # Same code as the matching file in demo/violations/
+  # Same code as fixtures/invalid/error-handling/bare_except.py
   - |
     def do_work(callback):
         try:

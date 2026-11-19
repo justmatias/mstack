@@ -1,12 +1,12 @@
 ---
 description: Logging instead of print in application code
-globs: "example_app/**/*.py"
+globs: "fixtures/valid/**/*.py"
 alwaysApply: false
 ---
 
 # Logging
 
-- Do not use `print` in `example_app/`. Use a module-level logger: `logger = logging.getLogger(__name__)`.
+- Do not use `print` in `fixtures/valid/`. Use a module-level logger: `logger = logging.getLogger(__name__)`.
 
 Why: `print` output has no level, no source and cannot be filtered or routed in production.
 

@@ -8,7 +8,6 @@ note: |
 metadata:
   source: .cursor/rules/logging.mdc
 files:
-  - "**/example_app/**"
-  - "**/demo/**"
+  - "**/fixtures/**"
 rule:
   pattern: print($$$ARGS)
