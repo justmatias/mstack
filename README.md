@@ -21,7 +21,7 @@ The first feature is **rules as checks**: every rule that can be verified become
 Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-make setup        # uv sync, pre-commit install, install the skills
+make setup        # uv sync, then asks which integrations to install
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans demo/violations/ and expects it to fail
@@ -44,6 +44,28 @@ make demo         # scans demo/violations/ and expects it to fail
 # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
 # ast-grep-ignore: prefer-pydantic-over-dataclass
 ```
+
+## Setup options
+
+`make setup` runs `scripts/setup.py`, which asks which integrations you want. Pass flags to skip the questions:
+
+```bash
+uv run python scripts/setup.py --yes                                  # everything, defaults
+uv run python scripts/setup.py --with pre-commit --with claude-hook   # only these
+uv run python scripts/setup.py --without cursor-hook --skills-scope global
+uv run python scripts/setup.py --claude-settings project              # hook in the shared .claude/settings.json
+uv run python scripts/setup.py --uninstall --yes                      # remove what install added
+uv run python scripts/setup.py --dry-run --yes                        # show what would change
+```
+
+| Component | What it installs |
+| --- | --- |
+| `pre-commit` | `.git/hooks/pre-commit` (via `pre-commit install`), running the static checks and `make lint-rules-changed STAGED=1` |
+| `claude-hook` | `PostToolUse` (`Edit\|Write`) in `.claude/settings.local.json` (default) or `.claude/settings.json` |
+| `cursor-hook` | `postToolUse` (`Write`) in `.cursor/hooks.json`; findings come back as `additional_context` |
+| `skills` | symlinks of `skills/*` into `.claude/skills/` and `.cursor/skills/` (or `~/` with `--skills-scope global`) |
+
+Existing JSON files are merged, never overwritten, and backed up as `*.bak-<timestamp>`. Running setup twice changes nothing.
 
 ## Static checks and releases
 
