@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v1.5.0 (2026-11-19)
+
+### Continuous Integration
+
+- Add pre-commit hook and GitHub Actions workflow running the single command
+  ([#8](https://github.com/justmatias/mstack/pull/8),
+  [`7ee0679`](https://github.com/justmatias/mstack/commit/7ee067982351b83142cac2084891c44c5b7a819a))
+
+### Features
+
+- Add agent hooks and a configurable setup CLI ([#8](https://github.com/justmatias/mstack/pull/8),
+  [`7ee0679`](https://github.com/justmatias/mstack/commit/7ee067982351b83142cac2084891c44c5b7a819a))
+
+- Add ast-grep checks, rule tests and import-linter contract
+  ([#8](https://github.com/justmatias/mstack/pull/8),
+  [`7ee0679`](https://github.com/justmatias/mstack/commit/7ee067982351b83142cac2084891c44c5b7a819a))
+
+- Add coverage, exception and domain-leak guards and the single command
+  ([#8](https://github.com/justmatias/mstack/pull/8),
+  [`7ee0679`](https://github.com/justmatias/mstack/commit/7ee067982351b83142cac2084891c44c5b7a819a))
+
+- Add example app, demo violations and prose rules
+  ([#8](https://github.com/justmatias/mstack/pull/8),
+  [`7ee0679`](https://github.com/justmatias/mstack/commit/7ee067982351b83142cac2084891c44c5b7a819a))
+
+
 ## v1.4.0 (2026-11-19)
 
 ### Continuous Integration
