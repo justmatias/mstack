@@ -28,16 +28,22 @@ make demo         # scans fixtures/invalid/ and expects it to fail
 make test         # pytest: checks, guards, setup CLI, skills and personal rules
 ```
 
+The skills call the guards as `mstack <command>` from whatever repo they run in. Install the CLI once, on your `PATH`:
+
+```bash
+uv tool install --editable .   # from this checkout; `mstack --help` lists the commands
+```
+
 ## What `make lint-rules` runs
 
 1. `ast-grep test`: every check passes its valid and invalid cases.
 2. `ast-grep scan`: the code follows every check (`fixtures/invalid/` excluded).
 3. `lint-imports`: architecture contracts in `.importlinter`.
-4. `scripts/guards/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
-5. `scripts/guards/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
-6. `scripts/guards/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
+4. `mstack coverage`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
+5. `mstack exceptions`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
+6. `mstack leak-check`: rules and checks contain no repo identifiers, URLs, emails or secrets.
 
-`make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main`, and warnings count as errors there.
+`make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main` (`BASE_REF` overrides it and must exist), and warnings count as errors there. CI runs it on every pull request against the PR's base branch, so a `warning` rule fails on new or touched code even when pre-commit was skipped.
 
 ## Exceptions
 
@@ -62,11 +68,13 @@ uv run python scripts/setup.py --dry-run --yes                        # show wha
 | Component | What it installs |
 | --- | --- |
 | `pre-commit` | `.git/hooks/pre-commit` (via `pre-commit install`), running the static checks and `make lint-rules-changed STAGED=1` |
-| `claude-hook` | `PostToolUse` (`Edit\|Write`) in `.claude/settings.local.json` (default) or `.claude/settings.json` |
-| `cursor-hook` | `postToolUse` (`Write`) in `.cursor/hooks.json`; findings come back as `additional_context` |
+| `claude-hook` | `PostToolUse` (`Edit\|Write\|MultiEdit`) in `.claude/settings.local.json` (default) or `.claude/settings.json` |
+| `cursor-hook` | `postToolUse` (no matcher: every tool, acting only on `.py` file paths) in `.cursor/hooks.json`; findings come back as `additional_context`. `.cursor/hooks.json` is gitignored here; to share it with the team, `git add -f` it (Cursor has no local-only hooks file) |
 | `skills` | symlinks of `skills/*` into `.claude/skills/` and `.cursor/skills/` (or `~/` with `--skills-scope global`) |
 
-Existing JSON files are merged, never overwritten, and backed up as `*.bak-<timestamp>`. Running setup twice changes nothing.
+Existing JSON files are merged, never overwritten, and backed up as `*.bak-<timestamp>`. Running setup twice changes nothing; re-running it upgrades the matchers of hooks installed by an older version.
+
+To see which tools a real Cursor (or Claude Code) session sends to the hooks, set `MSTACK_HOOK_DEBUG=1` in the agent's environment: every call appends its tool name and input keys to `$MSTACK_HOOK_DEBUG_LOG` (default `mstack-hooks.log` in the temp folder).
 
 ## Static checks and releases
 
@@ -76,7 +84,7 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 
 ## CI and branch protection
 
-The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
+The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make lint-rules-changed` on the files a pull request changes (warnings fail there), `make demo` and `make test`.
 
 To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
 
@@ -93,8 +101,8 @@ uv run python scripts/setup.py user --uninstall --yes
 | Component | What it does |
 | --- | --- |
 | `rules` | Copies `user-level/` to `$MY_RULES_HOME` **only if it does not exist**, links every git hook name in `githooks/` to `bin/git-hook-chain`, and copies the example prose rules to `~/.cursor/rules/my-*.mdc` |
-| `claude-hook` | Merges a `PostToolUse` (`Edit\|Write`) hook running `bin/claude-post-edit` into `~/.claude/settings.json` |
-| `cursor-hook` | Merges a `postToolUse` (`Write`) hook running `bin/cursor-after-edit` into `~/.cursor/hooks.json` |
+| `claude-hook` | Merges a `PostToolUse` (`Edit\|Write\|MultiEdit`) hook running `bin/claude-post-edit` into `~/.claude/settings.json` |
+| `cursor-hook` | Merges a `postToolUse` hook (no matcher) running `bin/cursor-after-edit` into `~/.cursor/hooks.json` |
 | `git-hooks` | `git config --global core.hooksPath $MY_RULES_HOME/githooks` |
 | `skills` | Links the three skills into `~/.claude/skills/` and `~/.cursor/skills/` |
 
@@ -106,7 +114,7 @@ uv run python scripts/setup.py user --uninstall --yes
 
 ### Pitfalls of the global git hook
 
-- **`pre-commit install` refuses to run** when a global `core.hooksPath` is set. That is why `git-hook-chain` calls `pre-commit hook-impl` directly, for the hook types the repo would have installed (`default_install_hook_types`, default `pre-commit`).
+- **`pre-commit install` refuses to run** when a global `core.hooksPath` is set. That is why `git-hook-chain` calls `pre-commit hook-impl` directly, for the hook types the repo would have installed (`default_install_hook_types`, default `pre-commit`). `hook-impl` is internal to pre-commit: the chain is tested with pre-commit 4 (`make test` fails if the flags it uses disappear).
 - **Repos using husky** set `core.hooksPath` at repo level, which takes precedence over the global one. There the personal git hook does not run; only the agent hooks remain.
 - **An existing global `core.hooksPath`** is never replaced silently: the installer warns and skips unless you pass `--replace-hooks-path`, and the previous value is restored on uninstall.
 - A repo's own `.git/hooks/<name>` still runs through the chain (with the same arguments and stdin), unless pre-commit generated it, in which case pre-commit is called instead.

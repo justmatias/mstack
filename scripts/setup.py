@@ -64,9 +64,11 @@ GIT_HOOK_NAMES = [
     "post-index-change",
 ]
 CLAUDE_HOOK_COMMAND = '"$CLAUDE_PROJECT_DIR"/scripts/hooks/claude_post_edit.sh'
-CLAUDE_HOOK_MATCHER = "Edit|Write"
+# MultiEdit is gone from current Claude Code, but older versions still send it.
+CLAUDE_HOOK_MATCHER = "Edit|Write|MultiEdit"
 CURSOR_HOOK_COMMAND = "scripts/hooks/cursor_after_edit.sh"
-CURSOR_HOOK_MATCHER = "Write"
+# The Cursor hook has no matcher: Cursor does not document which tools edit files,
+# so the hook runs after every tool and acts only when the input names a .py file.
 
 
 class Installer:
@@ -147,19 +149,24 @@ def skills_directories(scope: str) -> list[Path]:
     return [base / ".claude" / "skills", base / ".cursor" / "skills"]
 
 
-def has_hook(entries: list, command: str) -> bool:
-    return any(
-        command == hook.get("command")
+def entries_with_hook(entries: list, command: str) -> list[dict]:
+    return [
+        entry
         for entry in entries
-        for hook in (entry, *entry.get("hooks", []))
-    )
+        if any(
+            command == hook.get("command") for hook in (entry, *entry.get("hooks", []))
+        )
+    ]
 
 
 def add_claude_hook(installer: Installer, path: Path, command: str) -> None:
     original = installer.read_json(path)
     settings = json.loads(json.dumps(original))
     entries = settings.setdefault("hooks", {}).setdefault("PostToolUse", [])
-    if not has_hook(entries, command):
+    ours = entries_with_hook(entries, command)
+    for entry in ours:
+        entry["matcher"] = CLAUDE_HOOK_MATCHER  # upgrades an older matcher
+    if not ours:
         entries.append({
             "matcher": CLAUDE_HOOK_MATCHER,
             "hooks": [{"type": "command", "command": command}],
@@ -194,8 +201,11 @@ def add_cursor_hook(installer: Installer, path: Path, command: str) -> None:
     config = json.loads(json.dumps(original))
     config.setdefault("version", 1)
     entries = config.setdefault("hooks", {}).setdefault("postToolUse", [])
-    if not has_hook(entries, command):
-        entries.append({"command": command, "matcher": CURSOR_HOOK_MATCHER})
+    ours = entries_with_hook(entries, command)
+    for entry in ours:
+        entry.pop("matcher", None)  # an older install matched Write only
+    if not ours:
+        entries.append({"command": command})
     installer.write_json(path, config, original)
 
 

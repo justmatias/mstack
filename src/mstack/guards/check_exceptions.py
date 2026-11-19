@@ -2,12 +2,15 @@ import argparse
 import datetime
 import io
 import json
+import logging
 import re
 import shlex
 import subprocess
 import sys
 import tokenize
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 IGNORE_COMMENT = re.compile(r"^#\s*ast-grep-ignore\b(?::\s*(?P<rule_ids>.*))?$")
 EXCEPTION_COMMENT = re.compile(r"^#\s*rule-exception:\s*(?P<fields>.*)$")
@@ -138,12 +141,13 @@ def collect_exceptions(
     return exceptions, problems
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
+        prog="mstack exceptions",
         description=(
             "Every ast-grep-ignore must carry a rule-exception with reason, "
             "expiry and approval."
-        )
+        ),
     )
     parser.add_argument(
         "paths", nargs="*", type=Path, help="Files or folders (default: git files)."
@@ -154,19 +158,18 @@ def main() -> int:
     parser.add_argument(
         "--today", type=datetime.date.fromisoformat, default=datetime.date.today()
     )
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     exceptions, problems = collect_exceptions(
         python_files(arguments.paths), arguments.today
     )
     if arguments.json:
-        print(json.dumps({"exceptions": exceptions, "problems": problems}, indent=2))
+        sys.stdout.write(
+            json.dumps({"exceptions": exceptions, "problems": problems}, indent=2)
+            + "\n"
+        )
     for problem in problems:
-        print(problem, file=sys.stderr)
+        logger.error("%s", problem)
     if not problems and not arguments.json:
-        print(f"check_exceptions: OK ({len(exceptions)} active exceptions)")
+        logger.info("check_exceptions: OK (%d active exceptions)", len(exceptions))
     return 1 if problems else 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

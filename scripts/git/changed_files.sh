@@ -11,14 +11,27 @@ if [[ "${1:-}" == "--staged" ]]; then
   exit 0
 fi
 
-base_ref="${BASE_REF:-origin/main}"
-if ! git rev-parse --verify --quiet "$base_ref" >/dev/null; then
-  base_ref="main"
+# An explicit BASE_REF (as in CI) must exist: falling back would silently scan
+# nothing. Only the default falls back to the local main when there is no remote.
+if [[ -n "${BASE_REF:-}" ]]; then
+  base_ref="$BASE_REF"
+  if ! git rev-parse --verify --quiet "$base_ref^{commit}" >/dev/null; then
+    echo "changed_files.sh: BASE_REF '$base_ref' does not exist. Fetch it first (CI: actions/checkout with fetch-depth: 0)." >&2
+    exit 1
+  fi
+else
+  base_ref="origin/main"
+  if ! git rev-parse --verify --quiet "$base_ref^{commit}" >/dev/null; then
+    base_ref="main"
+  fi
 fi
 
 {
   if merge_base="$(git merge-base "$base_ref" HEAD 2>/dev/null)"; then
     git diff --name-only --diff-filter=ACMR "$merge_base" -- '*.py'
+  elif [[ -n "${BASE_REF:-}" ]]; then
+    echo "changed_files.sh: no merge base between '$base_ref' and HEAD (shallow clone?)." >&2
+    exit 1
   fi
   git ls-files --others --exclude-standard -- '*.py'
 } | sort -u | while IFS= read -r file; do

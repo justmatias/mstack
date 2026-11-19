@@ -19,7 +19,7 @@ Shared references: [rule format](../sync-rules/references/rule-format.md), [auth
 First, read recent commits, reverts, review comments, agent instruction files, and comments that explain workarounds. Also read:
 
 - **PR review comments:** `gh pr list --state merged --limit 50 --json number,title` and `gh api repos/{owner}/{repo}/pulls/<number>/comments --jq '.[].body'`.
-- **Existing exceptions:** `uv run python <toolkit>/scripts/guards/check_exceptions.py --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
+- **Existing exceptions:** `mstack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
 - **Accumulated warnings:** `uv run ast-grep scan -c lint-rules/sgconfig.yml --json=stream --globs '!fixtures/invalid/**' .`, counted per rule id.
 - **Optionally, recent agent transcripts** for this workspace only (see discovery).
 - **Search helpers:** `git log --oneline -n 200`, `git log --grep='revert\|fix' -i`, `git log -S '<construct>'`, `rg -n 'workaround|HACK|XXX|do not|don.t use'`.

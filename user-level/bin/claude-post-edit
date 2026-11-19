@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code user-level PostToolUse hook (matcher Edit|Write). Runs the personal set,
+# Claude Code user-level PostToolUse hook (matcher Edit|Write|MultiEdit). Runs the personal set,
 # plus the repo's lint-rules when the repo has no project hook of its own, on the
 # edited file. On errors, prints them to stderr and exits 2 so Claude sees them.
 set -uo pipefail
