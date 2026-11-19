@@ -1,0 +1,14 @@
+---
+description: Personal rule - logging instead of print
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# No print (personal)
+
+- Do not leave `print` calls in application code. Use `logging.getLogger(__name__)`.
+
+Why: print output has no level or source and is easy to leave behind after debugging.
+
+## Checks
+- enforced-by: my-no-print

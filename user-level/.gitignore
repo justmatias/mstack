@@ -1,0 +1,3 @@
+ignore-paths.txt
+*.bak-*
+.previous-hooks-path

@@ -1,0 +1,12 @@
+id: my-prefer-pydantic
+language: Python
+severity: error
+message: Use pydantic.BaseModel instead of @dataclass
+note: |
+  Personal rule. Pydantic models validate their input and serialize
+  consistently.
+metadata:
+  source: ~/.cursor/rules/my-prefer-pydantic.mdc
+rule:
+  kind: decorator
+  regex: dataclass

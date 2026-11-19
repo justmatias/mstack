@@ -1,0 +1,14 @@
+---
+description: Personal rule - Pydantic models instead of dataclasses
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Prefer Pydantic (personal)
+
+- Define data models as `pydantic.BaseModel` subclasses, not `@dataclass`.
+
+Why: Pydantic models validate their input and serialize consistently.
+
+## Checks
+- enforced-by: my-prefer-pydantic

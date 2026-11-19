@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from conventions_inventory import read_convention
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
 ENFORCED_BY = re.compile(r"^\s*-\s*enforced-by:\s*(?P<check_id>\S+)\s*$")
@@ -31,6 +32,52 @@ def parse_checks_section(mdc_path: Path) -> dict | None:
         elif LLM_REVIEW.match(line):
             llm_review = True
     return {"enforced_by": enforced_by, "llm_review": llm_review}
+
+
+def mdc_frontmatter(mdc_path: Path) -> dict:
+    text = mdc_path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return {}
+    try:
+        return yaml.safe_load(text.split("---", 2)[1]) or {}
+    except yaml.YAMLError:
+        return {}
+
+
+def derived_issues(mdc_path: Path, root: Path) -> list[dict]:
+    frontmatter = mdc_frontmatter(mdc_path)
+    source = frontmatter.get("derived-from")
+    if not source:
+        return []
+    location = display(mdc_path, root)
+    source_path = Path(str(source)).expanduser()
+    if not source_path.is_file():
+        return [
+            {
+                "kind": "orphan",
+                "file": location,
+                "detail": f"derived-from '{source}' no longer exists",
+            }
+        ]
+    try:
+        current = read_convention(source_path)["sha256"]
+    except ValueError as error:
+        return [
+            {
+                "kind": "stale",
+                "file": location,
+                "detail": f"derived-from '{source}' is malformed ({error})",
+            }
+        ]
+    if current != str(frontmatter.get("derived-sha256", "")):
+        return [
+            {
+                "kind": "stale",
+                "file": location,
+                "detail": f"'{source}' changed since this rule was derived",
+            }
+        ]
+    return []
 
 
 def load_ast_grep_rules(config_path: Path) -> dict[str, dict]:
@@ -73,12 +120,13 @@ def display(path: Path, root: Path) -> str:
 
 
 def prose_rule_issues(
-    rules_dir: Path, known_checks: set[str], root: Path
+    rules_dir: Path, known_checks: set[str], root: Path, pattern: str = "*.mdc"
 ) -> tuple[list[dict], list[dict], dict[Path, set[str]]]:
     issues: list[dict] = []
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
-    for mdc_path in sorted(rules_dir.rglob("*.mdc")):
+    for mdc_path in sorted(rules_dir.rglob(pattern)):
+        issues.extend(derived_issues(mdc_path, root))
         section = parse_checks_section(mdc_path)
         entry = {"mdc": display(mdc_path, root), "checks": [], "llm_review": False}
         rules.append(entry)
@@ -146,12 +194,18 @@ def check_source_issues(
 
 
 def compute_drift(
-    rules_dir: Path, config: Path, importlinter: Path, root: Path
+    rules_dir: Path,
+    config: Path,
+    importlinter: Path,
+    root: Path,
+    pattern: str = "*.mdc",
 ) -> dict:
     ast_grep_rules = load_ast_grep_rules(config)
     contracts = load_import_linter_contracts(importlinter)
     known_checks = set(ast_grep_rules) | contracts
-    rules, issues, listed_by_mdc = prose_rule_issues(rules_dir, known_checks, root)
+    rules, issues, listed_by_mdc = prose_rule_issues(
+        rules_dir, known_checks, root, pattern
+    )
     issues.extend(check_source_issues(ast_grep_rules, listed_by_mdc, root))
     return {"ok": not issues, "rules": rules, "issues": issues}
 
@@ -170,6 +224,11 @@ def main() -> int:
         help="Directory that relative metadata.source paths resolve against.",
     )
     parser.add_argument(
+        "--glob",
+        default="*.mdc",
+        help="Which .mdc files in --rules-dir to check (personal set: 'my-*.mdc').",
+    )
+    parser.add_argument(
         "--json", action="store_true", help="Print the drift report as JSON."
     )
     arguments = parser.parse_args()
@@ -179,6 +238,7 @@ def main() -> int:
         arguments.config.expanduser(),
         arguments.importlinter.expanduser(),
         arguments.root.expanduser(),
+        arguments.glob,
     )
     if arguments.json:
         print(json.dumps(report, indent=2))

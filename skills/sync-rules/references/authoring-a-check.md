@@ -126,9 +126,11 @@ Checks for your own preferences live outside every repo, in `$MY_RULES_HOME` (de
 
   ```bash
   uv run ast-grep test -c "$MY_RULES_HOME/sgconfig.yml" --skip-snapshot-tests
-  uv run python <toolkit>/scripts/check_rule_coverage.py \
-    --rules-dir ~/.cursor/rules --config "$MY_RULES_HOME/sgconfig.yml" --root ~
+  uv run python <toolkit>/scripts/check_rule_coverage.py --rules-dir ~/.cursor/rules \
+    --config "$MY_RULES_HOME/sgconfig.yml" --glob 'my-*.mdc' --root ~ --importlinter /dev/null
   uv run python <toolkit>/scripts/check_no_domain_leak.py <generated files> --repo <the repo you were working in>
   ```
 
+- Check a file by hand with `$MY_RULES_HOME/bin/my-rules-check <files>` (add `--with-repo` to also run the current repo's `lint-rules/`).
 - Commit in `$MY_RULES_HOME` only if it is a git repo; `ignore-paths.txt` stays in its `.gitignore`.
+- The personal set is installed with `uv run python <toolkit>/scripts/setup.py user` (see the rules-as-checks README).

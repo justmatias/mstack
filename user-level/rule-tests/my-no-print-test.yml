@@ -1,0 +1,12 @@
+id: my-no-print
+valid:
+  - |
+    logger.info("processing %d items", len(items))
+  - |
+    printer.print("not the builtin")
+invalid:
+  - |
+    def do_work(items):
+        print("processing", len(items))
+  - |
+    print()
