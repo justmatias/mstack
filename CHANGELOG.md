@@ -2,6 +2,46 @@
 
 <!-- version list -->
 
+## v1.6.0 (2026-11-19)
+
+### Bug Fixes
+
+- Drop shebang from conventions_inventory, which runs as a module
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+### Continuous Integration
+
+- Add pre-commit hook and GitHub Actions workflow running the single command
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+### Features
+
+- Add agent hooks and a configurable setup CLI ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+- Add ast-grep checks, rule tests and import-linter contract
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+- Add coverage, exception and domain-leak guards and the single command
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+- Add example app, demo violations and prose rules
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+- Add personal user-level rules, global hooks and conventions inventory
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+- Add sync-rules, reflect-rules and correct-rules skills
+  ([#10](https://github.com/justmatias/mstack/pull/10),
+  [`a415fd8`](https://github.com/justmatias/mstack/commit/a415fd89fc44bf8f3c919ccb3a24fece846a4dcf))
+
+
 ## v1.5.0 (2026-11-19)
 
 ### Continuous Integration
