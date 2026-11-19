@@ -1,0 +1,22 @@
+[project]
+name = "rules-as-checks"
+version = "0.1.0"
+description = "Turn team rules written in prose (.cursor/rules) into automated checks with ast-grep."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2"]
+
+[dependency-groups]
+dev = [
+    "ast-grep-cli",
+    "import-linter",
+    "pre-commit",
+    "pytest",
+    "pyyaml",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
