@@ -50,3 +50,9 @@ make demo         # scans fixtures/invalid/ and expects it to fail
 `pre-commit` runs ruff, pylint, mypy, bandit, gitleaks, hookpin and generic file hygiene hooks, and also this repo's own `lint-rules` hook: `mstack` checks itself with the same rules it ships.
 
 Versioning is automated with [python-semantic-release](https://python-semantic-release.readthedocs.io/). Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/); on every push to `main`, CI bumps the version in `pyproject.toml`, updates `CHANGELOG.md`, tags the release and publishes it on GitHub (`feat` is a minor bump, `fix` and `perf` a patch).
+
+## CI and branch protection
+
+The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
+
+To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
