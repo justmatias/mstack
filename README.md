@@ -1,8 +1,20 @@
-# rules-as-checks
+# mstack
 
-Team rules are written in prose in `.cursor/rules/`. This repo turns every rule that can be verified into an automated check (ast-grep and import-linter), runs the checks in the agent hook, in pre-commit and in CI, and ships three skills that keep prose and checks in sync.
+My stack for guiding AI coding agents: one place for the agents, skills, rules, hooks and tools I use to steer them while they write code, plus the logbook of how and why each piece came to be.
 
-The reasoning and the decisions behind it are in [`docs/design.md`](docs/design.md). Decisions taken during implementation are in [`docs/decisions.md`](docs/decisions.md).
+Agents only follow what they are told and what is checked. Instructions scattered across projects drift, get copied by hand and are forgotten. `mstack` centralizes them so every project can pull the same set, and so each piece is tested and versioned like any other code.
+
+## What lives here
+
+| Piece | What it is |
+| --- | --- |
+| Rules | Team and personal conventions written in prose (`.cursor/rules/`), the single source of truth agents read before writing code. |
+| Checks | The executable version of those rules (ast-grep, import-linter), run in the agent hook, in pre-commit and in CI. |
+| Skills | Agent skills that keep prose rules and checks in sync and turn corrections into new rules. |
+| Hooks | Agent hooks that run the checks while the agent edits, so mistakes surface before commit. |
+| Tools | Small scripts and a setup CLI that install the pieces you want into a project or your user profile. |
+
+The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review. The reasoning behind it is in [`docs/design.md`](docs/design.md), and decisions taken during implementation are in [`docs/decisions.md`](docs/decisions.md).
 
 ## Quick start
 
@@ -10,6 +22,13 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
 make setup        # uv sync, pre-commit install, install the skills
+make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans demo/violations/ and expects it to fail
 ```
+
+## Static checks and releases
+
+`pre-commit` runs ruff, pylint, mypy, bandit, gitleaks, hookpin and generic file hygiene hooks, and also this repo's own `lint-rules` hook: `mstack` checks itself with the same rules it ships.
+
+Versioning is automated with [python-semantic-release](https://python-semantic-release.readthedocs.io/). Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/); on every push to `main`, CI bumps the version in `pyproject.toml`, updates `CHANGELOG.md`, tags the release and publishes it on GitHub (`feat` is a minor bump, `fix` and `perf` a patch).
