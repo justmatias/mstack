@@ -26,8 +26,16 @@ def snapshot(root: Path) -> dict[str, str]:
 
 
 @pytest.fixture
-def home_directory(tmp_path: Path) -> Path:
-    home = tmp_path / "home"
+def sandbox(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    # tmp_path is named after the test (test_*), and personal rules scoped with
+    # globs such as "**/test_*.py" would match every file under it. A plain
+    # prefix keeps the sandbox path neutral, like a real home directory.
+    return tmp_path_factory.mktemp("sandbox")
+
+
+@pytest.fixture
+def home_directory(sandbox: Path) -> Path:
+    home = sandbox / "home"
     (home / ".claude").mkdir(parents=True)
     (home / ".claude" / "settings.json").write_text(
         json.dumps({"permissions": {"allow": ["Bash(ls:*)"]}})
@@ -105,9 +113,9 @@ def my_rules_home(home_directory: Path) -> Path:
 
 
 @pytest.fixture
-def make_repository(tmp_path: Path, run):
+def make_repository(sandbox: Path, run):
     def create(name: str) -> Path:
-        repository = tmp_path / "work" / name
+        repository = sandbox / "work" / name
         repository.mkdir(parents=True)
         run("git", "init", "-q", cwd=repository)
         (repository / "old.py").write_text('def legacy():\n    print("old")\n')

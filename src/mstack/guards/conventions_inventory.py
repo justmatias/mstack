@@ -3,12 +3,15 @@
 import argparse
 import hashlib
 import json
+import logging
 import os
 import re
 import sys
 from pathlib import Path
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 FRONTMATTER = re.compile(
     r"\A---\n(?P<frontmatter>.*?)\n---\n?(?P<body>.*)\Z", re.DOTALL
@@ -75,9 +78,10 @@ def inventory(directory: Path) -> dict:
     }
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="List the conventions store as JSON. Read-only."
+        prog="mstack conventions",
+        description="List the conventions store as JSON. Read-only.",
     )
     parser.add_argument(
         "--dir",
@@ -90,22 +94,18 @@ def main() -> int:
         action="store_true",
         help="Print the inventory as JSON (default: a summary).",
     )
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     directory = (arguments.dir or default_directory()).expanduser()
     if not directory.is_dir():
-        print(f"conventions_inventory: {directory} does not exist", file=sys.stderr)
+        logger.error("conventions_inventory: %s does not exist", directory)
         return 1
     report = inventory(directory)
     for problem in report["malformed"]:
-        print(f"{problem['path']}: skipped ({problem['error']})", file=sys.stderr)
+        logger.warning("%s: skipped (%s)", problem["path"], problem["error"])
     if arguments.json:
-        print(json.dumps(report, indent=2))
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
     else:
         for convention in report["conventions"]:
-            print(f"{convention['name']}: {', '.join(convention['tags'])}")
+            sys.stdout.write(f"{convention['name']}: {', '.join(convention['tags'])}\n")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

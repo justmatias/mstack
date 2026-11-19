@@ -21,11 +21,10 @@ def test_install_adds_hooks_and_skills(
 
     claude = json.loads((sandbox_root / ".claude" / "settings.local.json").read_text())
     cursor = json.loads((sandbox_root / ".cursor" / "hooks.json").read_text())
-    assert claude["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
-    assert (
-        cursor["hooks"]["postToolUse"][0]["command"]
-        == "scripts/hooks/cursor_after_edit.sh"
-    )
+    assert claude["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write|MultiEdit"
+    assert cursor["hooks"]["postToolUse"] == [
+        {"command": "scripts/hooks/cursor_after_edit.sh"}
+    ]
     assert (
         sandbox_root / ".claude" / "skills" / "sync-rules"
     ).resolve() == sandbox_root / "skills" / "sync-rules"
@@ -57,7 +56,7 @@ def test_install_merges_existing_settings(
     assert settings["permissions"] == existing_claude_settings["permissions"]
     assert [entry["matcher"] for entry in settings["hooks"]["PostToolUse"]] == [
         "Bash",
-        "Edit|Write",
+        "Edit|Write|MultiEdit",
     ]
     assert list((sandbox_root / ".claude").glob("settings.local.json.bak-*"))
 
@@ -102,3 +101,41 @@ def test_dry_run_writes_nothing(
     setup_module.main([*agent_components, "--dry-run"])
 
     assert snapshot(sandbox_root) == before
+
+
+def test_install_upgrades_older_hook_matchers(
+    setup_module, sandbox_root: Path, agent_components: list[str]
+):
+    claude_path = sandbox_root / ".claude" / "settings.local.json"
+    cursor_path = sandbox_root / ".cursor" / "hooks.json"
+    claude_path.parent.mkdir(parents=True, exist_ok=True)
+    cursor_path.parent.mkdir(parents=True, exist_ok=True)
+    claude_command = setup_module.CLAUDE_HOOK_COMMAND
+    claude_path.write_text(
+        json.dumps({
+            "hooks": {
+                "PostToolUse": [
+                    {
+                        "matcher": "Edit|Write",
+                        "hooks": [{"type": "command", "command": claude_command}],
+                    }
+                ]
+            }
+        })
+    )
+    cursor_command = setup_module.CURSOR_HOOK_COMMAND
+    cursor_path.write_text(
+        json.dumps({
+            "version": 1,
+            "hooks": {"postToolUse": [{"command": cursor_command, "matcher": "Write"}]},
+        })
+    )
+
+    setup_module.main(agent_components)
+
+    claude = json.loads(claude_path.read_text())
+    cursor = json.loads(cursor_path.read_text())
+    assert [entry["matcher"] for entry in claude["hooks"]["PostToolUse"]] == [
+        "Edit|Write|MultiEdit"
+    ]
+    assert cursor["hooks"]["postToolUse"] == [{"command": cursor_command}]

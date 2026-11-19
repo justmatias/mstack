@@ -14,7 +14,8 @@ dist/
 .coverage
 htmlcov/
 
-# Generated per developer by scripts/setup.py
+# Generated per developer by scripts/setup.py. Cursor has no local-only hooks
+# file: to share the Cursor hook with the team, `git add -f .cursor/hooks.json`.
 .claude/skills/
 .cursor/skills/
 .claude/settings.local.json

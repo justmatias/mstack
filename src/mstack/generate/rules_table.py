@@ -1,16 +1,18 @@
 import argparse
 import datetime
+import logging
 import re
-import sys
 from collections import Counter
 from pathlib import Path
 
-from scripts.guards.check_exceptions import collect_exceptions, python_files
-from scripts.guards.check_rule_coverage import (
+from mstack.guards.check_exceptions import collect_exceptions, python_files
+from mstack.guards.check_rule_coverage import (
     load_ast_grep_rules,
     load_import_linter_contracts,
     parse_checks_section,
 )
+
+logger = logging.getLogger(__name__)
 
 START_MARKER = "<!-- rules-table:start -->"
 END_MARKER = "<!-- rules-table:end -->"
@@ -52,13 +54,15 @@ def build_table(rules_dir: Path, config: Path, importlinter: Path) -> str:
     return "\n".join(rows) + "\n"
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate the rule -> check table.")
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="mstack rules-table", description="Generate the rule -> check table."
+    )
     parser.add_argument("--rules-dir", type=Path, default=Path(".cursor/rules"))
     parser.add_argument("--config", type=Path, default=Path("lint-rules/sgconfig.yml"))
     parser.add_argument("--importlinter", type=Path, default=Path(".importlinter"))
     parser.add_argument("--output", type=Path, default=Path("docs/rules-table.md"))
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     table = build_table(arguments.rules_dir, arguments.config, arguments.importlinter)
     arguments.output.write_text(
@@ -67,7 +71,7 @@ def main() -> int:
         "Do not edit by hand.\n\n" + table,
         encoding="utf-8",
     )
-    print(f"rules_table: wrote {arguments.output}")
+    logger.info("rules_table: wrote %s", arguments.output)
     for agent_file in (Path("CLAUDE.md"), Path("AGENTS.md")):
         if not agent_file.is_file():
             continue
@@ -79,9 +83,5 @@ def main() -> int:
         )
         if updated != content:
             agent_file.write_text(updated, encoding="utf-8")
-            print(f"rules_table: updated the table in {agent_file}")
+            logger.info("rules_table: updated the table in %s", agent_file)
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

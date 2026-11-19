@@ -195,9 +195,8 @@ def test_personal_set_passes_its_own_tests_and_coverage(
         "--skip-snapshot-tests",
     )
     coverage = run(
-        "python",
-        "-m",
-        "scripts.guards.check_rule_coverage",
+        "mstack",
+        "coverage",
         "--rules-dir",
         str(home_directory / ".cursor" / "rules"),
         "--config",
@@ -207,8 +206,25 @@ def test_personal_set_passes_its_own_tests_and_coverage(
         "--root",
         str(home_directory),
         cwd=home_directory,
-        extra={"PYTHONPATH": str(REPOSITORY_ROOT)},
     )
 
     assert tests.returncode == 0, tests.stdout + tests.stderr
     assert coverage.returncode == 0, coverage.stderr
+
+
+def test_sandbox_path_has_no_test_folder(sandbox: Path):
+    # Personal rules scoped with "**/test_*.py" also match any path with a
+    # "/test_" folder in it, so the sandbox must not live under one.
+    assert "/test_" not in sandbox.as_posix()
+
+
+def test_pre_commit_still_accepts_the_chain_flags(run):
+    # git-hook-chain calls `pre-commit hook-impl`, an internal command with no
+    # stability promise. Fail here, not in someone's commit, when it changes.
+    chain = (REPOSITORY_ROOT / "user-level" / "bin" / "git-hook-chain").read_text()
+    completed = run("pre-commit", "hook-impl", "--help")
+
+    assert completed.returncode == 0, completed.stderr
+    for flag in ("--config", "--hook-type", "--hook-dir", "--skip-on-missing-config"):
+        assert flag in chain
+        assert flag in completed.stdout

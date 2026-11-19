@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-`<toolkit>` below is the mstack folder that holds this skill: resolve the symlink of this file (`realpath`) and go up to the folder that contains `skills/` and `scripts/`. In the mstack repo itself, `<toolkit>` is the repo root.
+The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`, `mstack conventions`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 1. Pick the tool
 
@@ -82,10 +82,10 @@ Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule 
 ## 8. Verify what you generated
 
 ```bash
-uv run python <toolkit>/scripts/guards/check_no_domain_leak.py <every file you generated> --repo .
+mstack leak-check <every file you generated> --repo .
 ```
 
-In the mstack repo itself, add `--exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+In the mstack repo itself, add `--exclude src --exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
 
 ## 9. Run the single command
 
@@ -95,7 +95,7 @@ make demo         # only in repos that have fixtures/invalid/
 make rules-table
 ```
 
-In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage`, `check_exceptions.py` and `check_no_domain_leak.py`.
+In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `mstack coverage`, `mstack exceptions` and `mstack leak-check`.
 
 Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
 
@@ -122,15 +122,16 @@ Checks for your own preferences live outside every repo, in `$MY_RULES_HOME` (de
 - No repo paths at all: no `files` globs naming a repo, no examples from a repo.
 - Exceptions are lines in `$MY_RULES_HOME/ignore-paths.txt` (`<glob> [rule-id]`), never `ast-grep-ignore` comments, because nothing is written into other people's repos.
 - Only the lint level exists: architecture contracts and tests live in a repo and require changing it.
+- Ship personal rules as `error`. `my-rules-check` fails only on errors and nothing passes `--error` to it, so a `warning` in the personal set never blocks anything and the rule becomes advisory. Do not downgrade a rule because of a known glob limitation (for example `files: "**/test_*.py"` also matching files under a folder named `test_*`, since `*` matches `/`): record the limitation in the rule's `note`, and keep test sandboxes out of such folders.
 - Test and verify with:
 
   ```bash
   uv run ast-grep test -c "$MY_RULES_HOME/sgconfig.yml" --skip-snapshot-tests
-  PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage --rules-dir ~/.cursor/rules \
+  mstack coverage --rules-dir ~/.cursor/rules \
     --config "$MY_RULES_HOME/sgconfig.yml" --glob 'my-*.mdc' --root ~ --importlinter /dev/null
-  uv run python <toolkit>/scripts/guards/check_no_domain_leak.py <generated files> --repo <the repo you were working in>
+  mstack leak-check <generated files> --repo <the repo you were working in>
   ```
 
 - Check a file by hand with `$MY_RULES_HOME/bin/my-rules-check <files>` (add `--with-repo` to also run the current repo's `lint-rules/`).
 - Commit in `$MY_RULES_HOME` only if it is a git repo; `ignore-paths.txt` stays in its `.gitignore`.
-- The personal set is installed with `uv run python <toolkit>/scripts/setup.py user` (see the rules-as-checks README).
+- The personal set is installed from the mstack checkout with `uv run python scripts/setup.py user` (see the mstack README).

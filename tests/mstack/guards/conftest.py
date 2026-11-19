@@ -1,4 +1,3 @@
-import os
 import shutil
 import subprocess
 import sys
@@ -10,12 +9,11 @@ from tests.conftest import REPOSITORY_ROOT
 
 
 @pytest.fixture
-def run_guard():
-    def run(guard: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
+def run_mstack():
+    def run(command: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
         return subprocess.run(
-            [sys.executable, "-m", f"scripts.guards.{guard}", *arguments],
+            [sys.executable, "-m", "mstack", command, *arguments],
             cwd=working_directory,
-            env={**os.environ, "PYTHONPATH": str(REPOSITORY_ROOT)},
             capture_output=True,
             text=True,
             check=False,

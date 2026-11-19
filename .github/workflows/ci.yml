@@ -47,6 +47,16 @@ jobs:
       - name: Scan the code with the rules
         run: make lint-rules
 
+      # The full scan above does not fail on warning-level rules (old instances
+      # are tolerated). On a pull request, every rule, warnings included, must
+      # pass on the files the PR changes. fetch-depth: 0 above makes
+      # origin/<base branch> available; the target fails if it is missing.
+      - name: Scan the files changed by the PR, warnings included
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: make lint-rules-changed
+
       - name: The checks still catch the invalid fixtures
         run: make demo
 

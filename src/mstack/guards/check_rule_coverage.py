@@ -1,13 +1,16 @@
 import argparse
 import configparser
 import json
+import logging
 import re
 import sys
 from pathlib import Path
 
 import yaml
 
-from scripts.guards.conventions_inventory import read_convention
+from mstack.guards.conventions_inventory import read_convention
+
+logger = logging.getLogger(__name__)
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
 ENFORCED_BY = re.compile(r"^\s*-\s*enforced-by:\s*(?P<check_id>\S+)\s*$")
@@ -210,9 +213,10 @@ def compute_drift(
     return {"ok": not issues, "rules": rules, "issues": issues}
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Check that every prose rule and every check point to each other."
+        prog="mstack coverage",
+        description="Check that every prose rule and every check point to each other.",
     )
     parser.add_argument("--rules-dir", type=Path, default=Path(".cursor/rules"))
     parser.add_argument("--config", type=Path, default=Path("lint-rules/sgconfig.yml"))
@@ -231,7 +235,7 @@ def main() -> int:
     parser.add_argument(
         "--json", action="store_true", help="Print the drift report as JSON."
     )
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     report = compute_drift(
         arguments.rules_dir.expanduser(),
@@ -241,16 +245,10 @@ def main() -> int:
         arguments.glob,
     )
     if arguments.json:
-        print(json.dumps(report, indent=2))
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
     else:
         for issue in report["issues"]:
-            print(
-                f"{issue['file']}: [{issue['kind']}] {issue['detail']}", file=sys.stderr
-            )
+            logger.error("%s: [%s] %s", issue["file"], issue["kind"], issue["detail"])
         if report["ok"]:
-            print(f"check_rule_coverage: OK ({len(report['rules'])} rules)")
+            logger.info("check_rule_coverage: OK (%d rules)", len(report["rules"]))
     return 0 if report["ok"] else 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())

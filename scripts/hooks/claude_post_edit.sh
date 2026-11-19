@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code PostToolUse hook (matcher Edit|Write). On rule errors in the edited
+# Claude Code PostToolUse hook (matcher Edit|Write|MultiEdit). On rule errors in the edited
 # .py file, prints them to stderr and exits 2 so Claude sees and fixes them.
 set -uo pipefail
 repository_root="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}"
