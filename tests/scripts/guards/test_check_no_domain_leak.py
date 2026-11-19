@@ -1,9 +1,9 @@
 from pathlib import Path
 
 
-def test_example_rules_pass(run_script):
-    completed = run_script(
-        "check_no_domain_leak.py",
+def test_example_rules_pass(run_guard):
+    completed = run_guard(
+        "check_no_domain_leak",
         "lint-rules",
         ".cursor/rules",
         "--repo",
@@ -12,14 +12,16 @@ def test_example_rules_pass(run_script):
         "scripts",
         "--exclude",
         "tests",
+        "--exclude",
+        "fixtures/invalid",
     )
 
     assert completed.returncode == 0, completed.stderr
 
 
-def test_repo_identifier_is_caught(run_script, leaking_rule: Path):
-    completed = run_script(
-        "check_no_domain_leak.py",
+def test_repo_identifier_is_caught(run_guard, leaking_rule: Path):
+    completed = run_guard(
+        "check_no_domain_leak",
         str(leaking_rule),
         "--repo",
         ".",
@@ -27,6 +29,8 @@ def test_repo_identifier_is_caught(run_script, leaking_rule: Path):
         "scripts",
         "--exclude",
         "tests",
+        "--exclude",
+        "fixtures/invalid",
     )
 
     assert completed.returncode == 1
@@ -34,9 +38,9 @@ def test_repo_identifier_is_caught(run_script, leaking_rule: Path):
     assert f"{leaking_rule}:3" in completed.stderr
 
 
-def test_url_and_email_are_caught(run_script, rule_with_url_and_email: Path):
-    completed = run_script(
-        "check_no_domain_leak.py",
+def test_url_and_email_are_caught(run_guard, rule_with_url_and_email: Path):
+    completed = run_guard(
+        "check_no_domain_leak",
         str(rule_with_url_and_email),
         "--repo",
         ".",
@@ -44,6 +48,8 @@ def test_url_and_email_are_caught(run_script, rule_with_url_and_email: Path):
         "scripts",
         "--exclude",
         "tests",
+        "--exclude",
+        "fixtures/invalid",
     )
 
     assert completed.returncode == 1

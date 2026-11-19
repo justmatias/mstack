@@ -6,8 +6,8 @@ VALID_HEADER = (
 )
 
 
-def test_justified_exception_passes(run_script, exception_file):
-    completed = run_script("check_exceptions.py", str(exception_file(VALID_HEADER)))
+def test_justified_exception_passes(run_guard, exception_file):
+    completed = run_guard("check_exceptions", str(exception_file(VALID_HEADER)))
 
     assert completed.returncode == 0, completed.stderr
 
@@ -36,9 +36,9 @@ def test_justified_exception_passes(run_script, exception_file):
     ids=["no-justification", "expired", "no-approval", "no-reason", "bad-date"],
 )
 def test_unjustified_exception_fails(
-    run_script, exception_file, header: str, expected_problem: str
+    run_guard, exception_file, header: str, expected_problem: str
 ):
-    completed = run_script("check_exceptions.py", str(exception_file(header)))
+    completed = run_guard("check_exceptions", str(exception_file(header)))
 
     assert completed.returncode == 1
     assert expected_problem in completed.stderr

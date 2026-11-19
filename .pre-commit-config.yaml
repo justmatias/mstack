@@ -1,5 +1,5 @@
-# demo/ holds deliberate violations for the rule checks to catch, so the
-# Python linters skip it.
+# fixtures/invalid/ holds deliberate violations for the rule checks to catch,
+# so the Python linters skip it.
 repos:
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: 'v0.27'
@@ -25,16 +25,16 @@ repos:
       - id: ruff-check
         name: ruff
         args: ['--fix']
-        exclude: ^demo/
+        exclude: ^fixtures/invalid/
       - id: ruff-format
-        exclude: ^demo/
+        exclude: ^fixtures/invalid/
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
     hooks:
       - id: bandit
         args: ['-r', '-lll']
-        exclude: ^demo/
+        exclude: ^fixtures/invalid/
 
   - repo: https://github.com/justmatias/hookpin
     rev: v7.0.2
@@ -46,7 +46,7 @@ repos:
     hooks:
       - id: pylint
         types: [python]
-        exclude: ^demo/
+        exclude: ^fixtures/invalid/
         additional_dependencies:
           - pydantic==2.14.4
           - pytest==9.2.0
@@ -57,7 +57,7 @@ repos:
     rev: v2.4.1
     hooks:
       - id: mypy
-        exclude: ^demo/
+        exclude: ^fixtures/invalid/
         additional_dependencies:
           - pydantic==2.14.4
           - pytest==9.2.0

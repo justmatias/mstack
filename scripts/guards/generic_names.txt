@@ -25,7 +25,9 @@ build_thing
 callback
 
 # Structural folders and modules
-example_app
+fixtures
+valid
+invalid
 src
 app
 apps
@@ -58,8 +60,6 @@ configs
 settings
 main
 cli
-demo
-violations
 
 # Public documentation hosts that rules and skills may link to
 ast-grep.github.io

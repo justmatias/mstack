@@ -1,7 +1,7 @@
 import logging
 
-from example_app.domain import Item, Order, order_total
-from example_app.infra import InMemoryOrderRepository
+from fixtures.valid.domain import Item, Order, order_total
+from fixtures.valid.infra import InMemoryOrderRepository
 
 logger = logging.getLogger(__name__)
 
