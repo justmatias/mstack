@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`, `mstack conventions`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. Pass paths in the work repo as absolute paths or relative to the current directory.
+The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 1. Pick the tool
 

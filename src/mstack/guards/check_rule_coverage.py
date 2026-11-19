@@ -8,8 +8,6 @@ from pathlib import Path
 
 import yaml
 
-from mstack.guards.conventions_inventory import read_convention
-
 logger = logging.getLogger(__name__)
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
@@ -35,52 +33,6 @@ def parse_checks_section(mdc_path: Path) -> dict | None:
         elif LLM_REVIEW.match(line):
             llm_review = True
     return {"enforced_by": enforced_by, "llm_review": llm_review}
-
-
-def mdc_frontmatter(mdc_path: Path) -> dict:
-    text = mdc_path.read_text(encoding="utf-8")
-    if not text.startswith("---\n"):
-        return {}
-    try:
-        return yaml.safe_load(text.split("---", 2)[1]) or {}
-    except yaml.YAMLError:
-        return {}
-
-
-def derived_issues(mdc_path: Path, root: Path) -> list[dict]:
-    frontmatter = mdc_frontmatter(mdc_path)
-    source = frontmatter.get("derived-from")
-    if not source:
-        return []
-    location = display(mdc_path, root)
-    source_path = Path(str(source)).expanduser()
-    if not source_path.is_file():
-        return [
-            {
-                "kind": "orphan",
-                "file": location,
-                "detail": f"derived-from '{source}' no longer exists",
-            }
-        ]
-    try:
-        current = read_convention(source_path)["sha256"]
-    except ValueError as error:
-        return [
-            {
-                "kind": "stale",
-                "file": location,
-                "detail": f"derived-from '{source}' is malformed ({error})",
-            }
-        ]
-    if current != str(frontmatter.get("derived-sha256", "")):
-        return [
-            {
-                "kind": "stale",
-                "file": location,
-                "detail": f"'{source}' changed since this rule was derived",
-            }
-        ]
-    return []
 
 
 def load_ast_grep_rules(config_path: Path) -> dict[str, dict]:
@@ -129,7 +81,6 @@ def prose_rule_issues(
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
     for mdc_path in sorted(rules_dir.rglob(pattern)):
-        issues.extend(derived_issues(mdc_path, root))
         section = parse_checks_section(mdc_path)
         entry = {"mdc": display(mdc_path, root), "checks": [], "llm_review": False}
         rules.append(entry)
