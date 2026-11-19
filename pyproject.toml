@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "1.7.0"
+version = "1.8.0"
 description = "Logbook of agent skills, rules, hooks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }

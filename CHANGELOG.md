@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.8.0 (2026-11-19)
+
+### Features
+
+- Ship the guards as an mstack CLI and fix design review findings
+  ([#12](https://github.com/justmatias/mstack/pull/12),
+  [`8f724ca`](https://github.com/justmatias/mstack/commit/8f724ca765db4ea1b1c9291ba867ca883b99a021))
+
+### Refactoring
+
+- Remove the conventions store integration ([#14](https://github.com/justmatias/mstack/pull/14),
+  [`79b5ec8`](https://github.com/justmatias/mstack/commit/79b5ec8ad936c0837da759f5a4711f10cff50d36))
+
+
 ## v1.7.0 (2026-11-19)
 
 ### Continuous Integration
