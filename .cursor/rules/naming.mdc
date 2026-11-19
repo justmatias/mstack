@@ -1,0 +1,15 @@
+---
+description: Naming and function size guidelines
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Naming
+
+- Use descriptive names. Spell words out instead of abbreviating them.
+- A function does one thing. If its name needs "and", split it.
+
+Why: code is read far more often than it is written.
+
+## Checks
+- enforcement: llm-review
