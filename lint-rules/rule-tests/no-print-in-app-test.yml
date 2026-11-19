@@ -13,7 +13,7 @@ valid:
   - |
     pprint(value)
 invalid:
-  # Same code as demo/violations/print_debug.py
+  # Same code as the matching file in demo/violations/
   - |
     def do_work(items):
         print("processing", len(items))

@@ -10,7 +10,7 @@ valid:
     def load_user(user_id: int) -> User:
         return User(name=str(user_id))
 invalid:
-  # Same code as demo/violations/dataclass_model.py
+  # Same code as the matching file in demo/violations/
   - |
     import dataclasses
     from dataclasses import dataclass

@@ -17,7 +17,7 @@ valid:
         logger.warning("ignored: %s", error)
         pass
 invalid:
-  # Same code as demo/violations/swallowed_exception.py
+  # Same code as the matching file in demo/violations/
   - |
     def do_work(callback):
         try:

@@ -25,7 +25,7 @@ valid:
         def __init__(self, name):
             self.name = name.strip()
 invalid:
-  # Same code as demo/violations/manual_init.py
+  # Same code as the matching file in demo/violations/
   - |
     class User:
         def __init__(self, name, email):
