@@ -12,7 +12,7 @@ The operator keeps correcting agents in this repo for the same mistakes. Change 
 
 Assume every contributor is an agent that sees only the files it opened, copies the nearest example, and takes the shortest path that compiles. Design the repo so a change that looks right from one file is right for the whole repo.
 
-Shared references: [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md).
+Shared references: [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md). `<toolkit>` is resolved as described in the authoring reference (`$MSTACK_HOME`, then `~/.config/mstack/config.json`).
 
 ## Find the mistake classes
 

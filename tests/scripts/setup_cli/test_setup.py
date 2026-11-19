@@ -14,7 +14,7 @@ def snapshot(root: Path) -> dict[str, str]:
     }
 
 
-def test_install_adds_hooks_and_skills(
+def test_install_adds_hooks(
     setup_module, sandbox_root: Path, agent_components: list[str]
 ):
     setup_module.main(agent_components)
@@ -26,10 +26,7 @@ def test_install_adds_hooks_and_skills(
         cursor["hooks"]["postToolUse"][0]["command"]
         == "scripts/hooks/cursor_after_edit.sh"
     )
-    assert (
-        sandbox_root / ".claude" / "skills" / "sync-rules"
-    ).resolve() == sandbox_root / "skills" / "sync-rules"
-    assert (sandbox_root / ".cursor" / "skills" / "sync-rules").is_symlink()
+    assert not (sandbox_root / ".claude" / "skills").exists()
 
 
 def test_install_twice_changes_nothing(
@@ -87,11 +84,9 @@ def test_project_scope_writes_team_settings(setup_module, sandbox_root: Path):
     assert not (sandbox_root / ".claude" / "settings.local.json").exists()
 
 
-def test_global_skills_go_to_home(setup_module, home_directory: Path):
-    setup_module.main(["--with", "skills", "--skills-scope", "global"])
-
-    assert (home_directory / ".claude" / "skills" / "sync-rules").is_symlink()
-    assert (home_directory / ".cursor" / "skills" / "sync-rules").is_symlink()
+def test_skills_are_no_longer_a_setup_component(setup_module):
+    with pytest.raises(SystemExit):
+        setup_module.main(["--with", "skills"])
 
 
 def test_dry_run_writes_nothing(

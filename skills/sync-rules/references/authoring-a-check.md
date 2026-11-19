@@ -4,7 +4,25 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-`<toolkit>` below is the mstack folder that holds this skill: resolve the symlink of this file (`realpath`) and go up to the folder that contains `skills/` and `scripts/`. In the mstack repo itself, `<toolkit>` is the repo root.
+`<toolkit>` below is the mstack repo checkout that holds `scripts/`. The skills are installed as copies, so it cannot be found from this file's path. Resolve it in this order, and stop with the error if neither works:
+
+1. `$MSTACK_HOME`, if it is set;
+2. `toolkit_path` in `~/.config/mstack/config.json`, written by `/setup-mstack`.
+
+```bash
+# resolve-toolkit
+toolkit="${MSTACK_HOME:-}"
+if [ -z "$toolkit" ] && [ -f "$HOME/.config/mstack/config.json" ]; then
+  toolkit="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["toolkit_path"])' "$HOME/.config/mstack/config.json" 2>/dev/null)"
+fi
+if [ -z "$toolkit" ] || [ ! -d "$toolkit/scripts" ]; then
+  echo "mstack toolkit not found: set MSTACK_HOME to your mstack checkout, or run /setup-mstack from it" >&2
+  exit 1
+fi
+echo "$toolkit"
+```
+
+Run it once, then use the printed path wherever `<toolkit>` appears. If it fails, show the error to the user and stop: do not guess the path.
 
 ## 1. Pick the tool
 

@@ -9,7 +9,7 @@ description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, 
 
 Keep `.cursor/rules/` (prose, source of truth) and `lint-rules/` (checks) saying the same thing. Every checkable rule gets a check, every check points to its rule, and every judgment rule is marked as such.
 
-References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). `<toolkit>` is defined in the authoring reference.
+References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). `<toolkit>` is resolved as described in the authoring reference (`$MSTACK_HOME`, then `~/.config/mstack/config.json`).
 
 ## Modes
 

@@ -15,7 +15,9 @@ dist/
 htmlcov/
 
 # Generated per developer by scripts/setup.py
-.claude/skills/
+# Except setup-mstack, which is committed: it installs the others into ~/.
+.claude/skills/*
+!.claude/skills/setup-mstack/
 .cursor/skills/
 .claude/settings.local.json
 .cursor/hooks.json

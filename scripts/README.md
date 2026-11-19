@@ -35,4 +35,5 @@ Scripts are grouped by purpose. Nothing is meant to be called directly: each one
 
 ## setup.py
 
-- `setup.py`: the configurable setup CLI behind `make setup`. Installs or removes pre-commit, the agent hooks and the skills (`--help` lists the flags).
+- `setup.py`: the configurable setup CLI behind `make setup`. Installs or removes pre-commit and the agent hooks (`--help` lists the flags), and the personal set with `setup.py user`.
+- `setup.py skills plan|apply|verify`: installs and updates the skills by copy in `~/.claude/skills/` or `~/.cursor/skills/`, with a manifest and backups. It is run by the `/setup-mstack` skill, which makes the judgment calls; `plan --json` lists one action per skill, and `apply` takes one decision per plan item.

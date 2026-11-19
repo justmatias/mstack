@@ -64,4 +64,4 @@ def existing_claude_settings(sandbox_root: Path) -> dict:
 
 @pytest.fixture
 def agent_components() -> list[str]:
-    return ["--with", "claude-hook", "--with", "cursor-hook", "--with", "skills"]
+    return ["--with", "claude-hook", "--with", "cursor-hook"]

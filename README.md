@@ -22,6 +22,7 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
 make setup        # uv sync, then asks which integrations to install
+/setup-mstack     # in Claude Code or Cursor, with this repo open: installs the skills
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
@@ -53,7 +54,7 @@ make test         # pytest: checks, guards, setup CLI, skills and personal rules
 ```bash
 uv run python scripts/setup.py --yes                                  # everything, defaults
 uv run python scripts/setup.py --with pre-commit --with claude-hook   # only these
-uv run python scripts/setup.py --without cursor-hook --skills-scope global
+uv run python scripts/setup.py --without cursor-hook
 uv run python scripts/setup.py --claude-settings project              # hook in the shared .claude/settings.json
 uv run python scripts/setup.py --uninstall --yes                      # remove what install added
 uv run python scripts/setup.py --dry-run --yes                        # show what would change
@@ -64,9 +65,27 @@ uv run python scripts/setup.py --dry-run --yes                        # show wha
 | `pre-commit` | `.git/hooks/pre-commit` (via `pre-commit install`), running the static checks and `make lint-rules-changed STAGED=1` |
 | `claude-hook` | `PostToolUse` (`Edit\|Write`) in `.claude/settings.local.json` (default) or `.claude/settings.json` |
 | `cursor-hook` | `postToolUse` (`Write`) in `.cursor/hooks.json`; findings come back as `additional_context` |
-| `skills` | symlinks of `skills/*` into `.claude/skills/` and `.cursor/skills/` (or `~/` with `--skills-scope global`) |
 
 Existing JSON files are merged, never overwritten, and backed up as `*.bak-<timestamp>`. Running setup twice changes nothing.
+
+## Installing the skills
+
+`make setup` does not install the skills. Open this repo in Claude Code or Cursor and run `/setup-mstack` (or say "set up mstack"). The skill lives in `.claude/skills/setup-mstack/`, so it is only visible inside this repo and is never installed itself.
+
+It asks which tools you use and copies `skills/*` into one user-level folder:
+
+| You use | Skills go to |
+| --- | --- |
+| Claude Code | `~/.claude/skills/` |
+| Cursor | `~/.cursor/skills/` |
+| Both | `~/.claude/skills/` only, because Cursor loads that folder too. A second copy would show every skill twice. |
+
+The deterministic part is `scripts/setup.py skills` (`plan`, `apply`, `verify`). The skill decides what the script cannot: whether a similar skill you already have (for example pstack `reflect`) really overlaps, and whether to keep yours, keep mstack's, keep both (`mstack-<name>`), or combine them into one.
+
+- Copies, not symlinks: `skills/` in this repo stays the source of truth, and `<target>/.mstack-manifest.json` records the hash of every installed skill. A copy you edited is never overwritten without asking.
+- Backups go to `<target>/.mstack-backups/<timestamp>/`, never next to the skills.
+- `~/.config/mstack/config.json` records where this repo is. The installed skills read it (or `$MSTACK_HOME`, which takes priority) to find `scripts/`.
+- To update, pull this repo and run `/setup-mstack` again.
 
 ## Static checks and releases
 
@@ -96,7 +115,6 @@ uv run python scripts/setup.py user --uninstall --yes
 | `claude-hook` | Merges a `PostToolUse` (`Edit\|Write`) hook running `bin/claude-post-edit` into `~/.claude/settings.json` |
 | `cursor-hook` | Merges a `postToolUse` (`Write`) hook running `bin/cursor-after-edit` into `~/.cursor/hooks.json` |
 | `git-hooks` | `git config --global core.hooksPath $MY_RULES_HOME/githooks` |
-| `skills` | Links the three skills into `~/.claude/skills/` and `~/.cursor/skills/` |
 
 - `bin/my-rules-check [--with-repo] <files>` is the single command: it filters by the rules' languages, drops anything in `ignore-paths.txt` (`<glob> [rule-id]`), and runs only over the given files, so old mistakes you did not write never show up. `--with-repo` also runs the current repo's `lint-rules/`.
 - The agent hooks run the repo set too, unless the repo already has its own project hook (then only the personal set runs, so nothing runs twice).
