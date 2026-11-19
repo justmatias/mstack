@@ -1,0 +1,14 @@
+---
+description: Which HTTP client library to use
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# HTTP client
+
+- Use `httpx` for HTTP calls. Do not use `requests`.
+
+Why: `httpx` has the same API for sync and async code, timeouts by default, and HTTP/2 support.
+
+## Checks
+- enforced-by: prefer-httpx-over-requests

@@ -9,6 +9,7 @@ Every file in this folder breaks one rule from `.cursor/rules/` on purpose. `mak
 | `print_debug.py` | `logging.mdc` | `no-print-in-app` |
 | `bare_except.py` | `error-handling.mdc` | `no-bare-except` |
 | `swallowed_exception.py` | `error-handling.mdc` | `no-swallowed-exception` |
+| `requests_client.py` | `http-client.mdc` | `prefer-httpx-over-requests` |
 | `domain_imports_infra.py` | `architecture-layers.mdc` | import-linter `domain-is-pure` (only fails once copied into `example_app/domain/`) |
 
 `naming.mdc` is a judgment rule (`enforcement: llm-review`), so it has no demo file.

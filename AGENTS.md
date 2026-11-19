@@ -12,6 +12,7 @@
 | `.cursor/rules/architecture-layers.mdc` | `domain-is-pure` | import-linter | error | 0 |
 | `.cursor/rules/error-handling.mdc` | `no-bare-except` | ast-grep | error | 0 |
 | `.cursor/rules/error-handling.mdc` | `no-swallowed-exception` | ast-grep | error | 0 |
+| `.cursor/rules/http-client.mdc` | `prefer-httpx-over-requests` | ast-grep | error | 0 |
 | `.cursor/rules/logging.mdc` | `no-print-in-app` | ast-grep | error | 0 |
 | `.cursor/rules/naming.mdc` | - | LLM review on the PR | comment only | - |
 | `.cursor/rules/python-models.mdc` | `no-manual-init-boilerplate` | ast-grep | warning | 0 |

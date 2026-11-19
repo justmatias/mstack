@@ -1,0 +1,27 @@
+id: prefer-httpx-over-requests
+valid:
+  - |
+    import httpx
+
+
+    def do_work(url: str) -> int:
+        return httpx.get(url, timeout=5).status_code
+  - |
+    import requests_toolbelt
+    from foo import requests
+  - |
+    import foo as requests
+invalid:
+  # Same code as the matching file in demo/violations/
+  - |
+    import requests
+
+
+    def do_work(url: str) -> int:
+        return requests.get(url, timeout=5).status_code
+  - |
+    from requests import Session
+  - |
+    from requests.exceptions import HTTPError
+  - |
+    import os, requests.adapters as adapters
