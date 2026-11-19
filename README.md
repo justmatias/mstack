@@ -50,3 +50,9 @@ make demo         # scans demo/violations/ and expects it to fail
 `pre-commit` runs ruff, pylint, mypy, bandit, gitleaks, hookpin and generic file hygiene hooks, and also this repo's own `lint-rules` hook: `mstack` checks itself with the same rules it ships.
 
 Versioning is automated with [python-semantic-release](https://python-semantic-release.readthedocs.io/). Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/); on every push to `main`, CI bumps the version in `pyproject.toml`, updates `CHANGELOG.md`, tags the release and publishes it on GitHub (`feat` is a minor bump, `fix` and `perf` a patch).
+
+## CI and branch protection
+
+`.github/workflows/lint-rules.yml` has three jobs: `rules` (`make lint-rules-changed` on pull requests, `make lint-rules` on pushes to `main`), `demo-must-fail` (`make demo`) and `sync-drift` (`check_rule_coverage.py`).
+
+To make `rules` block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add `rules`, `demo-must-fail`, `sync-drift` and the `ci.yml` static checks as required checks.

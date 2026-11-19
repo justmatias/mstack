@@ -1,0 +1,42 @@
+name: lint-rules
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # The check that counts: make it required with branch protection (see README).
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - name: lint-rules on changed files (pull request)
+        if: github.event_name == 'pull_request'
+        run: make lint-rules-changed BASE_REF=origin/${{ github.base_ref }}
+      - name: lint-rules on the whole repo (push to main)
+        if: github.event_name == 'push'
+        run: make lint-rules
+      - run: make test
+
+  # Proves the checks still catch the real mistakes in demo/violations/.
+  demo-must-fail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: make demo
+
+  # A new .mdc with neither checks nor an llm-review mark does not pass.
+  sync-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run python scripts/check_rule_coverage.py
