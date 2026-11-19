@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Read-only inventory of the local conventions store (the store behind Helix
 # recall/remember). Never writes to the store.
 import argparse
