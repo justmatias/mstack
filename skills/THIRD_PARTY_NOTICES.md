@@ -6,7 +6,8 @@
 
 | File in this repo | Derived from (in `cursor/plugins`) | Commit |
 | --- | --- | --- |
-| `skills/reflect-rules/SKILL.md` | `pstack/skills/reflect/SKILL.md` | `b63c29ff846b972e26e88473919d9a2de5392224` (2026-11-16) |
+| `skills/reflect-rules/SKILL.md` (default mode) | `pstack/skills/reflect/SKILL.md` | `2f87c854fe3e2fcda44ca86b46ede35aad3c46b7` (2026-11-16; unchanged at `50b3a32`, 2026-11-19) |
+| `skills/reflect-rules/SKILL.md` (`--deep` mode) | `pstack/skills/reflect/SKILL.md` | `b63c29ff846b972e26e88473919d9a2de5392224` (2026-11-16) |
 | `skills/reflect-rules/references/judgment-reviewer.md` | `pstack/skills/reflect/references/judgment-reviewer.md` | `b63c29ff846b972e26e88473919d9a2de5392224` |
 | `skills/reflect-rules/references/tooling-reviewer.md` | `pstack/skills/reflect/references/tooling-reviewer.md` | `b63c29ff846b972e26e88473919d9a2de5392224` |
 | `skills/reflect-rules/references/divergent-reviewer.md` | `pstack/skills/reflect/references/divergent-reviewer.md` | `b63c29ff846b972e26e88473919d9a2de5392224` |
@@ -14,7 +15,7 @@
 | `skills/correct-rules/SKILL.md` | `pstack/skills/correct/SKILL.md` | `e58dd043600587dbaf58ba315e7f2b38373eeb43` (2026-11-19; unchanged since `b63c29f`) |
 | Claude Code tool and path mappings in `skills/sync-rules/references/discovery.md` and `skills/reflect-rules/SKILL.md` | `harness/pstack/claude-code/docs/harness/claude-code.md` | `e58dd043600587dbaf58ba315e7f2b38373eeb43` |
 
-Copied on 2026-11-19. `reflect` is taken from `b63c29f`, the last commit before upstream `2f87c85` removed its reviewer templates; the plan requires the parallel reviewers and the synthesizer. `skills/reflect-rules/references/conventions-reviewer.md` and the `sync-rules` skill are original to this repo.
+Copied on 2026-11-19. The default mode of `reflect-rules` follows the current upstream `reflect` (`2f87c85`), where the parent reads the transcript in one pass. The `--deep` mode and its reviewer templates are taken from `b63c29f`, the last commit before `2f87c85` removed them. `skills/reflect-rules/references/conventions-reviewer.md` and the `sync-rules` skill are original to this repo.
 
 ## License
 

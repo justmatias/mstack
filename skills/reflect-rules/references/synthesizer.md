@@ -14,8 +14,6 @@ Reviewer outputs:
 
 <CONVENTIONS_OUTPUT>
 
-(With `--light`, only one reviewer output is present.)
-
 Apply each criterion to every finding:
 
 - Durability: still true in 6 months once paths, SHAs, tool versions, and code shapes have changed.

@@ -13,7 +13,7 @@ TRIGGER_PHRASES = {
         "--check",
         "--user",
     ],
-    "reflect-rules": ["reflect-rules", "transcript", "personal"],
+    "reflect-rules": ["reflect-rules", "transcript", "personal", "--deep"],
     "correct-rules": ["/correct-rules", "keep repeating", "real past mistake"],
 }
 PRINCIPLES_HEADER = re.compile(r"English only.*Practices, not domain", re.DOTALL)

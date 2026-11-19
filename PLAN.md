@@ -332,7 +332,7 @@ Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 
    Only what truly cannot be checked with any available tool, or what requires a large architecture change, goes to Backlog.
 3. **Conflict detection.** If a learning contradicts an existing rule, the proposal shows both side by side and asks for a decision; it never resolves the conflict on its own.
-4. **Configurable cost.** By default, parallel reviewers as in pstack; with `--light`, a single reviewer plus the synthesizer. If `~/.cursor/rules/pstack-models.mdc` exists, honor its per-role models, as pstack does.
+4. **Configurable cost.** By default, the parent reads the transcript in one pass, as the current pstack `reflect` does; with `--deep`, parallel reviewers plus the synthesizer, as the earlier pstack version did (decision 51). If `~/.cursor/rules/pstack-models.mdc` exists, honor its per-role models, as pstack does.
 5. **Destination of each rule: repo or personal.** In the proposal, each new rule carries a suggested destination:
    - **repo**, if the correction is a team convention or the repo already has rules on that topic;
    - **personal**, if it is your own preference or the repo is not yours.
