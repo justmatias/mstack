@@ -23,7 +23,7 @@ jobs:
         run: make lint-rules
       - run: make test
 
-  # Proves the checks still catch the real mistakes in demo/violations/.
+  # Proves the checks still catch the real mistakes in fixtures/invalid/.
   demo-must-fail:
     runs-on: ubuntu-latest
     steps:
@@ -39,4 +39,4 @@ jobs:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked
-      - run: uv run python scripts/check_rule_coverage.py
+      - run: uv run python -m scripts.guards.check_rule_coverage
