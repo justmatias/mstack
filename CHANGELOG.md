@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-11-19)
+
+### Continuous Integration
+
+- Add pre-commit hook and GitHub Actions workflow running the single command
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+- Run the coverage guard as a module after the scripts regrouping
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+- Run the rule scan, demo and tests in ci.yml instead of a separate workflow
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+### Features
+
+- Add ast-grep checks, rule tests and import-linter contract
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+- Add coverage, exception and domain-leak guards and the single command
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+- Add example app, demo violations and prose rules
+  ([#7](https://github.com/justmatias/mstack/pull/7),
+  [`ac66a51`](https://github.com/justmatias/mstack/commit/ac66a51573555efbf09a3255314316edc8d0c10a))
+
+
 ## v1.3.0 (2026-11-19)
 
 ### Bug Fixes
