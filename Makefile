@@ -12,7 +12,7 @@ SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 setup:
 	uv sync
 	uv run pre-commit install
-	scripts/install_skills.sh
+	scripts/install/install_skills.sh
 
 lint:
 	uv run pre-commit run --all-files
@@ -28,7 +28,7 @@ lint-rules:
 # rule fails, warnings included: only new or touched code has to follow new rules.
 lint-rules-changed:
 	$(AST_GREP) test -c $(SGCONFIG) --skip-snapshot-tests
-	@files="$$(scripts/changed_files.sh $(if $(STAGED),--staged) | grep -v '^fixtures/invalid/' || true)"; \
+	@files="$$(scripts/git/changed_files.sh $(if $(STAGED),--staged) | grep -v '^fixtures/invalid/' || true)"; \
 	if [[ -z "$$files" ]]; then \
 		echo "lint-rules-changed: no changed Python files to scan"; \
 	else \
@@ -38,9 +38,9 @@ lint-rules-changed:
 
 guards:
 	uv run lint-imports
-	$(PYTHON) scripts/check_rule_coverage.py
-	$(PYTHON) scripts/check_exceptions.py
-	$(PYTHON) scripts/check_no_domain_leak.py lint-rules .cursor/rules --repo . --exclude scripts --exclude tests --exclude fixtures/invalid
+	$(PYTHON) -m scripts.guards.check_rule_coverage
+	$(PYTHON) -m scripts.guards.check_exceptions
+	$(PYTHON) -m scripts.guards.check_no_domain_leak lint-rules .cursor/rules --repo . --exclude scripts --exclude tests --exclude fixtures/invalid
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:
@@ -51,7 +51,7 @@ demo:
 	fi
 
 rules-table:
-	$(PYTHON) scripts/rules_table.py
+	$(PYTHON) -m scripts.generate.rules_table
 
 test:
 	uv run pytest -q

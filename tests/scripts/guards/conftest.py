@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 import sys
@@ -7,15 +8,14 @@ import pytest
 
 from tests.conftest import REPOSITORY_ROOT
 
-SCRIPTS = REPOSITORY_ROOT / "scripts"
-
 
 @pytest.fixture
-def run_script():
-    def run(script: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
+def run_guard():
+    def run(guard: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
         return subprocess.run(
-            [sys.executable, str(SCRIPTS / script), *arguments],
+            [sys.executable, "-m", f"scripts.guards.{guard}", *arguments],
             cwd=working_directory,
+            env={**os.environ, "PYTHONPATH": str(REPOSITORY_ROOT)},
             capture_output=True,
             text=True,
             check=False,

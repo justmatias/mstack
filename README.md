@@ -32,9 +32,9 @@ make demo         # scans fixtures/invalid/ and expects it to fail
 1. `ast-grep test`: every check passes its valid and invalid cases.
 2. `ast-grep scan`: the code follows every check (`fixtures/invalid/` excluded).
 3. `lint-imports`: architecture contracts in `.importlinter`.
-4. `scripts/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
-5. `scripts/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
-6. `scripts/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
+4. `scripts/guards/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
+5. `scripts/guards/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
+6. `scripts/guards/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
 
 `make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main`, and warnings count as errors there.
 

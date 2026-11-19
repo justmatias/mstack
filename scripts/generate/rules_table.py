@@ -6,8 +6,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from check_exceptions import collect_exceptions, python_files
-from check_rule_coverage import (
+from scripts.guards.check_exceptions import collect_exceptions, python_files
+from scripts.guards.check_rule_coverage import (
     load_ast_grep_rules,
     load_import_linter_contracts,
     parse_checks_section,
