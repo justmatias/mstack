@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.9.0 (2026-11-19)
+
+### Documentation
+
+- **skills**: Credit pstack in skill frontmatter instead of a notices file
+  ([#13](https://github.com/justmatias/mstack/pull/13),
+  [`550bd2a`](https://github.com/justmatias/mstack/commit/550bd2ab64f0c1661ea3b6615b51f01f1cf4667c))
+
+### Features
+
+- **reflect-rules**: Rebase on current upstream reflect, add --deep mode
+  ([#13](https://github.com/justmatias/mstack/pull/13),
+  [`550bd2a`](https://github.com/justmatias/mstack/commit/550bd2ab64f0c1661ea3b6615b51f01f1cf4667c))
+
+
 ## v1.8.0 (2026-11-19)
 
 ### Features
