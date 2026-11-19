@@ -18,3 +18,5 @@ htmlcov/
 .claude/skills/
 .cursor/skills/
 .claude/settings.local.json
+.cursor/hooks.json
+*.bak-*
