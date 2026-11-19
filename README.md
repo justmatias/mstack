@@ -53,6 +53,6 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 
 ## CI and branch protection
 
-`.github/workflows/lint-rules.yml` has three jobs: `rules` (`make lint-rules-changed` on pull requests, `make lint-rules` on pushes to `main`), `demo-must-fail` (`make demo`) and `sync-drift` (`check_rule_coverage.py`).
+The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
 
-To make `rules` block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add `rules`, `demo-must-fail`, `sync-drift` and the `ci.yml` static checks as required checks.
+To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
