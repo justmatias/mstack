@@ -1,6 +1,6 @@
 ---
 name: sync-rules
-description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) with their automated checks in lint-rules/ (ast-grep, import-linter), in both directions. Use when the user says sync the rules, sync-rules, after editing .cursor/rules, when a rule has no check, when adopting rules-as-checks in an existing repo, or with --check in CI. With --user it syncs your personal rules (~/.cursor/rules, ~/.config/my-rules); with --from-conventions it derives personal checks from the conventions store."
+description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) with their automated checks in lint-rules/ (ast-grep, import-linter), in both directions. Use when the user says sync the rules, sync-rules, after editing .cursor/rules, when a rule has no check, when adopting rules-as-checks in an existing repo, or with --check in CI. With --user it syncs your personal rules (~/.cursor/rules, ~/.config/my-rules)."
 ---
 
 # Sync rules
@@ -18,7 +18,6 @@ References: [rule format](references/rule-format.md), [authoring a check](refere
 | `sync-rules` | The current repo's rules ↔ `lint-rules/` | After approval |
 | `sync-rules --check` | Same | Nothing. Exits non-zero (or reports failure) if there is drift. |
 | `sync-rules --user` | `~/.cursor/rules/*.mdc` and `~/.claude/CLAUDE.md` ↔ `$MY_RULES_HOME` | After approval, never in the current repo |
-| `sync-rules --user --from-conventions [<dir>]` | The conventions store ↔ `~/.cursor/rules/my-*.mdc` ↔ `$MY_RULES_HOME` | After approval, never in the store or the repo |
 
 ## 1. Discover
 
@@ -108,23 +107,3 @@ The same procedure between your prose rules (`~/.cursor/rules/*.mdc`, `~/.claude
 - Prefix check ids with `my-`.
 - Report contradictions between your personal rules and the rules of the repo you are in. On conflict the repo wins: propose adding that repo to `$MY_RULES_HOME/ignore-paths.txt` for that rule, and never edit the repo's rules.
 - Commit to `$MY_RULES_HOME` if it is a git repo.
-
-## `--from-conventions [<dir>]`
-
-Also takes the conventions store (`$CONVENTIONS_HOME`, default `~/.dev_brain/conventions/`; `INDEX.md` is never a source) as a read-only prose source. Everything extracted goes to the personal set, never to a repo.
-
-1. Read the store with the inventory script; never parse it by hand and never modify it:
-
-   ```bash
-   mstack conventions --json [--dir <dir>]
-   ```
-
-2. Split each convention into atomic rules and classify each one:
-   - **pattern / architecture**: checkable. Generate a `my-<name>` YAML and tests in `$MY_RULES_HOME`.
-   - **judgment**: generate the `.mdc` with `enforcement: llm-review` and no YAML.
-   - **tooling note**: a workaround for a tool's quirk (linter false positives, autofix pitfalls, pin tools). No check, no `.mdc`. Report `skipped: tooling note`.
-   - **non-code**: commits, process, workflow. No ast-grep check. Where a git hook can enforce it (for example a `commit-msg` regex), propose a step in `$MY_RULES_HOME/bin/git-hook-chain`, only with approval. Otherwise report it as skipped.
-3. For each checkable or judgment rule, write `~/.cursor/rules/my-<name>.mdc` in English, with `derived-from: <convention path>` and `derived-sha256: <sha256 from the inventory>` in the frontmatter and the usual `## Checks` section. Never edit files under the store: to change a rule, the user changes the convention and the next run picks it up.
-4. Drift: a convention whose `sha256` no longer matches `derived-sha256` makes its `.mdc` and check `stale`; a deleted convention makes them `orphan`. `check_rule_coverage.py --rules-dir ~/.cursor/rules --config $MY_RULES_HOME/sgconfig.yml --glob 'my-*.mdc' --root ~` reports both, and also fails on a `derived-from` path that does not exist.
-5. Conventions may name specific projects or tools. Abstract or drop those details before writing anything, and run `check_no_domain_leak.py` over the generated files.
-6. Show the plan and wait for approval. A second run with an unchanged store reports everything `ok`.

@@ -84,4 +84,4 @@ print(banner)
 
 ## Personal rules
 
-Personal rules use the same format, under `~/.cursor/rules/my-*.mdc`, with checks in `$MY_RULES_HOME` (default `~/.config/my-rules/`) and ids prefixed `my-`. They have no `ast-grep-ignore` exceptions: exceptions go in `$MY_RULES_HOME/ignore-paths.txt`. Rules derived from the conventions store also carry `derived-from: <convention path>` and `derived-sha256: <hash>` in their frontmatter. See `authoring-a-check.md`, "Personal set".
+Personal rules use the same format, under `~/.cursor/rules/my-*.mdc`, with checks in `$MY_RULES_HOME` (default `~/.config/my-rules/`) and ids prefixed `my-`. They have no `ast-grep-ignore` exceptions: exceptions go in `$MY_RULES_HOME/ignore-paths.txt`. See `authoring-a-check.md`, "Personal set".
