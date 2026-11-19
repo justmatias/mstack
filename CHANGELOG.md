@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-11-19)
+
+### Features
+
+- Add ast-grep checks, rule tests and import-linter contract
+  ([#4](https://github.com/justmatias/mstack/pull/4),
+  [`c0dc23e`](https://github.com/justmatias/mstack/commit/c0dc23ef601d193a178a58a698757b21f3b3ef8d))
+
+
 ## v1.1.0 (2026-11-19)
 
 ### Bug Fixes
