@@ -2,6 +2,45 @@
 
 <!-- version list -->
 
+## v1.7.0 (2026-11-19)
+
+### Continuous Integration
+
+- Add pre-commit hook and GitHub Actions workflow running the single command
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+### Documentation
+
+- Record end-to-end scenario results ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+### Features
+
+- Add agent hooks and a configurable setup CLI ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+- Add ast-grep checks, rule tests and import-linter contract
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+- Add coverage, exception and domain-leak guards and the single command
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+- Add example app, demo violations and prose rules
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+- Add personal user-level rules, global hooks and conventions inventory
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+- Add sync-rules, reflect-rules and correct-rules skills
+  ([#11](https://github.com/justmatias/mstack/pull/11),
+  [`09185c1`](https://github.com/justmatias/mstack/commit/09185c1aee2ea824aeefa47a8fa36780ef3bc2c1))
+
+
 ## v1.6.0 (2026-11-19)
 
 ### Bug Fixes
