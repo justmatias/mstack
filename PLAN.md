@@ -117,7 +117,6 @@ rules-as-checks/
 │       ├── cursor-after-edit         # Cursor hook (user level)
 │       └── git-hook-chain            # global git hook that chains to each repo's hooks
 └── skills/
-    ├── THIRD_PARTY_NOTICES.md        # MIT attribution for pstack
     ├── sync-rules/
     │   ├── SKILL.md
     │   └── references/
@@ -258,7 +257,7 @@ rules-as-checks/
    - pstack's Claude Code adapter, which maps Cursor names to Claude Code (transcripts, subagents).
 
    **[VERIFY the paths: the layout may have changed]**. The adaptations **start from the original text** and extend it. Do not rewrite them from memory.
-2. `skills/THIRD_PARTY_NOTICES.md`: pstack's MIT license (Lauren Tan / Cursor), which files derive from which, and the date and commit of the copy. At the end of each adapted SKILL.md, one line: `Adapted from pstack/<skill> (MIT). See THIRD_PARTY_NOTICES.md`.
+2. Attribution in the frontmatter of each adapted SKILL.md: `license: MIT` and a `metadata` block with `adapted-from` (the pstack skill, thanking its author), `upstream-commit` (plus `upstream-commit-deep` for the `--deep` mode of `reflect-rules`) and `upstream-license` (MIT, Copyright (c) 2026 Lauren Tan, linking pstack's LICENSE). Adapted reference files end with a comment pointing to that frontmatter.
 3. Shared references in `skills/sync-rules/references/`. The other two skills cite them by relative path, `../sync-rules/references/...`, which is why all three are always installed together:
    - `rule-format.md`: `.mdc` frontmatter, the `## Checks` section (`enforced-by:` / `enforcement: llm-review`), `metadata.source` and the exception format.
    - `authoring-a-check.md`: the recipe for a new check. Step by step:
@@ -371,7 +370,7 @@ Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 **Phase 5 acceptance:**
 - `install_skills.sh` creates the symlinks in both environments.
 - All three skills have valid frontmatter and descriptions that trigger on the expected phrases.
-- `THIRD_PARTY_NOTICES.md` exists and every adapted skill references it.
+- Every adapted skill credits pstack in its frontmatter (`license`, `metadata.adapted-from`, `metadata.upstream-commit`).
 - `check_language.py` passes over `skills/`.
 
 ## Phase 6: End-to-end tests

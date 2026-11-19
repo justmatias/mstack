@@ -2,6 +2,12 @@
 name: reflect-rules
 description: "Mine the active transcript for coding conventions and durable learnings, and turn each into a prose rule in .cursor/rules plus its automated check (ast-grep, import-linter), or into a skill edit. Reads the transcript in one pass by default; --deep spawns parallel review subagents and a synthesizer. Waits for approval and routes each rule to the repo or to your personal set. Use when the user says reflect-rules, reflect on the rules, turn my corrections into rules, or make this preference a rule."
 disable-model-invocation: true
+license: MIT
+metadata:
+  adapted-from: "pstack/skills/reflect in cursor/plugins (https://github.com/cursor/plugins/tree/main/pstack). Thanks to Lauren Tan for the original skill."
+  upstream-commit: "2f87c854fe3e2fcda44ca86b46ede35aad3c46b7"
+  upstream-commit-deep: "b63c29ff846b972e26e88473919d9a2de5392224"
+  upstream-license: "MIT, Copyright (c) 2026 Lauren Tan, https://github.com/cursor/plugins/blob/main/pstack/LICENSE"
 ---
 
 # Reflect rules
@@ -108,5 +114,3 @@ Short list, no preamble:
 - Backlog filed: `<issue title>`. One line each.
 - Abstracted: what was generalized from the chat.
 - Dropped: one line per rejected finding and its reason (including `domain`).
-
-Adapted from pstack/reflect (MIT). See THIRD_PARTY_NOTICES.md

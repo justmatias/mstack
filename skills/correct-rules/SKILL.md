@@ -2,6 +2,11 @@
 name: correct-rules
 description: "Find the coding mistakes that keep repeating in this repo (commits, reverts, PR review comments, ast-grep-ignore exceptions, warnings) and make each one impossible. Try architecture first (import-linter), then types and lints (ast-grep, Fixit) whose error names the fix, then a test, and write the .cursor/rules prose last. Prove each check fails on a synthetic copy of a real past mistake. Use for /correct-rules, correct the rules, stop this mistake from happening again, or when the operator keeps correcting the same thing."
 disable-model-invocation: true
+license: MIT
+metadata:
+  adapted-from: "pstack/skills/correct in cursor/plugins (https://github.com/cursor/plugins/tree/main/pstack). Thanks to Lauren Tan for the original skill."
+  upstream-commit: "e58dd043600587dbaf58ba315e7f2b38373eeb43"
+  upstream-license: "MIT, Copyright (c) 2026 Lauren Tan, https://github.com/cursor/plugins/blob/main/pstack/LICENSE"
 ---
 
 # Correct rules
@@ -52,5 +57,3 @@ Last, regenerate the table that pairs each rule with what enforces it: `make rul
 By default, fixes go to the repo. If you cannot change the repo, or the class is yours (it appears only in your own commits: `git log --author="$(git config user.email)"`), offer to move the check to your personal set instead (`~/.cursor/rules/my-<name>.mdc` and `$MY_RULES_HOME`, ids prefixed `my-`, see "Personal set" in the authoring reference). There it stays at the lint level only, because architecture and tests live in the repo and require changing it. Nothing is written to the repo.
 
 **Reply:** each class with its evidence (commit shas, PR numbers, exception counts), the level you picked, why a higher level didn't work, the files touched, and the severity. Then: abstracted (what was generalized) and dropped (`domain-dependent` classes, one line each).
-
-Adapted from pstack/correct (MIT). See THIRD_PARTY_NOTICES.md
