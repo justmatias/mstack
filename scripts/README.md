@@ -1,6 +1,6 @@
 # scripts
 
-The tooling behind the `make` targets. ast-grep and import-linter check the code itself. These scripts cover what those tools cannot: keeping the prose rules and the checks in sync, validating exceptions, keeping domain details out of the rules, generating the rules table, picking the changed files, and installing the skills.
+The tooling behind the `make` targets. ast-grep and import-linter check the code itself. These scripts cover what those tools cannot: keeping the prose rules and the checks in sync, validating exceptions, keeping domain details out of the rules, generating the rules table, picking the changed files, running the checks from agent hooks, and installing the integrations.
 
 Scripts are grouped by purpose. Nothing is meant to be called directly: each one runs through the `make` target listed below. Python tools run as modules (`uv run python -m scripts.<folder>.<name>`) so they can import each other.
 
@@ -9,7 +9,7 @@ Scripts are grouped by purpose. Nothing is meant to be called directly: each one
 | `guards/` | Checks that fail the build when the rule system drifts. | `make guards` (part of `make lint-rules` and `make lint-rules-changed`) |
 | `generate/` | Generators for files that must not be edited by hand. | `make rules-table` |
 | `git/` | Helpers that read the git state. | `make lint-rules-changed` |
-| `install/` | Installers that link or copy this repo's pieces into a project or the user profile. | `make setup` |
+| `hooks/` | Agent hooks that scan each edited file and report findings back to the agent. | Claude Code / Cursor, once installed by `make setup` |
 
 ## guards/
 
@@ -26,6 +26,12 @@ Scripts are grouped by purpose. Nothing is meant to be called directly: each one
 
 - `changed_files.sh`: lists the `.py` files changed relative to `origin/main` (`BASE_REF` overrides it), or the staged files with `--staged`.
 
-## install/
+## hooks/
 
-- `install_skills.sh`: symlinks the skills into the agent skill folders.
+- `claude_post_edit.sh`: Claude Code `PostToolUse` hook; on rule errors in the edited `.py` file, prints them to stderr and exits 2.
+- `cursor_after_edit.sh`: Cursor `postToolUse` hook; returns the findings as `additional_context`.
+- `lib.sh`: helpers shared by both hooks (read the edited path from the payload, scan one file).
+
+## setup.py
+
+- `setup.py`: the configurable setup CLI behind `make setup`. Installs or removes pre-commit, the agent hooks and the skills (`--help` lists the flags).

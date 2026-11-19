@@ -9,10 +9,11 @@ SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 
 .PHONY: setup lint-rules lint-rules-changed guards demo rules-table test lint
 
+# Interactive unless SETUP_ARGS has flags, e.g. make setup SETUP_ARGS="--yes" or
+# SETUP_ARGS="--with pre-commit --with claude-hook". See: uv run python scripts/setup.py --help
 setup:
 	uv sync
-	uv run pre-commit install
-	scripts/install/install_skills.sh
+	uv run python scripts/setup.py $(SETUP_ARGS)
 
 lint:
 	uv run pre-commit run --all-files
