@@ -2,6 +2,8 @@
 
 Results of the acceptance scenarios, recorded while executing `PLAN.md`. Dates are 2026-11-19 unless stated.
 
+Paths and check names are the ones in use when each scenario ran. The repo was restructured later (`example_app/` and `demo/violations/` became `fixtures/valid/` and `fixtures/invalid/`, scripts moved under `scripts/guards/`, and `prefer-pydantic-over-dataclass` was dropped); see `docs/decisions.md`.
+
 ## Phase 4: integration
 
 | Scenario | Result | Evidence |
@@ -53,7 +55,7 @@ Every scenario ran with `HOME` pointing at a temporary folder and `GIT_CONFIG_GL
 | No skill writes outside the repo unasked | Only `--user` mode and the personal destination write outside, to `~/.cursor/rules/` and `$MY_RULES_HOME`, after approval (scenarios 8–10 checked the repo is untouched). |
 | No part of the personal set writes into repos | Exceptions live in `ignore-paths.txt`; the hooks only read. Scenarios 2–7 leave no files in the test repos beyond what the tests commit. |
 | No generated artifact contains domain information | `check_no_domain_leak.py` passed over every generated file in Phases 6–7 (two real findings in scenario 1 and 4 were rewritten). |
-| Every file and generated artifact is in English | Enforced as an explicit instruction in every skill (decision 13); reviewed by hand for this repo and the generated files. The only non-English text was scenario 4's input, kept in a throwaway clone. |
-| How `ruleDirs` resolves when `-c` points outside the current directory | Relative to the config file (decision 30). |
+| Every file and generated artifact is in English | Enforced as an explicit instruction in every skill (decision 16); reviewed by hand for this repo and the generated files. The only non-English text was scenario 4's input, kept in a throwaway clone. |
+| How `ruleDirs` resolves when `-c` points outside the current directory | Relative to the config file (decision 34). |
 | User-level hooks and their coexistence with project hooks | Decision 31; scenario 7. |
 | Invoking pre-commit from a chained hook; husky | Decision 32; scenarios 3 and 5. |
