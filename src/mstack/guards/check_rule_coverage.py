@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
 ENFORCED_BY = re.compile(r"^\s*-\s*enforced-by:\s*(?P<check_id>\S+)\s*$")
+ENFORCED_BY_HOOK = re.compile(r"^\s*-\s*enforced-by-hook:\s*(?P<hook_id>\S+)\s*$")
 LLM_REVIEW = re.compile(r"^\s*-\s*enforcement:\s*llm-review\s*$")
 IMPORT_LINTER_CONTRACT = re.compile(r"^importlinter:contract:(?P<contract_id>.+)$")
 
@@ -26,15 +27,18 @@ def parse_checks_section(mdc_path: Path) -> dict | None:
     if start is None:
         return None
     enforced_by: dict[str, int] = {}
+    hooks: dict[str, int] = {}
     llm_review = False
     for line_number, line in enumerate(lines[start + 1 :], start=start + 2):
         if line.startswith("#"):
             break
         if match := ENFORCED_BY.match(line):
             enforced_by[match["check_id"]] = line_number
+        elif match := ENFORCED_BY_HOOK.match(line):
+            hooks[match["hook_id"]] = line_number
         elif LLM_REVIEW.match(line):
             llm_review = True
-    return {"enforced_by": enforced_by, "llm_review": llm_review}
+    return {"enforced_by": enforced_by, "hooks": hooks, "llm_review": llm_review}
 
 
 def load_ast_grep_rules(config_path: Path) -> dict[str, dict]:
@@ -64,6 +68,42 @@ def load_import_linter_contracts(importlinter_path: Path) -> set[str]:
     }
 
 
+def load_pre_commit_hooks(config_path: Path) -> set[str] | None:
+    """Every hook id in every repo of the config, `local` ones included.
+
+    None when the file is missing, so every `enforced-by-hook` is unknown.
+    """
+    if not config_path.is_file():
+        return None
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    return {
+        hook["id"]
+        for repo in config.get("repos") or []
+        for hook in (repo or {}).get("hooks") or []
+        if isinstance(hook, dict) and "id" in hook
+    }
+
+
+def unknown_hook_issues(
+    mdc: str, hooks: dict[str, int], configured: set[str] | None, config_name: str
+) -> list[dict]:
+    reason = (
+        f"there is no {config_name}"
+        if configured is None
+        else f"no hook with this id in {config_name}"
+    )
+    return [
+        {
+            "kind": "unknown-hook",
+            "file": f"{mdc}:{line_number}",
+            "check": hook_id,
+            "detail": f"'enforced-by-hook: {hook_id}': {reason}",
+        }
+        for hook_id, line_number in hooks.items()
+        if configured is None or hook_id not in configured
+    ]
+
+
 def resolve_source(source: str, root: Path) -> Path:
     path = Path(source).expanduser()
     return path if path.is_absolute() else root / path
@@ -77,27 +117,40 @@ def display(path: Path, root: Path) -> str:
 
 
 def prose_rule_issues(
-    rules_dir: Path, known_checks: set[str], root: Path
+    rules_dir: Path,
+    known_checks: set[str],
+    root: Path,
+    pre_commit_config: Path,
 ) -> tuple[list[dict], list[dict], dict[Path, set[str]]]:
+    configured_hooks = load_pre_commit_hooks(pre_commit_config)
     issues: list[dict] = []
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
     for mdc_path in sorted(rules_dir.rglob("*.mdc")):
         section = parse_checks_section(mdc_path)
-        entry = {"mdc": display(mdc_path, root), "checks": [], "llm_review": False}
+        mdc = display(mdc_path, root)
+        entry = {"mdc": mdc, "checks": [], "hooks": [], "llm_review": False}
         rules.append(entry)
-        if section is None or not (section["enforced_by"] or section["llm_review"]):
+        if section is None or not (
+            section["enforced_by"] or section["hooks"] or section["llm_review"]
+        ):
             issues.append({
                 "kind": "missing-checks-section",
-                "file": display(mdc_path, root),
+                "file": mdc,
                 "detail": (
-                    "no '## Checks' section with 'enforced-by:' or "
-                    "'enforcement: llm-review'"
+                    "no '## Checks' section with 'enforced-by:', "
+                    "'enforced-by-hook:' or 'enforcement: llm-review'"
                 ),
             })
             continue
         entry["checks"] = sorted(section["enforced_by"])
+        entry["hooks"] = sorted(section["hooks"])
         entry["llm_review"] = section["llm_review"]
+        issues.extend(
+            unknown_hook_issues(
+                mdc, section["hooks"], configured_hooks, pre_commit_config.name
+            )
+        )
         listed_by_mdc[mdc_path.resolve()] = set(section["enforced_by"])
         issues.extend(
             {
@@ -154,11 +207,14 @@ def compute_drift(
     config: Path,
     importlinter: Path,
     root: Path,
+    pre_commit_config: Path,
 ) -> dict:
     ast_grep_rules = load_ast_grep_rules(config)
     contracts = load_import_linter_contracts(importlinter)
     known_checks = set(ast_grep_rules) | contracts
-    rules, issues, listed_by_mdc = prose_rule_issues(rules_dir, known_checks, root)
+    rules, issues, listed_by_mdc = prose_rule_issues(
+        rules_dir, known_checks, root, pre_commit_config
+    )
     issues.extend(check_source_issues(ast_grep_rules, listed_by_mdc, root))
     return {"ok": not issues, "rules": rules, "issues": issues}
 
@@ -178,6 +234,11 @@ def main(argv: list[str] | None = None) -> int:
         "--importlinter", type=Path, help="import-linter file (default: from config)."
     )
     parser.add_argument(
+        "--pre-commit-config",
+        type=Path,
+        help="pre-commit config whose hook ids count as checks (default: from config).",
+    )
+    parser.add_argument(
         "--root",
         type=Path,
         help=(
@@ -193,6 +254,7 @@ def main(argv: list[str] | None = None) -> int:
         "rules_dir": arguments.rules_dir,
         "sgconfig": arguments.config,
         "importlinter": arguments.importlinter,
+        "pre_commit_config": arguments.pre_commit_config,
     })
 
     report = compute_drift(
@@ -200,6 +262,7 @@ def main(argv: list[str] | None = None) -> int:
         config.values.sgconfig,
         config.values.importlinter,
         arguments.root.expanduser() if arguments.root else config.root,
+        config.values.pre_commit_config,
     )
     if arguments.json:
         sys.stdout.write(json.dumps(report, indent=2) + "\n")

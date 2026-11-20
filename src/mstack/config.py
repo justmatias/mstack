@@ -17,6 +17,7 @@ PATH_KEYS = {
     "rules_dir",
     "sgconfig",
     "importlinter",
+    "pre_commit_config",
     "leak_check.paths",
     "leak_check.exclude",
 }
@@ -50,6 +51,7 @@ class ProjectConfig(StrictModel):
     rules_dir: Path = Path(".cursor/rules")
     sgconfig: Path = Path("lint-rules/sgconfig.yml")
     importlinter: Path = Path(".importlinter")
+    pre_commit_config: Path = Path(".pre-commit-config.yaml")
     scan: ScanSettings = ScanSettings()
     leak_check: LeakCheckSettings = LeakCheckSettings()
     changed: ChangedSettings = ChangedSettings()

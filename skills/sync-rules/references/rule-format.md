@@ -39,9 +39,12 @@ Every `.mdc` ends with a `## Checks` section. Each line is one of:
 | Line | Meaning |
 | --- | --- |
 | `- enforced-by: <id>` | An ast-grep rule with `id: <id>`, or an import-linter contract `[importlinter:contract:<id>]`. |
+| `- enforced-by-hook: <id>` | A pre-commit hook with `id: <id>` in `.pre-commit-config.yaml` (any repo, `local` ones included), for a rule an existing linter enforces: shellcheck, gitleaks, `no-commit-to-branch`, a commit-message check. |
 | `- enforcement: llm-review` | Judgment rule: no deterministic check. The LLM reviewer on the PR comments on it. |
 
-A file may mix both when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `check_rule_coverage.py` fails on it.
+Use `enforced-by-hook:` only when no ast-grep rule or import-linter contract can express the rule and a pinned linter already does; it is its own keyword, so a hook and an ast-grep rule may share an id. `mstack coverage` reports `unknown-hook` when the id is not configured (or there is no `.pre-commit-config.yaml`; the path is `pre_commit_config` in `.mstack.toml`). Hooks have no `metadata.source`, so only rule → hook is checked, and a hook skipped with `SKIP` still counts as configured.
+
+A file may mix these when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `check_rule_coverage.py` fails on it.
 
 ## `metadata.source` in the YAML
 

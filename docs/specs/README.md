@@ -18,7 +18,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | runtime-lint-command |
 | [pre-commit-hooks](pre-commit-hooks.md) | `.pre-commit-hooks.yaml` so other repos use the guards as hooks | runtime-lint-command |
 | [reusable-ci-action](reusable-ci-action.md) | A GitHub Action that runs `mstack lint` in any repo | runtime-lint-command |
-| [hook-checks](hook-checks.md) | Let a rule be enforced by a pre-commit hook (prerequisite of the shell and git packs) | none |
 | [rule-pack-shell](rule-pack-shell.md) | Shell script rules and checks | hook-checks |
 | [rule-pack-testing](rule-pack-testing.md) | Test-code rules and checks | none |
 | [rule-pack-git-commits](rule-pack-git-commits.md) | Git and commit-message rules, with `mstack commit-msg` | hook-checks |

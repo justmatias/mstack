@@ -92,3 +92,44 @@ def edit_skill(skills_sandbox: Path):
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
     return edit
+
+
+@pytest.fixture
+def pre_commit_config(rules_sandbox: Path) -> Path:
+    path = rules_sandbox / ".pre-commit-config.yaml"
+    path.write_text(
+        "repos:\n"
+        "  - repo: https://github.com/gitleaks/gitleaks\n"
+        "    rev: v8.30.0\n"
+        "    hooks:\n"
+        "      - id: gitleaks\n"
+        "  - repo: local\n"
+        "    hooks:\n"
+        "      - id: check-something\n"
+        "        name: check something\n"
+        "        entry: true\n"
+        "        language: system\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.fixture
+def add_hook_line(rules_sandbox: Path):
+    def add(hook_id: str, mdc_name: str = "logging.mdc") -> None:
+        mdc = rules_sandbox / "rules" / mdc_name
+        mdc.write_text(
+            mdc.read_text(encoding="utf-8") + f"- enforced-by-hook: {hook_id}\n",
+            encoding="utf-8",
+        )
+
+    return add
+
+
+@pytest.fixture
+def _only_hook_in_checks_section(rules_sandbox: Path) -> None:
+    mdc = rules_sandbox / "rules" / "naming.mdc"
+    prose = mdc.read_text(encoding="utf-8").split("## Checks")[0]
+    mdc.write_text(
+        prose + "## Checks\n- enforced-by-hook: gitleaks\n", encoding="utf-8"
+    )

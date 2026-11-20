@@ -5,7 +5,7 @@ The `mstack` command: the guards that `make lint-rules` and the skills run. Inst
 | Command | Module | What it does |
 | --- | --- | --- |
 | `mstack config` | `config.py` | Prints the resolved project config and where each value comes from (`default`, `file` or `flag`). `--json` prints it as JSON. |
-| `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists, and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. |
+| `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
 | `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
 | `mstack config-check [--root <dir>]` | `guards/check_agent_config.py` | `agents/*.md` have a frontmatter `name` equal to the file name and a `description`; `mcp/*.json` and `settings/*.json` are JSON objects (an MCP entry has a `command` or a `url`); no literal secrets (sensitive keys must hold a `${VAR}` placeholder) and no machine-specific paths. |
@@ -50,6 +50,7 @@ Every command reads one optional file that describes the repo's layout, so no co
 rules_dir = ".cursor/rules"          # prose rules (*.mdc)
 sgconfig = "lint-rules/sgconfig.yml" # ast-grep config
 importlinter = ".importlinter"       # optional; skipped when missing
+pre_commit_config = ".pre-commit-config.yaml" # hook ids that enforced-by-hook may name
 
 [scan]
 exclude = []                         # globs the scan skips; mstack exceptions skips them too
