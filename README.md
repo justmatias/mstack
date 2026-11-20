@@ -50,6 +50,7 @@ On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows prof
 | `correct` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate` | Bring skills or rules from a GitHub URL into `skills/` or `rules/`, merged into what already exists, with their license, credit and a check for each rule. |
 | `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
+| `open-pull-request` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `code-simplification` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `repair` | Close the gaps `mstack doctor` reports: reinstall the CLI, update drifted skills and rules with a backup, and rerun doctor until it is clean. |
 
