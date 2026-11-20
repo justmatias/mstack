@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.11.0 (2026-11-20)
+
+### Features
+
+- **init**: Scaffold the rules-as-checks layout with mstack init
+  ([#29](https://github.com/justmatias/mstack/pull/29),
+  [`4e400cc`](https://github.com/justmatias/mstack/commit/4e400cc3939396d379ab256a1b5ff6681141205b))
+
+
 ## v3.10.0 (2026-11-20)
 
 ### Features
