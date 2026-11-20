@@ -69,7 +69,8 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
   # ast-grep-ignore: no-manual-init-boilerplate
   ```
 
-- rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`).
+- rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`);
+- a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 

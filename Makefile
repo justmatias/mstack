@@ -45,6 +45,7 @@ guards:
 	uv run lint-imports
 	$(MSTACK) coverage $(RULE_PATHS)
 	$(MSTACK) exceptions
+	$(MSTACK) skills-check skills
 	$(MSTACK) leak-check lint rules --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
