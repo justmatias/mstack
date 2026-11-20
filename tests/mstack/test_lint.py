@@ -160,7 +160,7 @@ def test_imports_fails_when_the_contract_is_broken(run_lint, import_contract):
 
 
 def test_coverage_failure_is_reported_with_its_findings(run_lint, lint_sandbox: Path):
-    mdc = lint_sandbox / "rules" / "logging.mdc"
+    mdc = lint_sandbox / "rules" / "error-handling.mdc"
     mdc.write_text(mdc.read_text() + "- enforced-by: no-such-check\n")
 
     exit_code, report = run_lint("--only", "coverage")

@@ -67,12 +67,12 @@ def test_configured_hook_counts_as_check(
     completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert completed.returncode == 0, completed.stdout
-    logging_rule = next(
+    error_handling_rule = next(
         rule
         for rule in json.loads(completed.stdout)["rules"]
-        if rule["mdc"].endswith("logging.mdc")
+        if rule["mdc"].endswith("error-handling.mdc")
     )
-    assert logging_rule["hooks"] == [hook_id]
+    assert error_handling_rule["hooks"] == [hook_id]
 
 
 def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):

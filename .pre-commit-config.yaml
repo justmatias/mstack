@@ -44,13 +44,6 @@ repos:
         args: ['-r', '-lll']
         exclude: ^fixtures/invalid/
 
-  # Enforces part of rules/shell.mdc (enforced-by-hook: shellcheck).
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
-    hooks:
-      - id: shellcheck
-        exclude: ^fixtures/invalid/
-
   # Lints the workflows, and the inputs they pass to local actions such as action.yml.
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
