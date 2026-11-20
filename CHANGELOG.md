@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.0.0 (2026-11-20)
+
+### Features
+
+- **integrate-skills**: Add skill to integrate skills from a GitHub URL
+  ([#17](https://github.com/justmatias/mstack/pull/17),
+  [`6260b0d`](https://github.com/justmatias/mstack/commit/6260b0d849d559a262710cdef27945187d0f5708))
+
+- **integrate-skills**: Compare with every existing skill before adding a new one
+  ([#17](https://github.com/justmatias/mstack/pull/17),
+  [`6260b0d`](https://github.com/justmatias/mstack/commit/6260b0d849d559a262710cdef27945187d0f5708))
+
+### Testing
+
+- Remove the skill tests ([#17](https://github.com/justmatias/mstack/pull/17),
+  [`6260b0d`](https://github.com/justmatias/mstack/commit/6260b0d849d559a262710cdef27945187d0f5708))
+
+
 ## v2.0.0 (2026-11-20)
 
 ### Documentation
