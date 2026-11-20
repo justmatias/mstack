@@ -54,6 +54,7 @@ Skills, rules and agents are copies, not symlinks. MCP servers, instructions and
 ## Working on mstack
 
 ```bash
+uv run pre-commit install   # installs the pre-commit and the commit-msg hooks
 make lint                 # every pre-commit hook on every file
 make lint-rules           # mstack lint: check tests, full scan and guards
 make lint-rules-changed   # mstack lint --changed: the scan covers only changed files and warnings fail
@@ -75,6 +76,7 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
   ```
 
 - rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`);
+- a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.

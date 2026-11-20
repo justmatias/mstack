@@ -1,5 +1,10 @@
 # fixtures/invalid/ holds deliberate violations for the rule checks to catch,
 # so the Python linters skip it.
+# `pre-commit install` installs both the pre-commit and the commit-msg hooks. Hooks
+# run at the pre-commit stage unless they say otherwise.
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
 repos:
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: 'v0.27'
@@ -13,6 +18,9 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: detect-private-key
+      # rules/git-commits.mdc: branch first. CI skips it on main pushes.
+      - id: no-commit-to-branch
+        args: [--branch, main]
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
@@ -80,3 +88,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+
+      - id: mstack-commit-msg
+        name: mstack commit-msg (Conventional Commits)
+        entry: uv run mstack commit-msg
+        language: system
+        stages: [commit-msg]

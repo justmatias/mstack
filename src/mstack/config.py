@@ -47,6 +47,22 @@ class ChangedSettings(StrictModel):
     base_ref: str = "origin/main"
 
 
+class CommitsSettings(StrictModel):
+    # The Conventional Commits types `mstack commit-msg` accepts.
+    types: list[str] = [
+        "build",
+        "chore",
+        "ci",
+        "docs",
+        "feat",
+        "fix",
+        "perf",
+        "refactor",
+        "style",
+        "test",
+    ]
+
+
 class ProjectConfig(StrictModel):
     rules_dir: Path = Path(".cursor/rules")
     sgconfig: Path = Path("lint-rules/sgconfig.yml")
@@ -55,6 +71,7 @@ class ProjectConfig(StrictModel):
     scan: ScanSettings = ScanSettings()
     leak_check: LeakCheckSettings = LeakCheckSettings()
     changed: ChangedSettings = ChangedSettings()
+    commits: CommitsSettings = CommitsSettings()
 
 
 class ResolvedConfig(StrictModel):

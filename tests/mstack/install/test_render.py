@@ -12,10 +12,13 @@ def expected_rendering(mdc_text: str) -> str:
     """The conversion setup-mstack step 3 describes, written independently."""
     _, frontmatter, body = mdc_text.split("---\n", 2)
     globs_line = next(
-        line for line in frontmatter.splitlines() if line.startswith("globs:")
+        (line for line in frontmatter.splitlines() if line.startswith("globs:")),
+        None,
     )
-    globs = globs_line.removeprefix("globs:").strip().strip('"')
     body = body.split("## Checks")[0].strip()
+    if globs_line is None:
+        return f"{body}\n"
+    globs = globs_line.removeprefix("globs:").strip().strip('"')
     return f"Applies to files matching `{globs}`.\n\n{body}\n"
 
 
