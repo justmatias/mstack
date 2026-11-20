@@ -36,7 +36,7 @@ make setup        # uv sync (dev dependencies)
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
-make test         # pytest: checks, guards and skills
+make test         # pytest: checks and guards
 ```
 
 The skills call the guards as `mstack <command>` from whatever repo they run in. Install the CLI once, on your `PATH`:

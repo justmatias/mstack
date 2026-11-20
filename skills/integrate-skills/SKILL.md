@@ -139,7 +139,6 @@ Draft every skill in a temp folder (`<tmp>/draft/<name>/`), never in the target.
 - Every relative link in every written file resolves.
 - The principles header is in the first lines of every written `.md` file.
 - In the mstack checkout, also:
-  - add the skill to the tests in `tests/test_skills.py` (trigger phrases, `disable-model-invocation`, credit) where the existing skills are listed;
   - add any confirmed overlap to `skills/setup-mstack/references/known-overlaps.json`;
   - update the Skills row of `README.md` if the set of skills changed what it says;
   - run `make test` and `make lint-rules-changed`, and fix every error they report.
