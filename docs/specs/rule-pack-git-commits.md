@@ -1,7 +1,7 @@
 # Rule pack: git and commit conventions
 
 - **Phase:** now
-- **Depends on:** `hook-checks` (the checks are pre-commit hooks). Uses `project-config` for the allowed types when it exists.
+- **Depends on:** `hook-checks` (the checks are pre-commit hooks). Reads the allowed types from `.mstack.toml`.
 
 ## Problem
 

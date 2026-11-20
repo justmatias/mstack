@@ -8,18 +8,17 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 ### Now
 
-Suggested order: the first two unblock most of the rest.
+Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [project-config](project-config.md) | `.mstack.toml`: one place for a repo's rule, check and scan paths | none |
 | [remove-architecture-layers-rule](remove-architecture-layers-rule.md) | Drop the fixture-only rule and everything that exists only for it | none |
-| [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | project-config |
+| [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | none |
 | [install-manifest](install-manifest.md) | Record what mstack installed, so updates tell user edits from upstream changes | none |
 | [skill-validation](skill-validation.md) | `mstack skills-check`: validate every `SKILL.md` and its links in CI | none |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [agent-config-folders](agent-config-folders.md) | `agents/`, `mcp/`, `settings/`, `instructions/` alongside `skills/` and `rules/` | install-manifest (soft) |
-| [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | project-config, runtime-lint-command |
+| [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | runtime-lint-command |
 | [pre-commit-hooks](pre-commit-hooks.md) | `.pre-commit-hooks.yaml` so other repos use the guards as hooks | runtime-lint-command |
 | [reusable-ci-action](reusable-ci-action.md) | A GitHub Action that runs `mstack lint` in any repo | runtime-lint-command |
 | [hook-checks](hook-checks.md) | Let a rule be enforced by a pre-commit hook (prerequisite of the shell and git packs) | none |
@@ -34,7 +33,7 @@ Suggested order: the first two unblock most of the rest.
 | --- | --- | --- |
 | [rollback-and-uninstall](rollback-and-uninstall.md) | Restore from `.mstack-backups/` and uninstall what mstack installed | install-manifest |
 | [agent-hooks](agent-hooks.md) | Agent hooks that run the checks while the agent edits | agent-config-folders, runtime-lint-command |
-| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | runtime-lint-command, project-config |
+| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | runtime-lint-command |
 
 ### Future
 

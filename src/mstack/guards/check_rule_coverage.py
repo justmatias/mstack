@@ -8,6 +8,8 @@ from pathlib import Path
 
 import yaml
 
+from mstack.config import resolve_config
+
 logger = logging.getLogger(__name__)
 
 CHECKS_HEADING = re.compile(r"^##\s+Checks\s*$")
@@ -166,25 +168,38 @@ def main(argv: list[str] | None = None) -> int:
         prog="mstack coverage",
         description="Check that every prose rule and every check point to each other.",
     )
-    parser.add_argument("--rules-dir", type=Path, default=Path(".cursor/rules"))
-    parser.add_argument("--config", type=Path, default=Path("lint-rules/sgconfig.yml"))
-    parser.add_argument("--importlinter", type=Path, default=Path(".importlinter"))
+    parser.add_argument(
+        "--rules-dir", type=Path, help="Prose rules folder (default: from config)."
+    )
+    parser.add_argument(
+        "--config", type=Path, help="ast-grep sgconfig.yml (default: from config)."
+    )
+    parser.add_argument(
+        "--importlinter", type=Path, help="import-linter file (default: from config)."
+    )
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path.cwd(),
-        help="Directory that relative metadata.source paths resolve against.",
+        help=(
+            "Directory that relative metadata.source paths resolve against "
+            "(default: the config file's folder)."
+        ),
     )
     parser.add_argument(
         "--json", action="store_true", help="Print the drift report as JSON."
     )
     arguments = parser.parse_args(argv)
+    config = resolve_config({
+        "rules_dir": arguments.rules_dir,
+        "sgconfig": arguments.config,
+        "importlinter": arguments.importlinter,
+    })
 
     report = compute_drift(
-        arguments.rules_dir.expanduser(),
-        arguments.config.expanduser(),
-        arguments.importlinter.expanduser(),
-        arguments.root.expanduser(),
+        config.values.rules_dir,
+        config.values.sgconfig,
+        config.values.importlinter,
+        arguments.root.expanduser() if arguments.root else config.root,
     )
     if arguments.json:
         sys.stdout.write(json.dumps(report, indent=2) + "\n")
