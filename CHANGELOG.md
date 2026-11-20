@@ -2,6 +2,31 @@
 
 <!-- version list -->
 
+## v3.7.0 (2026-11-20)
+
+### Bug Fixes
+
+- **platform**: Portable config paths and test homes on Windows
+  ([#35](https://github.com/justmatias/mstack/pull/35),
+  [`adee83e`](https://github.com/justmatias/mstack/commit/adee83e95360551bc247d50344bb16fdc04b0f9f))
+
+### Documentation
+
+- **commit-msg**: Document the command and [commits] in the README
+  ([#35](https://github.com/justmatias/mstack/pull/35),
+  [`adee83e`](https://github.com/justmatias/mstack/commit/adee83e95360551bc247d50344bb16fdc04b0f9f))
+
+### Features
+
+- **coverage**: Let a rule be enforced by a pre-commit hook
+  ([#35](https://github.com/justmatias/mstack/pull/35),
+  [`adee83e`](https://github.com/justmatias/mstack/commit/adee83e95360551bc247d50344bb16fdc04b0f9f))
+
+- **rules**: Add git commit rules and mstack commit-msg
+  ([#35](https://github.com/justmatias/mstack/pull/35),
+  [`adee83e`](https://github.com/justmatias/mstack/commit/adee83e95360551bc247d50344bb16fdc04b0f9f))
+
+
 ## v3.6.0 (2026-11-20)
 
 ### Bug Fixes
