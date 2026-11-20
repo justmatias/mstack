@@ -7,6 +7,9 @@ SGCONFIG := lint/sgconfig.yml
 # This repo keeps its prose rules in rules/ and its checks in lint/; the guards default
 # to a work repo's .cursor/rules/ and lint-rules/, so the paths are passed explicitly.
 RULE_PATHS := --rules-dir rules --config $(SGCONFIG)
+# The installable files in agents/, mcp/, settings/ and instructions/. Each folder's
+# README.md documents the format for this repo and is not installed, so it is left out.
+AGENT_CONFIG_FILES := $(filter-out %/README.md,$(wildcard agents/*.md mcp/*.json settings/*.json instructions/*.md))
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 
@@ -45,7 +48,8 @@ guards:
 	uv run lint-imports
 	$(MSTACK) coverage $(RULE_PATHS)
 	$(MSTACK) exceptions
-	$(MSTACK) leak-check lint rules --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
+	$(MSTACK) config-check
+	$(MSTACK) leak-check lint rules $(AGENT_CONFIG_FILES) --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:

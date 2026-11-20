@@ -4,7 +4,7 @@ import shutil
 import pytest
 
 from mstack.cli import main
-from mstack.install import manifest
+from mstack.install import files, manifest
 
 
 @pytest.mark.usefixtures("home")
@@ -196,7 +196,7 @@ def test_failed_write_keeps_the_previous_manifest(monkeypatch):
     def fail(*_arguments):
         raise OSError("disk full")
 
-    monkeypatch.setattr(manifest.os, "replace", fail)
+    monkeypatch.setattr(files.os, "replace", fail)
 
     with pytest.raises(OSError):
         manifest.save_manifest(manifest.Manifest(), path)
