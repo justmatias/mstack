@@ -14,8 +14,11 @@ Try them in this order and stop at the first that expresses the rule without fal
 | --- | --- | --- |
 | ast-grep (YAML in `lint-rules/rules/`) | Code patterns | no `print`, no `@dataclass`, no bare `except:` |
 | import-linter (`.importlinter`) | Dependencies between modules | `domain` does not import `infra` |
+| An existing linter run as a pre-commit hook (`enforced-by-hook: <id>`) | What a dedicated tool already checks | shellcheck for unquoted expansions, gitleaks for committed secrets, a commit-message check |
 | Fixit (LibCST, Python) | Logic a pattern cannot express | an `__init__` that only assigns `self.x = x` across a whole class |
 | none: `enforcement: llm-review` | Judgment | descriptive names, single-purpose functions |
+
+A hook goes in `.pre-commit-config.yaml` pinned to a full tag or sha (in the mstack repo, `hookpin` checks the pins); write `- enforced-by-hook: <hook id>` in the Checks section, and skip steps 2 to 6.
 
 If no tool fits, the rule is judgment: mark it `enforcement: llm-review` and stop. Do not force a pattern at the cost of false positives; a narrower check shipped as `warning` is better than a broad one that people learn to ignore.
 

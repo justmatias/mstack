@@ -48,6 +48,59 @@ def test_missing_source_fails(run_mstack, rules_sandbox: Path):
     ]
 
 
+def coverage_issues(run_mstack, rules_sandbox: Path) -> tuple[int, list[tuple]]:
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+    issues = json.loads(completed.stdout)["issues"]
+    return completed.returncode, [
+        (issue["kind"], issue.get("check")) for issue in issues
+    ]
+
+
+@pytest.mark.usefixtures("pre_commit_config")
+@pytest.mark.parametrize(
+    "hook_id", ["gitleaks", "check-something"], ids=["remote", "local"]
+)
+def test_configured_hook_counts_as_check(
+    run_mstack, rules_sandbox: Path, add_hook_line, hook_id: str
+):
+    add_hook_line(hook_id)
+
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+
+    assert completed.returncode == 0, completed.stdout
+    logging_rule = next(
+        rule
+        for rule in json.loads(completed.stdout)["rules"]
+        if rule["mdc"].endswith("logging.mdc")
+    )
+    assert logging_rule["hooks"] == [hook_id]
+
+
+@pytest.mark.usefixtures("pre_commit_config")
+def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):
+    add_hook_line("no-such-hook")
+
+    assert coverage_issues(run_mstack, rules_sandbox) == (
+        1,
+        [("unknown-hook", "no-such-hook")],
+    )
+
+
+def test_missing_pre_commit_config_makes_every_hook_unknown(
+    run_mstack, rules_sandbox: Path, add_hook_line
+):
+    add_hook_line("gitleaks")
+
+    exit_code, issues = coverage_issues(run_mstack, rules_sandbox)
+
+    assert (exit_code, issues) == (1, [("unknown-hook", "gitleaks")])
+
+
+@pytest.mark.usefixtures("pre_commit_config", "_only_hook_in_checks_section")
+def test_checks_section_with_only_hooks_is_not_missing(run_mstack, rules_sandbox: Path):
+    assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
+
+
 @pytest.fixture
 def import_linter_layout(tmp_path: Path) -> Path:
     (tmp_path / ".git").mkdir()
