@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.9.0 (2026-11-20)
+
+### Features
+
+- **hooks**: Publish the checks as pre-commit hooks for other repos
+  ([#27](https://github.com/justmatias/mstack/pull/27),
+  [`887650d`](https://github.com/justmatias/mstack/commit/887650dd7f80ade5d4d13dac64d278f0c52a0b4c))
+
+
 ## v3.8.0 (2026-11-20)
 
 ### Features
