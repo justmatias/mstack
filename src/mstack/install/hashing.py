@@ -6,6 +6,11 @@ IGNORED_NAMES = frozenset({".DS_Store", "__pycache__"})
 HASH_PREFIX = "sha256:"
 
 
+def file_content(path: Path) -> bytes:
+    """A file's bytes with CRLF read as LF: a copy written on Windows is the same item."""
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
 def is_ignored(relative_path: Path) -> bool:
     return any(part in IGNORED_NAMES for part in relative_path.parts)
 
@@ -22,7 +27,7 @@ def hash_tree(root: Path) -> str:
     """Hash the sorted relative paths and contents of every file under root."""
     digest = hashlib.sha256()
     for relative_path in tree_files(root):
-        content = (root / relative_path).read_bytes()
+        content = file_content(root / relative_path)
         digest.update(relative_path.as_posix().encode("utf-8") + b"\0")
         digest.update(str(len(content)).encode("ascii") + b"\0")
         digest.update(content)
@@ -38,5 +43,5 @@ def hash_installed(target: Path) -> str | None:
     if target.is_dir():
         return hash_tree(target)
     if target.is_file():
-        return HASH_PREFIX + hashlib.sha256(target.read_bytes()).hexdigest()
+        return HASH_PREFIX + hashlib.sha256(file_content(target)).hexdigest()
     return None

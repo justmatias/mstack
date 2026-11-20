@@ -1,6 +1,7 @@
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,7 @@ import mstack.doctor
 from mstack.doctor import main
 from mstack.doctor.cli import check_cli
 from mstack.doctor.drift import check_drift
+from mstack.doctor.platform import check_platform
 from mstack.doctor.rules import check_rules
 from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.tools import check_tools
@@ -57,7 +59,8 @@ def test_duplicate_skill_in_both_tools_warns(context, installed_home: Path):
 
 def test_broken_skill_is_an_error(context, installed_home: Path):
     skill = installed_home / ".claude" / "skills" / "sync-rules" / "SKILL.md"
-    skill.write_text(skill.read_text().replace("name: sync-rules", "name: other"))
+    text = skill.read_text(encoding="utf-8")
+    skill.write_text(text.replace("name: sync-rules", "name: other"), encoding="utf-8")
 
     results = check_skills_installed(context())
 
@@ -66,7 +69,8 @@ def test_broken_skill_is_an_error(context, installed_home: Path):
 
 def test_rule_with_frontmatter_is_an_error(context, installed_home: Path):
     rule = installed_home / ".claude" / "rules" / "logging.md"
-    rule.write_text("---\nalwaysApply: true\n---\n" + rule.read_text())
+    text = rule.read_text(encoding="utf-8")
+    rule.write_text("---\nalwaysApply: true\n---\n" + text, encoding="utf-8")
 
     results = check_rules(context())
 
@@ -75,20 +79,21 @@ def test_rule_with_frontmatter_is_an_error(context, installed_home: Path):
 
 def test_cursor_only_skips_claude_rules(context):
     assert not check_rules(context(tool="cursor"))
-    assert "/.cursor/skills" in check_skills_installed(context(tool="cursor"))[0].detail
+    detail = check_skills_installed(context(tool="cursor"))[0].detail
+    assert str(Path(".cursor") / "skills") in detail
 
 
 def record(checkout: Path, kind: Kind, name: str, target: Path) -> None:
     path = manifest_path()
     manifest = Manifest()
     if path.is_file():
-        manifest = Manifest.model_validate_json(path.read_text())
+        manifest = Manifest.model_validate_json(path.read_text(encoding="utf-8"))
     record_item(manifest, kind, name, target, checkout)
     save_manifest(manifest, path)
 
 
 def edit(path: Path) -> None:
-    path.write_text(path.read_text() + "\nEdited.\n")
+    path.write_text(path.read_text(encoding="utf-8") + "\nEdited.\n", encoding="utf-8")
 
 
 def apply_drift(state: str, checkout: Path, home: Path) -> None:
@@ -155,6 +160,7 @@ def test_mstack_missing_from_path(context, monkeypatch: pytest.MonkeyPatch):
     assert (results[0].fix or "").startswith("uv tool install --editable")
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="runs a POSIX shell script")
 def test_mstack_on_path_with_another_version(
     context, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
@@ -246,3 +252,26 @@ def test_no_network_without_online(context, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("mstack.doctor.version.subprocess.run", fail)
 
     assert not check_version(context())
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_wsl_with_both_tools_checks_each_tools_skills(context, tmp_path):
+    windows = tmp_path / "windows"
+
+    results = check_skills_installed(
+        context(tool="both", platform="wsl", cursor_home=windows)
+    )
+
+    installed = [result for result in results if result.check == "installed"]
+    assert [result.status for result in installed] == ["ok", "error"]
+    assert str(windows / ".cursor" / "skills") in installed[1].detail
+
+
+def test_wsl_without_windows_profile_warns(context):
+    results = check_platform(context(tool="cursor", platform="wsl"))
+
+    assert statuses(results) == {("platform", "wsl-cursor"): "warn"}
+
+
+def test_platform_check_is_silent_outside_wsl(context):
+    assert not check_platform(context(tool="cursor"))

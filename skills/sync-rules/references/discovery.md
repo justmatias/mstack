@@ -43,6 +43,8 @@ git ls-files '.cursor/rules/**' .cursorrules AGENTS.md CLAUDE.md '.claude/rules/
 | `~/.cursor/rules/*.mdc` | Cursor user rules |
 | `~/.claude/CLAUDE.md`, `~/.claude/rules/*.md` | Claude Code user memory |
 
+On WSL, Cursor runs on Windows, so its user folder is the Windows profile's `.cursor` (`/mnt/c/Users/<user>/.cursor`), not `~/.cursor` inside WSL. `mstack platform` prints the folder each tool uses.
+
 User rules are personal. Read them only when asked, and never copy them into a repo without confirmation.
 
 ## Transcripts (`reflect-rules`, optionally `correct-rules`)

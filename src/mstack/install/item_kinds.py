@@ -23,6 +23,7 @@ from mstack.install.merge import (
     project,
 )
 from mstack.install.render import RuleFormatError, render_rule
+from mstack.platform import tool_homes
 
 Kind = Literal["skill", "rule", "agent", "mcp", "settings", "instructions"]
 Tool = Literal["claude", "cursor", "both"]
@@ -63,15 +64,24 @@ def target_locations(kind: Kind, tool: Tool) -> list[Path]:
     """Folders a copied kind installs into, or files a merged kind merges into.
 
     With both tools, skills and agents go to ~/.claude only: Cursor also loads those
-    folders, and a second copy would show every item twice.
+    folders, and a second copy would show every item twice. On WSL, Cursor runs on
+    Windows and reads the Windows profile, so there both tools get their own copy.
     """
-    home = Path.home()
-    claude, cursor = home / ".claude", home / ".cursor"
+    homes = tool_homes()
+    claude, cursor = homes["claude"] / ".claude", homes["cursor"] / ".cursor"
+    separate_homes = homes["claude"] != homes["cursor"]
+    copies_for_cursor = uses_cursor(tool) and (not uses_claude(tool) or separate_homes)
+
+    def copied(folder: str) -> list[Path]:
+        return [claude / folder] * uses_claude(tool) + [
+            cursor / folder
+        ] * copies_for_cursor
+
     locations = {
-        "skill": [claude / "skills"] if uses_claude(tool) else [cursor / "skills"],
-        "agent": [claude / "agents"] if uses_claude(tool) else [cursor / "agents"],
+        "skill": copied("skills"),
+        "agent": copied("agents"),
         "rule": [claude / "rules"] if uses_claude(tool) else [],
-        "mcp": [home / ".claude.json"] * uses_claude(tool)
+        "mcp": [homes["claude"] / ".claude.json"] * uses_claude(tool)
         + [cursor / "mcp.json"] * uses_cursor(tool),
         "settings": [claude / "settings.json"] if uses_claude(tool) else [],
         "instructions": [claude / "CLAUDE.md"] if uses_claude(tool) else [],

@@ -38,6 +38,8 @@ uv tool install --editable .    # the mstack CLI; `mstack --help` lists the comm
 | Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | none |
 | Both | `~/.claude/` only (Cursor loads it too) | both of the above | both of the above | merged into `~/.claude/settings.json` |
 
+**Windows and WSL.** On native Windows, `~` is `%USERPROFILE%`. On WSL, Claude Code inside WSL uses the WSL home, but Cursor runs on Windows and reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), so with both tools the skills and agents are copied to each home. `mstack platform` prints where each tool's files go (`MSTACK_WINDOWS_HOME` overrides the Windows profile when it can't be found).
+
 Skills, rules and agents are copies, not symlinks. MCP servers, instructions and settings are merged: your own keys and text stay. Anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
 **3. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
@@ -127,6 +129,6 @@ Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation 
 
 ## CI and releases
 
-`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the action in `action.yml` on this repo, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the action in `action.yml` on this repo, the tests and `mstack lint` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
 On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch), and moves the `v<major>` tag to it.

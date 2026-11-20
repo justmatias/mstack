@@ -15,7 +15,13 @@ class ChangedFilesError(Exception):
 
 def git(root: Path, *arguments: str) -> subprocess.CompletedProcess:
     return subprocess.run(
-        ["git", *arguments], cwd=root, capture_output=True, text=True, check=False
+        ["git", *arguments],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
 
 

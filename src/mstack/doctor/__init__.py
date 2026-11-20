@@ -24,6 +24,7 @@ from mstack.doctor.source import check_source
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
 from mstack.install.item_kinds import Tool
+from mstack.platform import detect, tool_homes
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,9 @@ def installed_checkout() -> Path | None:
     return None
 
 
-def default_tool(home: Path) -> Tool:
+def default_tool(home: Path, cursor_home: Path) -> Tool:
     claude = (home / ".claude").is_dir()
-    cursor = (home / ".cursor").is_dir()
+    cursor = (cursor_home / ".cursor").is_dir()
     if claude and cursor:
         return "both"
     return "cursor" if cursor else "claude"
@@ -113,10 +114,14 @@ def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     arguments = parse_arguments(argv)
-    home = Path.home()
+    platform = detect()
+    homes = tool_homes(platform)
+    home = homes["claude"]
     context = Context(
         home=home,
-        tool=arguments.tool or default_tool(home),
+        cursor_home=homes["cursor"],
+        platform=platform,
+        tool=arguments.tool or default_tool(home, homes["cursor"]),
         checkout=(
             arguments.checkout.expanduser().resolve()
             if arguments.checkout
@@ -132,6 +137,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "ok": errors == 0,
             "tool": context.tool,
+            "platform": context.platform,
             "checkout": str(context.checkout) if context.checkout else None,
             "results": [result.model_dump() for result in results],
         }

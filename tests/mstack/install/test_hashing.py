@@ -44,3 +44,22 @@ def test_renaming_a_file_changes_the_hash(tmp_path: Path):
 
 def test_nothing_installed_has_no_hash(tmp_path: Path):
     assert hash_installed(tmp_path / "missing") is None
+
+
+def test_line_endings_do_not_change_the_hash(tmp_path: Path):
+    unix = tmp_path / "unix"
+    windows = tmp_path / "windows"
+    for root, newline in ((unix, b"\n"), (windows, b"\r\n")):
+        (root / "references").mkdir(parents=True)
+        (root / "SKILL.md").write_bytes(b"# Skill" + newline + b"Body" + newline)
+        (root / "references" / "notes.md").write_bytes(b"Notes" + newline)
+
+    assert hash_tree(unix) == hash_tree(windows)
+    assert hash_installed(unix / "SKILL.md") == hash_installed(windows / "SKILL.md")
+
+
+def test_content_changes_still_change_the_hash(tmp_path: Path):
+    first = write_tree(tmp_path / "first", {"a.md": "A\n"})
+    second = write_tree(tmp_path / "second", {"a.md": "B\n"})
+
+    assert hash_tree(first) != hash_tree(second)

@@ -79,6 +79,8 @@ def run_tool(
         cwd=run.config.root,
         capture_output=run.json_output,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
         env=env,
     )
