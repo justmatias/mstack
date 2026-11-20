@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.4.0 (2026-11-20)
+
+### Features
+
+- **lint**: Ship ast-grep and import-linter with the CLI and add mstack lint
+  ([#26](https://github.com/justmatias/mstack/pull/26),
+  [`64f6b14`](https://github.com/justmatias/mstack/commit/64f6b142849c0f42fb010b8b8434d6b82f3464bc))
+
+
 ## v3.3.0 (2026-11-20)
 
 ### Features
