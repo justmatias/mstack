@@ -52,6 +52,10 @@ On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows prof
 | `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
 | `open-pull-request` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |
+| `review-loop` | Loop an independent reviewer over a change: pick the reviewer from the agents and CLIs available, answer each finding with the smallest fix or evidence-backed pushback, and stop on approval, a stuck dispute or a 3-round budget. |
+| `babysit-pr` | Watch a pull request through CI and review with one watcher, verify each bot finding before acting, keep the PR small, and rebase when the base moves. |
+| `full-send` | Take a task to a merged PR unattended: prove the change, run the review loop, open and babysit the PR, merge once the gate passes. Only when you say "full send". |
+| `full-stop` | The same as `full-send`, but stop with the PR ready for you to merge and never merge it. Only when you say "full stop". |
 | `declutter` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
 | `bro` | Restate the last message in plain language, shorter and without jargon. |
