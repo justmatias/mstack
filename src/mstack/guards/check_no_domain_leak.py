@@ -8,6 +8,8 @@ import sys
 import tomllib
 from pathlib import Path
 
+from mstack.config import resolve_config
+
 logger = logging.getLogger(__name__)
 
 GENERIC_NAMES_FILE = Path(__file__).with_name("generic_names.txt")
@@ -285,13 +287,15 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
-        "paths", nargs="+", type=Path, help="Generated files or folders to check."
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Generated files or folders to check (default: [leak_check].paths).",
     )
     parser.add_argument(
         "--repo",
         type=Path,
-        required=True,
-        help="The repo the files were generated from.",
+        help="The repo the files were generated from (default: the git root).",
     )
     parser.add_argument(
         "--exclude",
@@ -299,16 +303,26 @@ def main(argv: list[str] | None = None) -> int:
         default=[],
         help=(
             "Repo folder (relative to --repo) whose code is tooling, not the "
-            "analyzed project. Repeatable."
+            "analyzed project. Repeatable (default: [leak_check].exclude)."
         ),
     )
     arguments = parser.parse_args(argv)
+    config = resolve_config({"leak_check.paths": arguments.paths or None})
 
-    repository = arguments.repo.expanduser().resolve()
+    repository = (
+        arguments.repo.expanduser().resolve()
+        if arguments.repo
+        else config.git_root or config.root
+    )
+    excluded_directories = (
+        [repository / directory for directory in arguments.exclude]
+        if arguments.exclude
+        else config.values.leak_check.exclude
+    )
     findings = find_leaks(
-        generated_files(arguments.paths),
+        generated_files(config.values.leak_check.paths),
         repository,
-        [repository / directory for directory in arguments.exclude],
+        excluded_directories,
     )
     for finding in findings:
         logger.error("%s", finding)

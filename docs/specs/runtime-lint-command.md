@@ -1,7 +1,7 @@
 # Runtime lint tools and `mstack lint`
 
 - **Phase:** now
-- **Depends on:** `project-config` (the command reads its paths from `.mstack.toml`).
+- **Depends on:** none. Reads its paths from `.mstack.toml` (`src/mstack/config.py`); the Makefile still repeats the sgconfig and scan exclude for `ast-grep`, and this spec removes them.
 - **Combines:** shipping the scan tools with the CLI, and the `mstack lint` command that runs them. The command cannot work without the tools.
 
 ## Problem

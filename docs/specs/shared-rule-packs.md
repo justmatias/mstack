@@ -1,7 +1,7 @@
 # Shared rule packs
 
 - **Phase:** next
-- **Depends on:** `runtime-lint-command` (packs run through `mstack lint`), `project-config` (repos choose packs in `.mstack.toml`).
+- **Depends on:** `runtime-lint-command` (packs run through `mstack lint`); repos choose packs in `.mstack.toml` (`src/mstack/config.py`).
 
 ## Problem
 

@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. Pass paths in the work repo as absolute paths or relative to the current directory.
+The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 1. Pick the tool
 
@@ -55,15 +55,15 @@ For an import-linter contract, the "test" is proving the contract breaks: copy t
 ## 4. Run the tests
 
 ```bash
-uv run ast-grep test -c lint-rules/sgconfig.yml --skip-snapshot-tests
+uv run ast-grep test -c <sgconfig> --skip-snapshot-tests
 ```
 
-Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case matches or an invalid case does not; it only skips label snapshots.
+`<sgconfig>` is the configured sgconfig (default `lint-rules/sgconfig.yml`). Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case matches or an invalid case does not; it only skips label snapshots.
 
 ## 5. Measure existing violations
 
 ```bash
-uv run ast-grep scan -c lint-rules/sgconfig.yml --filter '^<id>$' --globs '!fixtures/invalid/**' .
+uv run ast-grep scan -c <sgconfig> --filter '^<id>$' --globs '!fixtures/invalid/**' .
 ```
 
 Count the findings and look at each one: is it a real violation or a false positive? Fix false positives in the rule (back to step 2).
@@ -85,7 +85,7 @@ Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule 
 mstack leak-check <every file you generated> --repo .
 ```
 
-In the mstack repo itself, add `--exclude src --exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+`--repo` defaults to the git root, and `[leak_check].exclude` in `.mstack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `mstack leak-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
 
 ## 9. Run the single command
 
@@ -110,4 +110,4 @@ testConfigs:
   - testDir: rule-tests
 ```
 
-and add `ast-grep-cli` (and `import-linter` for architecture rules) to the repo's dev dependencies. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.
+If the checks live anywhere other than `lint-rules/`, or the prose rules anywhere other than `.cursor/rules/`, write a `.mstack.toml` at the repo root with `rules_dir` and `sgconfig`, so every `mstack` command finds them without flags. Then add `ast-grep-cli` (and `import-linter` for architecture rules) to the repo's dev dependencies. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.

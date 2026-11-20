@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import fnmatch
 import io
 import json
 import logging
@@ -10,6 +11,8 @@ import sys
 import tokenize
 from pathlib import Path
 
+from mstack.config import resolve_config
+
 logger = logging.getLogger(__name__)
 
 IGNORE_COMMENT = re.compile(r"^#\s*ast-grep-ignore\b(?::\s*(?P<rule_ids>.*))?$")
@@ -17,7 +20,15 @@ EXCEPTION_COMMENT = re.compile(r"^#\s*rule-exception:\s*(?P<fields>.*)$")
 REQUIRED_FIELDS = ("reason", "expires", "approved-by")
 
 
-def python_files(paths: list[Path]) -> list[Path]:
+def is_excluded(path: Path, root: Path, exclude_globs: list[str]) -> bool:
+    resolved = path.resolve()
+    if not resolved.is_relative_to(root):
+        return False
+    relative = resolved.relative_to(root).as_posix()
+    return any(fnmatch.fnmatch(relative, pattern) for pattern in exclude_globs)
+
+
+def python_files(paths: list[Path], root: Path, exclude_globs: list[str]) -> list[Path]:
     if not paths:
         listed = subprocess.run(
             ["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.py"],
@@ -25,7 +36,11 @@ def python_files(paths: list[Path]) -> list[Path]:
             text=True,
             check=True,
         ).stdout.split()
-        return [Path(name) for name in listed if Path(name).is_file()]
+        return [
+            Path(name)
+            for name in listed
+            if Path(name).is_file() and not is_excluded(Path(name), root, exclude_globs)
+        ]
     files: list[Path] = []
     for path in paths:
         files.extend(sorted(path.rglob("*.py")) if path.is_dir() else [path])
@@ -150,7 +165,10 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
-        "paths", nargs="*", type=Path, help="Files or folders (default: git files)."
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Files or folders (default: git files, minus [scan].exclude).",
     )
     parser.add_argument(
         "--json", action="store_true", help="Print active exceptions as JSON."
@@ -159,9 +177,11 @@ def main(argv: list[str] | None = None) -> int:
         "--today", type=datetime.date.fromisoformat, default=datetime.date.today()
     )
     arguments = parser.parse_args(argv)
+    config = resolve_config()
 
     exceptions, problems = collect_exceptions(
-        python_files(arguments.paths), arguments.today
+        python_files(arguments.paths, config.root, config.values.scan.exclude),
+        arguments.today,
     )
     if arguments.json:
         sys.stdout.write(

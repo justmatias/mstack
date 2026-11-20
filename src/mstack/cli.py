@@ -3,10 +3,14 @@ import logging
 import sys
 from collections.abc import Callable
 
+from mstack import config
 from mstack.guards import check_exceptions, check_no_domain_leak, check_rule_coverage
 from mstack.install import manifest, render
 
+logger = logging.getLogger(__name__)
+
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
+    "config": config.main,
     "coverage": check_rule_coverage.main,
     "exceptions": check_exceptions.main,
     "leak-check": check_no_domain_leak.main,
@@ -28,4 +32,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    return COMMANDS[parsed.command](arguments[1:])
+    try:
+        return COMMANDS[parsed.command](arguments[1:])
+    except config.ConfigError as error:
+        logger.error("mstack: %s", error)
+        return 2

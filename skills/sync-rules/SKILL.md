@@ -9,6 +9,8 @@ description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, 
 
 Keep `.cursor/rules/` (prose, source of truth) and `lint-rules/` (checks) saying the same thing. Every checkable rule gets a check, every check points to its rule, and every judgment rule is marked as such.
 
+The paths here are the defaults; a repo may move them in `.mstack.toml`. Run `mstack config` to see the configured `rules_dir` and `sgconfig` (default `lint-rules/sgconfig.yml`), and use those.
+
 References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
 
 ## Modes
