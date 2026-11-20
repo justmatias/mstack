@@ -51,6 +51,27 @@ Skills, rules and agents are copies, not symlinks. MCP servers, instructions and
 
 **4. Update.** Pull this repo and run step 2 again. mstack records what it installed, so upstream changes update on their own (with a backup), your own edits are kept, and it only asks about real conflicts.
 
+## Use the checks in another repo
+
+`mstack lint` runs every check in any repo that has the layout (`.mstack.toml`, an ast-grep `sgconfig.yml`, the prose rules). To run them on every commit, add the hooks to that repo's `.pre-commit-config.yaml`. pre-commit installs mstack in its own environment, with ast-grep and import-linter, so the repo needs nothing else:
+
+```yaml
+repos:
+  - repo: https://github.com/justmatias/mstack
+    rev: vX.Y.Z   # pin a full release tag (or a commit sha), never a branch
+    hooks:
+      - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
+      - id: mstack-rules       # rule tests and coverage, when rules or checks change
+      - id: mstack-exceptions  # every ast-grep-ignore has a rule-exception
+      - id: mstack-leak-check  # rules and checks hold no repo details
+      - id: mstack-imports     # .importlinter contracts
+      - id: mstack-commit-msg  # Conventional Commits messages (commit-msg stage)
+```
+
+`mstack-commit-msg` runs at the `commit-msg` stage: add `default_install_hook_types: [pre-commit, commit-msg]` at the top of the file so `pre-commit install` installs it too.
+
+`mstack-imports` needs the project importable: if its modules import third-party packages, list them under the hook's `additional_dependencies`, or leave the hook out and run `mstack lint --only imports` from the project's environment.
+
 ## Working on mstack
 
 ```bash
