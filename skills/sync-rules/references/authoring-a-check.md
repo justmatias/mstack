@@ -104,14 +104,4 @@ Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a 
 
 ## Adopting in a repo with no `lint-rules/`
 
-Create the minimal layout before the first check:
-
-```yaml
-# lint-rules/sgconfig.yml
-ruleDirs:
-  - rules
-testConfigs:
-  - testDir: rule-tests
-```
-
-If the checks live anywhere other than `lint-rules/`, or the prose rules anywhere other than `.cursor/rules/`, write a `.mstack.toml` at the repo root with `rules_dir` and `sgconfig`, so every `mstack` command finds them without flags. ast-grep and import-linter come with `mstack`; add `import-linter` to the repo's dev dependencies only when its contracts need the project's own environment to import it. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.
+Before the first check, scaffold the layout with `mstack init`. Run `mstack init --dry-run` first (add `--pre-commit`, `--ci github` or `--makefile` for the optional pieces, and `--rules-dir` or `--checks-dir` when the repo keeps them elsewhere), show the user its plan, and run it with `--yes` only after they approve. It writes `.mstack.toml`, `lint-rules/sgconfig.yml` with empty `rules/` and `rule-tests/`, and the rules folder; it never overwrites a file, and an empty layout passes `mstack lint`.

@@ -3,7 +3,7 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack import config, lint
+from mstack import config, init, lint
 from mstack.guards import (
     check_agent_config,
     check_commit_msg,
@@ -22,6 +22,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "config-check": check_agent_config.main,
     "coverage": check_rule_coverage.main,
     "exceptions": check_exceptions.main,
+    "init": init.main,
     "leak-check": check_no_domain_leak.main,
     "lint": lint.main,
     "manifest": manifest.main,

@@ -40,7 +40,7 @@ uv tool install --editable .    # the mstack CLI; `mstack --help` lists the comm
 
 Skills, rules and agents are copies, not symlinks. MCP servers, instructions and settings are merged: your own keys and text stay. Anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
-**3. Use the skills in your projects.**
+**3. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
 
 | Skill | Use it to |
 | --- | --- |
