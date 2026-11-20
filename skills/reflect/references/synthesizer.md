@@ -21,7 +21,7 @@ Apply each criterion to every finding:
 - Existing-skill-first: propose `new skill via create-skill:` only when no existing skill is a real home, the pattern recurs, and the topic deserves its own skill.
 - Convergence: findings echoed by 2+ reviewers carry higher confidence. Singletons must clear a higher bar on the other criteria.
 - Decision-changing: a future agent does something different because of the edit, not just reads more text.
-- Structural-mechanism check: when a lint rule, contract or script could enforce a finding, do not send it to Backlog. Accept it as a `rule:` row with its kind (pattern, architecture or judgment): the parent writes the prose rule (new or an edit to the related `.mdc`) and its check in the same change. Backlog is only for what no available tool (ast-grep, import-linter, Fixit) can check, or what needs a large architecture change. Skill prose is for workflow, not for coding conventions.
+- Structural-mechanism check: when a lint rule, contract or script could enforce a finding, do not send it to Backlog. Accept it as a `rule:` row with its kind (pattern, architecture, judgment or borderline). Keep pattern and architecture only for a concrete construct one simple rule denies from the file alone; a check that needs complex logic, cross-file knowledge or many exceptions is judgment (`enforcement: llm-review`), and a close call is borderline, for the user to decide: the parent writes the prose rule (new or an edit to the related `.mdc`) and its check in the same change. Backlog is only for what no available tool (ast-grep, import-linter, Fixit) can check, or what needs a large architecture change. Skill prose is for workflow, not for coding conventions.
 - Existing-rule-first: before accepting a new `.mdc`, look for a related rule in `.cursor/rules/` and propose an edit to it instead of a duplicate.
 - Conflict: if a finding contradicts an existing rule, accept it as a `conflict` row that shows both side by side (existing rule path and line, proposed rule). Never resolve the conflict yourself.
 - Domain: reject with reason `domain` any finding that only makes sense with the domain.
@@ -46,7 +46,7 @@ Output exactly the format below. No preamble, no narration. One sentence per cel
 
 | Problem | Proposal | Routing | Kind |
 |---|---|---|---|
-| <coding convention from the chat> | <prose rule + check: generic construct to match> | <rule: .cursor/rules/<file>.mdc or new: <name>> | <pattern / architecture / judgment> |
+| <coding convention from the chat> | <prose rule + check: generic construct to match> | <rule: .cursor/rules/<file>.mdc or new: <name>> | <pattern / architecture / judgment / borderline> |
 | <finding that contradicts an existing rule> | <conflict: existing rule (path:line) vs proposed rule> | <rule: path> | <kind> |
 | <failure mode in a skill the parent used> | <change to that skill's body> | <skill path + section> | - |
 | <skill existed but didn't trigger> | <tune the skill's description so it fires next time> | <tune description: <skill path>> | - |

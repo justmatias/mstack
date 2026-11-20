@@ -40,7 +40,7 @@ Each atomic rule is one of:
 | Architecture | import-linter | `domain` does not import from `infra`; routers do not access the database directly |
 | Judgment | `enforcement: llm-review` | descriptive names; a function does one thing |
 
-When a rule sits on the border, prefer the kind whose check has no false positives. If no tool can express it reliably, it is judgment.
+Apply the static-check criteria in step 0 of [authoring-a-check](references/authoring-a-check.md): a rule is pattern or architecture only if one simple check denies it from the file alone. If no tool can express it reliably, or only with complex logic, it is judgment. When it sits on the border, ask the user.
 
 ## 4. Compute drift
 
