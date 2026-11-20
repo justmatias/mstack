@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from mstack.guards.check_no_domain_leak import SECRETS
-from mstack.render import RuleFormatError, split_frontmatter
+from mstack.render import FrontmatterError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ def agent_problems(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     try:
         metadata, _ = split_frontmatter(text)
-    except RuleFormatError as error:
+    except FrontmatterError as error:
         return [f"{path}: {error}"]
     problems = text_problems(str(path), text)
     if metadata.get("name") != path.stem:

@@ -20,10 +20,10 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import Field
 
 from mstack.changed_files import ChangedFilesError, changed_files
-from mstack.config import ConfigError, ResolvedConfig, resolve_config
+from mstack.config import ConfigError, ResolvedConfig, StrictModel, resolve_config
 from mstack.guards import check_exceptions, check_no_domain_leak, check_rule_coverage
 
 logger = logging.getLogger(__name__)
@@ -36,22 +36,18 @@ class LintError(Exception):
     pass
 
 
-class StepResult(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class StepResult(StrictModel):
     ok: bool
     skipped: str | None = None
-    findings: list[Any] = []
+    findings: list[Any] = Field(default_factory=list)
 
 
-class LintRun(BaseModel):
+class LintRun(StrictModel):
     """What one `mstack lint` invocation scans and how it reports."""
-
-    model_config = ConfigDict(extra="forbid")
 
     config: ResolvedConfig
     mode: Mode = "full"
-    files: list[Path] = []
+    files: list[Path] = Field(default_factory=list)
     json_output: bool = False
 
 

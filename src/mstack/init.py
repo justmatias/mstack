@@ -16,10 +16,9 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict
 
 from mstack import lint
-from mstack.config import find_config_file, find_git_root
+from mstack.config import StrictModel, find_config_file, find_git_root
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +35,7 @@ class InitError(Exception):
     pass
 
 
-class PlannedFile(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class PlannedFile(StrictModel):
     path: Path
     action: Action
     # The file's full content after the change; empty when skipped.

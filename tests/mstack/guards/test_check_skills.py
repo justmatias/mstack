@@ -28,7 +28,7 @@ def test_renamed_folder_fails_the_name_check(run_mstack, skills_sandbox: Path):
     "case",
     [
         ("---\nname: sync", "name: sync", "[frontmatter] no '---'"),
-        ("name: sync", "name: [sync", "[frontmatter] not valid YAML"),
+        ("name: sync", "name: [sync", "[frontmatter] invalid frontmatter"),
         (
             "name: sync",
             "name: Sync_Rules",

@@ -17,7 +17,7 @@ from mstack.doctor.targets import (
     skill_names,
     uses_claude,
 )
-from mstack.render import RuleFormatError, render_rule
+from mstack.render import FrontmatterError, render_rule
 
 
 def drifted(kind: str, name: str, installed: Path) -> Result:
@@ -66,7 +66,7 @@ def rule_drift(context: Context, checkout: Path) -> list[Result]:
             expected = render_rule(
                 (checkout / "rules" / f"{name}.mdc").read_text(encoding="utf-8")
             )
-        except RuleFormatError as error:
+        except FrontmatterError as error:
             results.append(
                 Result(
                     group="drift",

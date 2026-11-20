@@ -11,8 +11,8 @@ FRONTMATTER_DELIMITER = "---"
 CHECKS_HEADING = "## Checks"
 
 
-class RuleFormatError(ValueError):
-    """The .mdc file cannot be converted into a Claude Code rule."""
+class FrontmatterError(ValueError):
+    """The frontmatter of a rule, skill or agent file cannot be parsed."""
 
 
 def split_frontmatter(text: str) -> tuple[dict, str]:
@@ -24,11 +24,11 @@ def split_frontmatter(text: str) -> tuple[dict, str]:
             try:
                 metadata = yaml.safe_load("\n".join(lines[1:index])) or {}
             except yaml.YAMLError as error:
-                raise RuleFormatError(f"invalid frontmatter: {error}") from error
+                raise FrontmatterError(f"invalid frontmatter: {error}") from error
             if not isinstance(metadata, dict):
-                raise RuleFormatError("the frontmatter is not a mapping")
+                raise FrontmatterError("the frontmatter is not a mapping")
             return metadata, "\n".join(lines[index + 1 :])
-    raise RuleFormatError("the frontmatter has no closing '---'")
+    raise FrontmatterError("the frontmatter has no closing '---'")
 
 
 def drop_checks_section(body: str) -> str:
@@ -88,7 +88,7 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     try:
         rendered = render_rule(arguments.mdc.read_text(encoding="utf-8"))
-    except (OSError, RuleFormatError) as error:
+    except (OSError, FrontmatterError) as error:
         logger.error("render-rule: %s: %s", arguments.mdc, error)
         return 1
     sys.stdout.write(rendered)
