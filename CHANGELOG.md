@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.12.0 (2026-11-20)
+
+### Features
+
+- **doctor**: Verify a machine's setup with mstack doctor
+  ([#30](https://github.com/justmatias/mstack/pull/30),
+  [`1c38399`](https://github.com/justmatias/mstack/commit/1c3839956dc3c5c3e3ea3e69a8c8d26372773e0a))
+
+
 ## v3.11.0 (2026-11-20)
 
 ### Features
