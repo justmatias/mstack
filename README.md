@@ -1,94 +1,80 @@
 # mstack
 
-My stack for guiding AI coding agents: one place for the skills, rules, checks and tools I use to steer them while they write code.
+My stack for guiding AI coding agents: the skills, rules and checks I use to steer them while they write code, kept in one place, tested and versioned like any other code.
 
-Agents only follow what they are told and what is checked. Instructions scattered across projects drift, get copied by hand and are forgotten. `mstack` centralizes them so every project can pull the same set, and so each piece is tested and versioned like any other code.
+Agents follow what they are told and what is checked. So every rule that can be verified becomes an automated check (**rules as checks**), and conventions are enforced instead of re-flagged in code review.
 
-## What lives here
+## What's inside
 
-| Piece | Where | What it is |
-| --- | --- | --- |
-| Rules | `rules/` | Conventions written in prose (`.mdc`), the single source of truth agents read before writing code. |
-| Checks | `lint/` | The executable version of those rules (ast-grep, plus import-linter in `.importlinter`), run in pre-commit and in CI. |
-| Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, integrate skills from GitHub with their credit (`integrate-skills`), and install mstack itself (`setup-mstack`). |
-| Tools | `src/mstack/`, `scripts/` | The `mstack` CLI (guards) and the repo tooling behind the `make` targets. |
-
-The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review.
-
-## Rules
-
-| Rule | What it covers |
+| Folder | What it is |
 | --- | --- |
-| `architecture-layers.mdc` | Dependency direction between the domain, infra and api layers. |
-| `error-handling.mdc` | No bare `except`, no swallowed exceptions. |
-| `logging.mdc` | Logging instead of `print` in application code. |
-| `naming.mdc` | Naming and function size (judgment only, reviewed by an LLM on the PR). |
-| `python-models.mdc` | How to define data models in Python. |
+| `rules/` | Conventions in prose (`.mdc`), the source of truth agents read before writing code. |
+| `lint/` | The checks that enforce those rules (ast-grep), plus architecture contracts in `.importlinter`. |
+| `skills/` | Agent skills that keep rules and checks in sync and turn corrections into new rules. |
+| `src/mstack/` | The `mstack` CLI: the guards the skills and `make` targets run. |
 
-Each rule ends with a `## Checks` section naming the checks in `lint/` (or `.importlinter`) that enforce it, and each check points back to its rule through `metadata.source`. `mstack coverage` fails when the two sides disagree, so the rule files themselves are the index: there is no separate table to regenerate.
+## Getting started
 
-## Quick start
+You need [`uv`](https://docs.astral.sh/uv/), git, and Claude Code or Cursor.
 
-Requires [`uv`](https://docs.astral.sh/uv/).
-
-```bash
-make setup        # uv sync (dev dependencies)
-make lint         # every pre-commit hook on every file
-make lint-rules   # the single command: tests, scan, contracts and guards
-make demo         # scans fixtures/invalid/ and expects it to fail
-make test         # pytest: checks and guards
-```
-
-The skills call the guards as `mstack <command>` from whatever repo they run in. Install the CLI once, on your `PATH`:
+**1. Clone and install the CLI.** The skills run the guards as `mstack <command>`, so it has to be on your `PATH`.
 
 ```bash
-uv tool install --editable .   # from this checkout; `mstack --help` lists the commands
+git clone https://github.com/justmatias/mstack
+cd mstack
+make setup                      # dev dependencies
+uv tool install --editable .    # the mstack CLI; `mstack --help` lists the commands
 ```
 
-## What `make lint-rules` runs
-
-1. `ast-grep test`: every check passes its valid and invalid cases.
-2. `ast-grep scan`: the code follows every check (`fixtures/invalid/` excluded).
-3. `lint-imports`: architecture contracts in `.importlinter`.
-4. `mstack coverage`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
-5. `mstack exceptions`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
-6. `mstack leak-check`: rules and checks contain no repo identifiers, URLs, emails or secrets.
-
-`make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main` (`BASE_REF` overrides it and must exist), and warnings count as errors there. CI runs it on every pull request against the PR's base branch, so a `warning` rule fails on new or touched code even when pre-commit was skipped.
-
-## Exceptions
-
-```python
-# rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-# ast-grep-ignore: no-manual-init-boilerplate
-```
-
-## Installing the skills and rules
-
-Open this repo in Claude Code or Cursor and ask the agent to "set up mstack following skills/setup-mstack/SKILL.md". There is no install script: the skill is a set of instructions the agent follows, asking you before every change.
-
-1. It asks whether you use Claude Code, Cursor, or both.
-2. It compares every skill in `skills/` (except `setup-mstack` itself) and every rule in `rules/` with what you already have, including similar skills such as pstack `reflect`.
-3. For each one it proposes add, update, replace, discard or combine, shows the diffs, and waits for your answer.
+**2. Install the skills and rules.** Open this repo in Claude Code or Cursor and ask the agent to *"set up mstack following skills/setup-mstack/SKILL.md"*. It asks which tool you use, compares each skill and rule with what you already have, and waits for your answer before every change.
 
 | You use | Skills go to | Rules go to |
 | --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `~/.claude/rules/<name>.md` |
-| Cursor | `~/.cursor/skills/` | Cursor Settings → Rules (Cursor does not load rule files from `~/.cursor/rules/`; the skill prints them for you to paste) |
-| Both | `~/.claude/skills/` only, because Cursor loads that folder too | both of the above |
+| Claude Code | `~/.claude/skills/` | `~/.claude/rules/` |
+| Cursor | `~/.cursor/skills/` | Cursor Settings → Rules (the skill prints them for you to paste) |
+| Both | `~/.claude/skills/` (Cursor loads it too) | both of the above |
 
-- Copies, not symlinks: `skills/` and `rules/` in this repo stay the source of truth. To update, pull this repo and run the skill again.
-- Anything replaced or removed is backed up to `<folder>/.mstack-backups/<timestamp>/`, never next to the skills or rules.
-- The installed skills run the guards as `mstack <command>`, so the skill also installs the `mstack` CLI from this checkout (`uv tool install --editable .`).
+They are copies, not symlinks, and anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
-## Static checks and releases
+**3. Use the skills in your projects.**
 
-`pre-commit` runs ruff, pylint, mypy, bandit, gitleaks, hookpin and generic file hygiene hooks, and also this repo's own `lint-rules` hook: `mstack` checks itself with the same rules it ships.
+| Skill | Use it to |
+| --- | --- |
+| `sync-rules` | Adopt rules as checks in a repo: turn its prose rules (`.cursor/rules`, `AGENTS.md`, `CLAUDE.md`) into checks, and keep both in sync. |
+| `reflect-rules` | Turn the corrections and preferences from the current session into rules and checks. |
+| `correct-rules` | Find the mistakes that keep repeating in a repo and make each one impossible. |
+| `integrate-skills` | Bring a skill from a GitHub URL into `skills/`, with its license and credit. |
 
-Versioning is automated with [python-semantic-release](https://python-semantic-release.readthedocs.io/). Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/); on every push to `main`, CI bumps the version in `pyproject.toml`, updates `CHANGELOG.md`, tags the release and publishes it on GitHub (`feat` is a minor bump, `fix` and `perf` a patch).
+**4. Update.** Pull this repo and run step 2 again.
 
-## CI and branch protection
+## Working on mstack
 
-The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make lint-rules-changed` on the files a pull request changes (warnings fail there), `make demo` and `make test`.
+```bash
+make lint                 # every pre-commit hook on every file
+make lint-rules           # check tests, full scan, contracts and guards
+make lint-rules-changed   # the same, but the scan covers only changed files and warnings fail
+make test                 # pytest
+make demo                 # scans fixtures/invalid/, which must fail
+```
 
-To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
+Each rule ends with a `## Checks` section naming its checks, and each check points back to its rule through `metadata.source`. `make lint-rules` fails when:
+
+- a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
+- an `.importlinter` contract is broken (`lint-imports`);
+- a rule and its checks don't point to each other (`mstack coverage`);
+- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
+
+  ```python
+  # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
+  # ast-grep-ignore: no-manual-init-boilerplate
+  ```
+
+- rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`).
+
+`fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
+
+## CI and releases
+
+`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+
+On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).
