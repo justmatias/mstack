@@ -11,8 +11,11 @@ from mstack.install.render import render_rule
 def home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     home_directory = tmp_path / "home"
     home_directory.mkdir()
+    # Path.home() reads USERPROFILE on Windows, and the manifest LOCALAPPDATA.
     monkeypatch.setenv("HOME", str(home_directory))
+    monkeypatch.setenv("USERPROFILE", str(home_directory))
     monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "state"))
     return home_directory
 
 

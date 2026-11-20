@@ -92,6 +92,31 @@ jobs:
       - name: Run the mstack lint action
         uses: ./
 
+  # The CLI and the checks must behave the same on every OS. `make` is a
+  # contributor convenience (bash), so this job calls pytest and mstack directly.
+  portability:
+    name: Portability (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: uv run pytest -q
+
+      - name: mstack lint
+        run: uv run mstack lint
+
   security:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest
@@ -115,7 +140,7 @@ jobs:
     name: Versioning
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [static-checks, action-self-test, security]
+    needs: [static-checks, action-self-test, portability, security]
     # Pushes the release commit and tag, and creates the GitHub release.
     permissions:
       contents: write

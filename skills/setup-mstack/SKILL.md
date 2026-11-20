@@ -23,7 +23,14 @@ Ask this first, before reading anything else: **Claude Code, Cursor, or both?** 
 | Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (pasted by the user, see step 8) | merged into `~/.cursor/mcp.json` | printed for Cursor Settings → Rules | none |
 | Both | `~/.claude/skills/` and `~/.claude/agents/` only, because Cursor also loads those folders and a second copy would show every item twice | `~/.claude/rules/`, plus Cursor Settings → Rules | both of the above | both of the above | merged into `~/.claude/settings.json` |
 
-The skills target is called `<skills>` below.
+**Where each tool's files are.** Run `mstack platform` from `<mstack>` and say which home each tool uses before planning anything; the `~/.claude` and `~/.cursor` paths in this skill mean the folders it prints:
+
+- Linux, macOS and native Windows: both tools use the user's home (`%USERPROFILE%` on Windows).
+- **WSL**: Claude Code inside WSL uses the WSL home, but Cursor runs on Windows and reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), not `~/.cursor` inside WSL. `mstack platform` finds it through `cmd.exe` and `wslpath`; if it can't, ask the user for the path and export `MSTACK_WINDOWS_HOME=/mnt/c/Users/<user>` for every `mstack` command. Because the tools are in different homes, **Both** means two copies on WSL: skills and agents go to `~/.claude/` and to the Windows `.cursor/`. `mstack manifest status` already plans it that way.
+
+The skills target is called `<skills>` below (two targets on WSL with both tools).
+
+On native Windows, the shell commands in this skill are examples: use the PowerShell equivalents (`Copy-Item -Recurse` for `cp -R`, `Move-Item` for `mv`, `New-Item -ItemType Directory -Force` for `mkdir -p`, `Compare-Object` or `git diff --no-index` for `diff`).
 
 ## 2. Inventory the skills
 

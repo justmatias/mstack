@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -34,3 +35,11 @@ def scan_findings():
         return [json.loads(line) for line in completed.stdout.splitlines() if line]
 
     return scan
+
+
+@pytest.fixture(autouse=True)
+def _host_platform(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Never resolve the real Windows profile on WSL: tests use a temporary HOME."""
+    native = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux")
+    monkeypatch.setenv("MSTACK_PLATFORM", native)
+    monkeypatch.delenv("MSTACK_WINDOWS_HOME", raising=False)

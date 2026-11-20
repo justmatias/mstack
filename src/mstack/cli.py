@@ -4,7 +4,7 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack import config, doctor, init, lint
+from mstack import config, doctor, init, lint, platform
 from mstack.guards import (
     check_agent_config,
     check_commit_msg,
@@ -30,6 +30,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "manifest": manifest.main,
     "merge-block": merge.merge_block_main,
     "merge-settings": merge.merge_settings_main,
+    "platform": platform.main,
     "render-rule": render.main,
     "skills-check": check_skills.main,
 }

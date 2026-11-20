@@ -2,13 +2,19 @@ from pathlib import Path
 
 from mstack.doctor.model import SETUP_FIX, Context, Result
 from mstack.guards.check_skills import check_skills
-from mstack.install.item_kinds import source_names, uses_claude
+from mstack.install.item_kinds import source_names, uses_claude, uses_cursor
 
 
-def skills_folder(context: Context) -> Path:
-    """With both tools, skills go to ~/.claude only: Cursor loads that folder too."""
-    tool_folder = ".claude" if uses_claude(context.tool) else ".cursor"
-    return context.home / tool_folder / "skills"
+def skills_folders(context: Context) -> list[Path]:
+    """With both tools, skills go to ~/.claude only, because Cursor loads that folder
+    too, unless Cursor lives in another home (WSL): then each tool gets a copy."""
+    claude = context.home / ".claude" / "skills"
+    cursor = context.cursor / ".cursor" / "skills"
+    if not uses_cursor(context.tool):
+        return [claude]
+    if not uses_claude(context.tool):
+        return [cursor]
+    return [claude, cursor] if context.cursor != context.home else [claude]
 
 
 def missing_results(context: Context, folder: Path) -> list[Result]:
@@ -63,9 +69,10 @@ def validation_results(folder: Path) -> list[Result]:
 
 
 def duplicate_results(context: Context) -> list[Result]:
+    """Only when Cursor shares the home: it then loads ~/.claude/skills as well."""
     claude = context.home / ".claude" / "skills"
-    cursor = context.home / ".cursor" / "skills"
-    if not (claude.is_dir() and cursor.is_dir()):
+    cursor = context.cursor / ".cursor" / "skills"
+    if context.cursor != context.home or not (claude.is_dir() and cursor.is_dir()):
         return []
     names = {path.name for path in claude.iterdir() if (path / "SKILL.md").is_file()}
     duplicates = sorted(
@@ -90,9 +97,7 @@ def duplicate_results(context: Context) -> list[Result]:
 
 
 def check_skills_installed(context: Context) -> list[Result]:
-    folder = skills_folder(context)
-    return [
-        *missing_results(context, folder),
-        *validation_results(folder),
-        *duplicate_results(context),
-    ]
+    results = []
+    for folder in skills_folders(context):
+        results += missing_results(context, folder) + validation_results(folder)
+    return results + duplicate_results(context)

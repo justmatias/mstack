@@ -12,7 +12,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [portability](portability.md) | Linux, macOS, Windows and WSL behave the same | runtime-lint-command (soft) |
 
 ### Next
 
