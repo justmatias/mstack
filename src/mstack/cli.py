@@ -4,7 +4,7 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack import config, doctor, init, lint, platform
+from mstack import config, doctor, init, lint, platform, render
 from mstack.guards import (
     check_agent_config,
     check_commit_msg,
@@ -13,7 +13,6 @@ from mstack.guards import (
     check_rule_coverage,
     check_skills,
 )
-from mstack.install import manifest, merge, render
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +26,6 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "init": init.main,
     "leak-check": check_no_domain_leak.main,
     "lint": lint.main,
-    "manifest": manifest.main,
-    "merge-block": merge.merge_block_main,
-    "merge-settings": merge.merge_settings_main,
     "platform": platform.main,
     "render-rule": render.main,
     "skills-check": check_skills.main,
@@ -41,8 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="mstack",
         description=(
-            "Keep prose rules and their automated checks in sync, and track what "
-            "mstack installed."
+            "Keep prose rules and their automated checks in sync, and check that "
+            "this machine has the mstack stack."
         ),
         epilog="Run 'mstack <command> --help' for what each command does.",
     )

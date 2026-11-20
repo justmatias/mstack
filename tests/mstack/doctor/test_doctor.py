@@ -15,13 +15,6 @@ from mstack.doctor.rules import check_rules
 from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
-from mstack.install.item_kinds import Kind
-from mstack.install.manifest import (
-    Manifest,
-    manifest_path,
-    record_item,
-    save_manifest,
-)
 from tests.mstack.conftest import git
 
 
@@ -83,62 +76,72 @@ def test_cursor_only_skips_claude_rules(context):
     assert str(Path(".cursor") / "skills") in detail
 
 
-def record(checkout: Path, kind: Kind, name: str, target: Path) -> None:
-    path = manifest_path()
-    manifest = Manifest()
-    if path.is_file():
-        manifest = Manifest.model_validate_json(path.read_text(encoding="utf-8"))
-    record_item(manifest, kind, name, target, checkout)
-    save_manifest(manifest, path)
-
-
-def edit(path: Path) -> None:
+def append_line(path: Path) -> None:
     path.write_text(path.read_text(encoding="utf-8") + "\nEdited.\n", encoding="utf-8")
 
 
-def apply_drift(state: str, checkout: Path, home: Path) -> None:
+def drift_rows(results) -> list[tuple[str, str]]:
+    return [(result.check, result.status) for result in results]
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_drift_passes_when_every_copy_matches_the_checkout(context):
+    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_drift_warns_when_the_installed_skill_was_edited(context, home: Path):
+    append_line(home / ".claude" / "skills" / "sync" / "SKILL.md")
+
+    results = check_drift(context())
+
+    assert drift_rows(results) == [("skill sync", "warn")]
+    assert results[0].fix
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_drift_warns_when_the_checkout_skill_changed(context, checkout: Path):
+    (checkout / "skills" / "sync" / "references" / "new.md").write_text(
+        "New.\n", encoding="utf-8"
+    )
+
+    assert drift_rows(check_drift(context())) == [("skill sync", "warn")]
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_drift_warns_when_the_installed_rule_differs_from_the_rendered_one(
+    context, home: Path
+):
+    append_line(home / ".claude" / "rules" / "naming.md")
+
+    assert drift_rows(check_drift(context())) == [("rule naming", "warn")]
+
+
+@pytest.mark.usefixtures("installed_home")
+def test_drift_ignores_backups_and_caches_inside_a_skill(context, home: Path):
     skill = home / ".claude" / "skills" / "sync"
-    if state != "unknown":
-        record(checkout, "skill", "sync", skill)
-    if state in {"locally-edited", "conflict"}:
-        edit(skill / "SKILL.md")
-    if state in {"upstream-changed", "conflict"}:
-        edit(checkout / "skills" / "sync" / "SKILL.md")
-    if state == "unknown":
-        # Installed and different from upstream, but never recorded.
-        record(
-            checkout, "rule", "error-handling", home / ".claude/rules/error-handling.md"
-        )
-        edit(skill / "SKILL.md")
-    if state == "removed":
-        shutil.rmtree(skill)
+    (skill / "__pycache__").mkdir()
+    (skill / "__pycache__" / "module.pyc").write_bytes(b"cache")
+    (skill / ".DS_Store").write_bytes(b"finder")
+
+    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
 
 
 @pytest.mark.usefixtures("installed_home")
-@pytest.mark.parametrize(
-    "state", ["locally-edited", "upstream-changed", "conflict", "removed", "unknown"]
-)
-def test_every_drift_state_warns(context, checkout: Path, home: Path, state: str):
-    apply_drift(state, checkout, home)
+def test_drift_warns_when_the_installed_agent_differs(
+    context, checkout: Path, home: Path
+):
+    agent = "---\nname: helper\ndescription: Helps.\n---\n\nHelp.\n"
+    (checkout / "agents" / "helper.md").write_text(agent, encoding="utf-8")
+    installed = home / ".claude" / "agents" / "helper.md"
+    installed.parent.mkdir(parents=True)
+    installed.write_text(agent + "Edited.\n", encoding="utf-8")
 
-    results = check_drift(context())
-
-    assert [
-        (result.check, result.status, result.detail.split()[0]) for result in results
-    ] == [("skill sync", "warn", state)]
-
-
-@pytest.mark.usefixtures("installed_home")
-def test_identical_items_pass_drift(context, checkout: Path, home: Path):
-    record(checkout, "skill", "sync", home / ".claude/skills/sync")
-
-    results = check_drift(context())
-
-    assert [result.status for result in results] == ["ok"]
+    assert drift_rows(check_drift(context())) == [("agent helper", "warn")]
 
 
-def test_no_manifest_means_no_drift_check(context):
-    assert check_drift(context()) == []
+def test_drift_skips_items_that_are_not_installed(context):
+    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
 
 
 def test_missing_tools(context, monkeypatch: pytest.MonkeyPatch):

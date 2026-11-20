@@ -1,7 +1,7 @@
 # Host profiles
 
 - **Phase:** future
-- **Depends on:** `install-command`. Better with `version-pinning` and `per-host-secrets`.
+- **Depends on:** nothing. Better with `per-host-secrets`.
 
 ## Problem
 
@@ -42,26 +42,26 @@ rules = ["error-handling", "logging", "git-commits"]
 
 ```toml
 profile = "full"
-version = "3.2.0"     # version-pinning
 [overrides]
 exclude = { mcp = ["<server>"] }
 settings = { "statusLine.command" = "..." }
 ```
 
 - Selection is by name, and `*` is a glob. Unknown names in a profile fail validation in CI.
-- `mstack install` uses the profile's tools by default, and only installs what the profile includes. Items installed earlier but no longer included become `orphan`s (see `rollback-and-uninstall`).
-- `mstack profile show` prints the resolved selection; `mstack profile use <name>` writes the machine config.
+- `setup-mstack` reads the machine config: it uses the profile's tools instead of asking, installs only what the profile includes, and offers to remove (with a backup) mstack items installed earlier that the profile no longer includes.
+- `mstack profile show` prints the resolved selection, so the skill and `doctor` read the same answer; `mstack profile use <name>` writes the machine config.
 
 ## Changes
 
-- `profiles/`, a validator (part of `skills-check` or `config-check`), `src/mstack/profiles.py`, and install integration.
-- `doctor`: shows the active profile, and warns when there is none.
+- `profiles/`, a validator (part of `skills-check` or `config-check`), and `src/mstack/profiles.py`.
+- `setup-mstack`: a step that reads the profile.
+- `doctor`: shows the active profile, warns when there is none, and checks only the profile's items.
 
 ## Tests
 
-- Resolution: globs, overrides, unknown names. Install with each profile in a temporary `HOME`. A profile switch marks dropped items as orphans.
+- Resolution: globs, overrides, unknown names. `doctor` in a temporary `HOME` reports only the profile's items as missing.
 
 ## Acceptance criteria
 
-- [ ] Two machines with the same profile and version have identical installs (the same manifest hashes).
+- [ ] Two machines with the same profile and checkout get the same items, and `doctor` shows no drift on either.
 - [ ] Changing a machine's profile changes only what the profiles differ in.

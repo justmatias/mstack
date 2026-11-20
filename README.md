@@ -19,18 +19,17 @@ Agents follow what they are told and what is checked. So every rule that can be 
 
 ## Getting started
 
-You need [`uv`](https://docs.astral.sh/uv/), git, and Claude Code or Cursor.
+You need git, [`uv`](https://docs.astral.sh/uv/), and Claude Code or Cursor.
 
-**1. Clone and install the CLI.** The skills run the guards as `mstack <command>`, so it has to be on your `PATH`.
+**1. Clone and run the setup.**
 
 ```bash
 git clone https://github.com/justmatias/mstack
 cd mstack
-make setup                      # dev dependencies
-uv tool install --editable .    # the mstack CLI; `mstack --help` lists the commands
+claude "set up mstack"
 ```
 
-**2. Install the skills, rules and agent config.** Open this repo in Claude Code or Cursor and ask the agent to *"set up mstack following skills/setup-mstack/SKILL.md"*. It asks which tool you use, compares each skill and rule with what you already have, and waits for your answer before every change.
+The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
 | You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
 | --- | --- | --- | --- | --- |
@@ -38,11 +37,9 @@ uv tool install --editable .    # the mstack CLI; `mstack --help` lists the comm
 | Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | none |
 | Both | `~/.claude/` only (Cursor loads it too) | both of the above | both of the above | merged into `~/.claude/settings.json` |
 
-**Windows and WSL.** On native Windows, `~` is `%USERPROFILE%`. On WSL, Claude Code inside WSL uses the WSL home, but Cursor runs on Windows and reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), so with both tools the skills and agents are copied to each home. `mstack platform` prints where each tool's files go (`MSTACK_WINDOWS_HOME` overrides the Windows profile when it can't be found).
+On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), so with both tools the skills and agents get a copy in each home; `mstack platform` prints where each tool's files go.
 
-Skills, rules and agents are copies, not symlinks. MCP servers, instructions and settings are merged: your own keys and text stay. Anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
-
-**3. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
+**2. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
 
 | Skill | Use it to |
 | --- | --- |
@@ -54,9 +51,9 @@ Skills, rules and agents are copies, not symlinks. MCP servers, instructions and
 | `code-simplification` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `repair` | Close the gaps `mstack doctor` reports: reinstall the CLI, update drifted skills and rules with a backup, and rerun doctor until it is clean. |
 
-**4. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and no drift from the checkout. It prints the fix for each problem and exits 1 on any error; ask your agent to run the `repair` skill to apply them. `--online` also compares with the latest release.
+**3. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and whether an installed copy drifted from the checkout. It prints the fix for each problem and exits 1 on any error; run `/repair` to apply them. `--online` also compares with the latest release.
 
-**5. Update.** Pull this repo and run step 2 again. mstack records what it installed, so upstream changes update on their own (with a backup), your own edits are kept, and it only asks about real conflicts.
+**4. Update.** `git pull` in the checkout, then run the setup again. Copies that only mstack changed update with a backup; it asks before touching your own edits.
 
 ## Use the checks in another repo
 
@@ -101,6 +98,7 @@ Inputs: `mode` (`full`, `changed` or `both`; default `both` on pull requests, `f
 ## Working on mstack
 
 ```bash
+make setup                # dev dependencies
 uv run pre-commit install   # installs the pre-commit and the commit-msg hooks
 make lint                 # every pre-commit hook on every file
 make lint-rules           # mstack lint: check tests, full scan and guards

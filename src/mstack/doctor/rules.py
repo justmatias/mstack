@@ -1,5 +1,5 @@
 from mstack.doctor.model import REPAIR_FIX, Context, Result
-from mstack.install.item_kinds import source_names, uses_claude
+from mstack.doctor.targets import rule_names, uses_claude
 
 
 def check_rules(context: Context) -> list[Result]:
@@ -7,7 +7,7 @@ def check_rules(context: Context) -> list[Result]:
     if not uses_claude(context.tool) or context.checkout is None:
         return []
     folder = context.home / ".claude" / "rules"
-    names = source_names(context.checkout, "rule")
+    names = rule_names(context.checkout)
     missing = [name for name in names if not (folder / f"{name}.md").is_file()]
     with_frontmatter = [
         name

@@ -17,7 +17,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [rollback-and-uninstall](rollback-and-uninstall.md) | Restore from `.mstack-backups/` and uninstall what mstack installed | install-manifest |
 | [agent-hooks](agent-hooks.md) | Agent hooks that run the checks while the agent edits | agent-config-folders, runtime-lint-command |
 | [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | runtime-lint-command |
 
@@ -25,13 +24,10 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [install-command](install-command.md) | `mstack install` / `mstack update`: the setup without an agent | install-manifest, agent-config-folders |
-| [packaged-install](packaged-install.md) | Install from a git tag, no local checkout | install-command |
-| [version-pinning](version-pinning.md) | Pin and compare the installed version per machine | packaged-install, install-manifest |
 | [claude-code-plugin](claude-code-plugin.md) | Distribute skills, agents and hooks as a Claude Code plugin | agent-config-folders, skill-validation |
-| [host-profiles](host-profiles.md) | Per-machine profiles (personal, work) choosing what gets installed | install-command |
+| [host-profiles](host-profiles.md) | Per-machine profiles (personal, work) choosing what gets installed | |
 | [per-host-secrets](per-host-secrets.md) | `${VAR}` placeholders resolved per machine, never stored in the repo | agent-config-folders |
-| [more-agent-tools](more-agent-tools.md) | Codex, Gemini CLI and Copilot targets | install-command |
+| [more-agent-tools](more-agent-tools.md) | Codex, opencode, Gemini CLI and Copilot targets, with one shared `~/.agents/skills/` copy | |
 | [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect` | agent-config-folders, doctor |
 
 ## Writing a spec

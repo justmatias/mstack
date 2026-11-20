@@ -1,26 +1,18 @@
 from pathlib import Path
 
 from mstack.doctor.model import REPAIR_FIX, Context, Result
+from mstack.doctor.targets import copied_folders, skill_names
 from mstack.guards.check_skills import check_skills
-from mstack.install.item_kinds import source_names, uses_claude, uses_cursor
 
 
 def skills_folders(context: Context) -> list[Path]:
-    """With both tools, skills go to ~/.claude only, because Cursor loads that folder
-    too, unless Cursor lives in another home (WSL): then each tool gets a copy."""
-    claude = context.home / ".claude" / "skills"
-    cursor = context.cursor / ".cursor" / "skills"
-    if not uses_cursor(context.tool):
-        return [claude]
-    if not uses_claude(context.tool):
-        return [cursor]
-    return [claude, cursor] if context.cursor != context.home else [claude]
+    return copied_folders(context.tool, context.home, context.cursor, "skills")
 
 
 def missing_results(context: Context, folder: Path) -> list[Result]:
     if context.checkout is None:
         return []
-    names = source_names(context.checkout, "skill")
+    names = skill_names(context.checkout)
     missing = [name for name in names if not (folder / name / "SKILL.md").is_file()]
     if missing:
         return [

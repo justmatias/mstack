@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from mstack.doctor.model import Context
-from mstack.install.render import render_rule
+from mstack.render import render_rule
 from tests.conftest import REPOSITORY_ROOT
 from tests.mstack.conftest import init_git_repository
 
@@ -15,8 +15,6 @@ def home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
-    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
-    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "state"))
     return home
 
 
@@ -32,10 +30,9 @@ def checkout(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def installed_home(home: Path, checkout: Path) -> Path:
-    """What setup-mstack leaves for Claude Code: every skill and rendered rule."""
+    """What setup leaves for Claude Code: every skill and rendered rule."""
     for skill in (checkout / "skills").iterdir():
-        if skill.name != "setup-mstack":
-            shutil.copytree(skill, home / ".claude" / "skills" / skill.name)
+        shutil.copytree(skill, home / ".claude" / "skills" / skill.name)
     rules = home / ".claude" / "rules"
     rules.mkdir(parents=True)
     for mdc in (checkout / "rules").glob("*.mdc"):

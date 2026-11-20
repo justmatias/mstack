@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from mstack.install.render import RuleFormatError, render_rule, split_frontmatter
+from mstack.render import RuleFormatError, render_rule, split_frontmatter
 from tests.conftest import REPOSITORY_ROOT
 
 RULE_FILES = sorted((REPOSITORY_ROOT / "rules").glob("*.mdc"))

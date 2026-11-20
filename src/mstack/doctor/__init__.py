@@ -21,9 +21,9 @@ from mstack.doctor.platform import check_platform
 from mstack.doctor.rules import check_rules
 from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.source import check_source
+from mstack.doctor.targets import Tool
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
-from mstack.install.item_kinds import Tool
 from mstack.platform import detect, tool_homes
 
 logger = logging.getLogger(__name__)
