@@ -4,19 +4,15 @@ from pathlib import Path
 import pytest
 
 
-def test_repository_rules_are_covered(run_mstack, coverage_arguments):
-    completed = run_mstack("coverage", *coverage_arguments)
+def test_repository_rules_are_covered(run_mstack):
+    completed = run_mstack("coverage")
 
     assert completed.returncode == 0, completed.stderr
 
 
 @pytest.mark.usefixtures("_delete_enforced_by_line")
-def test_deleting_enforced_by_line_fails(
-    run_mstack, coverage_arguments, rules_sandbox: Path
-):
-    completed = run_mstack(
-        "coverage", *coverage_arguments, "--json", working_directory=rules_sandbox
-    )
+def test_deleting_enforced_by_line_fails(run_mstack, rules_sandbox: Path):
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert completed.returncode == 1
     assert [
@@ -26,12 +22,8 @@ def test_deleting_enforced_by_line_fails(
 
 
 @pytest.mark.usefixtures("_delete_checks_section")
-def test_missing_checks_section_fails(
-    run_mstack, coverage_arguments, rules_sandbox: Path
-):
-    completed = run_mstack(
-        "coverage", *coverage_arguments, "--json", working_directory=rules_sandbox
-    )
+def test_missing_checks_section_fails(run_mstack, rules_sandbox: Path):
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
         "missing-checks-section"
@@ -39,10 +31,8 @@ def test_missing_checks_section_fails(
 
 
 @pytest.mark.usefixtures("_add_unknown_check")
-def test_unknown_check_fails(run_mstack, coverage_arguments, rules_sandbox: Path):
-    completed = run_mstack(
-        "coverage", *coverage_arguments, "--json", working_directory=rules_sandbox
-    )
+def test_unknown_check_fails(run_mstack, rules_sandbox: Path):
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
         "unknown-check"
@@ -50,10 +40,8 @@ def test_unknown_check_fails(run_mstack, coverage_arguments, rules_sandbox: Path
 
 
 @pytest.mark.usefixtures("_point_rule_to_missing_source")
-def test_missing_source_fails(run_mstack, coverage_arguments, rules_sandbox: Path):
-    completed = run_mstack(
-        "coverage", *coverage_arguments, "--json", working_directory=rules_sandbox
-    )
+def test_missing_source_fails(run_mstack, rules_sandbox: Path):
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
         "missing-source"

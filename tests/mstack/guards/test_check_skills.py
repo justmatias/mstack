@@ -164,7 +164,7 @@ def test_generic_profile_skips_mstack_only_checks(
         '  upstream-commit: "e58dd043600587dbaf58ba315e7f2b38373eeb43"\n',
         "",
     )
-    edit_skill("setup-mstack/SKILL.md", "Copy the mstack", "Copiá the mstack")
+    edit_skill("setup-mstack/SKILL.md", "Install the mstack", "Instalá the mstack")
     edit_skill(
         "integrate-skills/SKILL.md",
         "name: integrate-skills",

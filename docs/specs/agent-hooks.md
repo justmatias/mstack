@@ -18,7 +18,7 @@ User-level hooks that run the repo's own checks on each file the agent edits and
 
 ## Design
 
-**Opt-in by repo:** the hook does nothing unless the repo has `.mstack.toml` (`project-config`). A user-level hook then stays silent in unrelated projects.
+**Opt-in by repo:** the hook does nothing unless the repo has `.mstack.toml`. A user-level hook then stays silent in unrelated projects.
 
 **Hooks** (Claude Code; each in `hooks/` with its settings fragment in `settings/claude.json`):
 

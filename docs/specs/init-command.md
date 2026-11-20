@@ -1,7 +1,7 @@
 # `mstack init`
 
 - **Phase:** now
-- **Depends on:** `project-config` (writes `.mstack.toml`), `runtime-lint-command` (the scaffold calls `mstack lint`). Uses `pre-commit-hooks` and `reusable-ci-action` when they exist.
+- **Depends on:** `runtime-lint-command` (the scaffold calls `mstack lint`). Uses `pre-commit-hooks` and `reusable-ci-action` when they exist.
 
 ## Problem
 
