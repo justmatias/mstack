@@ -1,5 +1,4 @@
 import json
-import logging
 from pathlib import Path
 
 import pytest
@@ -29,32 +28,12 @@ def test_mstack_toml_only(git_repository: Path, write_config):
     assert config.sources["scan.extensions"] == "default"
 
 
-def test_pyproject_table_only(git_repository: Path, write_config):
+def test_pyproject_table_is_ignored_when_no_mstack_toml(
+    git_repository: Path, write_config
+):
     write_config('[tool.mstack]\nrules_dir = "rules"\n', name="pyproject.toml")
 
-    config = resolve_config(start=git_repository)
-
-    assert config.file == git_repository / "pyproject.toml"
-    assert config.values.rules_dir == git_repository / "rules"
-
-
-def test_pyproject_without_table_is_ignored(git_repository: Path, write_config):
-    write_config('[project]\nname = "sample"\n', name="pyproject.toml")
-
     assert resolve_config(start=git_repository).file is None
-
-
-def test_mstack_toml_wins_over_pyproject_with_warning(
-    git_repository: Path, write_config, caplog
-):
-    write_config('rules_dir = "from-mstack-toml"\n')
-    write_config('[tool.mstack]\nrules_dir = "from-pyproject"\n', "pyproject.toml")
-
-    with caplog.at_level(logging.WARNING):
-        config = resolve_config(start=git_repository)
-
-    assert config.values.rules_dir == git_repository / "from-mstack-toml"
-    assert "using .mstack.toml" in caplog.text
 
 
 @pytest.mark.parametrize(

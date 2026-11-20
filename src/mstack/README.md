@@ -67,7 +67,7 @@ mstack init [--rules-dir DIR] [--checks-dir DIR]
 - `--ci github`: `.github/workflows/mstack.yml`, which runs the mstack action at the running version's tag.
 - `--makefile`: the `lint-rules` and `lint-rules-changed` targets, each only when the Makefile doesn't define it yet.
 
-It prints every file as `create`, `append` or `exists, skipped` and asks before writing, unless `--yes`; `--dry-run` only prints. It never overwrites a file and appends only missing entries, so a second run changes nothing. If the repo already has a `.mstack.toml` (or `[tool.mstack]`) or a `lint-rules/sgconfig.yml`, the layout is left as it is and only missing optional pieces are added. After writing it runs `mstack lint` once; an empty layout passes. The templates are in `templates/` and ship in the wheel.
+It prints every file as `create`, `append` or `exists, skipped` and asks before writing, unless `--yes`; `--dry-run` only prints. It never overwrites a file and appends only missing entries, so a second run changes nothing. If the repo already has a `.mstack.toml` or a `lint-rules/sgconfig.yml`, the layout is left as it is and only missing optional pieces are added. After writing it runs `mstack lint` once; an empty layout passes. The templates are in `templates/` and ship in the wheel.
 
 ### `mstack doctor`
 
@@ -92,7 +92,7 @@ Data output (JSON, inventories) goes to stdout; messages go to stderr through `l
 
 Every command reads one optional file that describes the repo's layout, so no command needs path flags:
 
-- `.mstack.toml`, found by walking up from the current directory to the git root (never above it). Python repos may instead use a `[tool.mstack]` table in `pyproject.toml`; if both exist, `.mstack.toml` wins and a warning is logged.
+- `.mstack.toml`, found by walking up from the current directory to the git root (never above it).
 - Precedence: a command-line flag, then the file, then the built-in defaults below. A repo without the file gets the defaults.
 - Paths in the file are relative to the file's folder; paths in flags are relative to the current directory.
 - Unknown keys are an error, so a typo fails loudly instead of being ignored.
