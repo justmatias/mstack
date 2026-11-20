@@ -6,6 +6,7 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | --- | --- | --- |
 | `mstack config` | `config.py` | Prints the resolved project config and where each value comes from (`default`, `file` or `flag`). `--json` prints it as JSON. |
 | `mstack lint` | `lint.py`, `changed_files.py` | Runs every check in order (see below). |
+| `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
 | `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
@@ -85,6 +86,9 @@ exclude = []                         # tooling folders that are not analyzed cod
 
 [changed]
 base_ref = "origin/main"
+
+[commits]
+types = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "style", "test"]
 ```
 
 `mstack leak-check --repo` defaults to the git root. Run `mstack config` to see the resolved values; this repo's own `.mstack.toml` is an example.
