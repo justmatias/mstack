@@ -1,7 +1,7 @@
 # Engram as the agent memory layer
 
 - **Phase:** future
-- **Depends on:** `agent-config-folders` (MCP and instructions), `doctor`. Better with `host-profiles` (personal and work memory kept apart) and `claude-code-plugin`.
+- **Depends on:** nothing open. Builds on `mcp/`, `instructions/` and `mstack doctor`. Better with `host-profiles` (personal and work memory kept apart) and `claude-code-plugin`.
 
 ## Problem
 
@@ -31,7 +31,7 @@ Engram becomes the optional memory layer of the stack: installed and verified th
 **Install and verify:**
 
 - mstack doesn't install the binary. `doctor` checks that `engram` is on `PATH` and its version is at least the minimum (recorded in `mcp/engram.json`), and prints the official install command for the platform (Homebrew, `go install`, or a release archive).
-- **Agent wiring:** prefer mstack's own `mcp/engram.json` (`engram mcp --tools=agent`), installed by `agent-config-folders`, so mstack's plan, backups and `doctor` cover it. Using `engram setup <agent>` is the alternative when its plugin or hooks are wanted; then mstack records that Engram owns that config and doesn't touch it. Never both for the same agent: `doctor` flags duplicate MCP entries.
+- **Agent wiring:** prefer mstack's own `mcp/engram.json` (`engram mcp --tools=agent`), installed by `setup-mstack` like any other `mcp/` file, so mstack's plan, backups and `doctor` cover it. Using `engram setup <agent>` is the alternative when its plugin or hooks are wanted; then mstack records that Engram owns that config and doesn't touch it. Never both for the same agent: `doctor` flags duplicate MCP entries.
 - **Instructions:** a short section in `instructions/global.md` about when to save a memory (a decision, a non-obvious fix, a project convention not yet in a rule) and when to search one (at the start of a task in a known project). The same principles apply: English, and no secrets.
 
 **Personal and work data stay apart:**

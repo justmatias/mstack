@@ -35,7 +35,7 @@ mcp = []
 tools = ["claude"]
 [include]
 skills = ["sync", "reflect"]
-rules = ["error-handling", "logging", "git-commits"]
+rules = ["error-handling", "git-commits"]
 ```
 
 **Per machine:** `~/.config/mstack/config.toml` (never committed):

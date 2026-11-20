@@ -1,11 +1,11 @@
 # Per-host secrets and values
 
 - **Phase:** future
-- **Depends on:** `agent-config-folders` (the `${VAR}` placeholders live in `mcp/` and `settings/`). Better with `host-profiles`.
+- **Depends on:** nothing open. The `${VAR}` placeholders live in `mcp/` and `settings/`. Better with `host-profiles`.
 
 ## Problem
 
-MCP servers and some settings need tokens, URLs or account names that differ between machines and must never reach the repo. `agent-config-folders` only allows `${VAR}` placeholders, so something has to supply the values on each machine, and say clearly when one is missing.
+MCP servers and some settings need tokens, URLs or account names that differ between machines and must never reach the repo. `mcp/` and `settings/` only allow `${VAR}` placeholders, so something has to supply the values on each machine, and say clearly when one is missing.
 
 ## Goal
 

@@ -1,7 +1,7 @@
 # Claude Code plugin
 
 - **Phase:** future
-- **Depends on:** `agent-config-folders` (agents and hooks to package), `skill-validation`. Better with `agent-hooks`.
+- **Depends on:** nothing open. Packages `skills/` and `agents/`, validated by `mstack skills-check`. Better with `agent-hooks`.
 
 ## Problem
 

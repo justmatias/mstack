@@ -1,7 +1,7 @@
 # Agent hooks that run the checks
 
 - **Phase:** next
-- **Depends on:** `agent-config-folders` (hooks ship in `settings/` and are merged on install), `runtime-lint-command` (`mstack lint --files`).
+- **Depends on:** nothing open. Builds on `settings/` (the setup merges it into `~/.claude/settings.json`) and `mstack lint --files`.
 
 ## Problem
 
@@ -49,5 +49,5 @@ User-level hooks that run the repo's own checks on each file the agent edits and
 
 ## Acceptance criteria
 
-- [ ] In an opted-in repo, an agent that writes `print(...)` in application code sees the `no-print-in-app` finding right after the edit.
+- [ ] In an opted-in repo, an agent that writes a bare `except:` sees the `no-bare-except` finding right after the edit.
 - [ ] In any other repo, the hooks add no visible output and under 100 ms per edit.

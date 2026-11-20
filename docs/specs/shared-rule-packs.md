@@ -1,11 +1,11 @@
 # Shared rule packs
 
 - **Phase:** next
-- **Depends on:** `runtime-lint-command` (packs run through `mstack lint`); repos choose packs in `.mstack.toml` (`src/mstack/config.py`).
+- **Depends on:** nothing open. Packs run through `mstack lint`, and repos choose them in `.mstack.toml` (`src/mstack/config.py`).
 
 ## Problem
 
-mstack's checks (`no-bare-except`, `no-print-in-app`, ...) only run inside this repo. To use them in a work repo, `sync` writes a copy into its `lint-rules/`. Copies don't get fixes, and the same check drifts across repos.
+mstack's checks (`no-bare-except`, `no-sleep-in-tests`, ...) only run inside this repo. To use them in a work repo, `sync` writes a copy into its `lint-rules/`. Copies don't get fixes, and the same check drifts across repos.
 
 ## Goal
 
@@ -21,13 +21,13 @@ A repo lists the packs it uses in `.mstack.toml`, and `mstack lint` runs mstack'
 
 ```toml
 [packs.python-core]
-rules = ["error-handling", "logging", "python-models", "naming"]
+rules = ["error-handling", "python-models", "naming"]
 
 [packs.testing]
 rules = ["testing"]
 
-[packs.shell]
-rules = ["shell"]
+[packs.git]
+rules = ["git-commits"]
 ```
 
 The wheel includes `rules/`, `lint/rules/`, `lint/rule-tests/` and `packs.toml` as package data (check whether the `uv_build` backend can include top-level folders; an editable install reads them from the checkout).
@@ -39,7 +39,7 @@ packs = ["python-core", "testing"]
 
 [packs.overrides]
 disable = ["no-manual-init-boilerplate"]
-severity = { no-print-in-app = "warning" }
+severity = { no-sleep-in-tests = "warning" }
 ```
 
 - `mstack lint` writes a temporary sgconfig whose `ruleDirs` are the repo's own plus each selected pack's rule files, with disabled rules removed and severities rewritten in the temporary copies. The repo's own rules win on an id clash, and the clash is logged.
