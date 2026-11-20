@@ -11,6 +11,12 @@
       "other": "correct",
       "origin": "pstack",
       "reason": "mstack correct is adapted from pstack correct, under the same name: both find repeated mistakes and make them impossible at the highest level available"
+    },
+    {
+      "skill": "review",
+      "other": "code-review",
+      "origin": "mattpocock/skills",
+      "reason": "mstack review is adapted from mattpocock/skills code-review under another name: both review a diff on a standards axis and a spec axis in parallel subagents and report them separately"
     }
   ]
 }
