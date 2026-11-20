@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v4.2.0 (2026-11-20)
+
+### Features
+
+- **doctor**: Add the repair skill and point doctor's fixes at it
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **skills**: Add code-simplification from addyosmani/agent-skills
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **skills**: Add review, code-simplification and repair
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **skills**: Add the review skill ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+
 ## v4.1.0 (2026-11-20)
 
 ### Features
