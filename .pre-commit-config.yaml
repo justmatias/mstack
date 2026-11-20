@@ -51,6 +51,12 @@ repos:
       - id: shellcheck
         exclude: ^fixtures/invalid/
 
+  # Lints the workflows, and the inputs they pass to local actions such as action.yml.
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
   - repo: https://github.com/justmatias/hookpin
     rev: v7.0.2
     hooks:

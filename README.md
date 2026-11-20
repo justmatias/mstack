@@ -72,6 +72,25 @@ repos:
 
 `mstack-imports` needs the project importable: if its modules import third-party packages, list them under the hook's `additional_dependencies`, or leave the hook out and run `mstack lint --only imports` from the project's environment.
 
+In GitHub Actions, the action in `action.yml` runs the full scan, and on pull requests the changed-files scan where warnings fail too. It needs only `contents: read`, and the checkout must have the full history so the base branch exists:
+
+```yaml
+name: mstack
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: justmatias/mstack@vX.Y.Z   # a full tag or sha; @v3 follows the major's fixes
+```
+
+Inputs: `mode` (`full`, `changed` or `both`; default `both` on pull requests, `full` otherwise), `base-ref` (default `origin/<base branch>`), `mstack-version` (default the action's own ref, so CLI and action match), `python-version` and `working-directory`. Every release moves the `v<major>` tag. On other CI providers, run the same two commands: `uvx --from git+https://github.com/justmatias/mstack@<tag> mstack lint`, and on merge requests the same with `--changed --base-ref origin/<base branch>`.
+
 ## Working on mstack
 
 ```bash
@@ -106,6 +125,6 @@ Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation 
 
 ## CI and releases
 
-`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the action in `action.yml` on this repo, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
-On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).
+On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch), and moves the `v<major>` tag to it.
