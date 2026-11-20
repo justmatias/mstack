@@ -100,3 +100,65 @@ def test_missing_pre_commit_config_makes_every_hook_unknown(
 @pytest.mark.usefixtures("_only_hook_in_checks_section")
 def test_checks_section_with_only_hooks_is_not_missing(run_mstack, rules_sandbox: Path):
     assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
+
+
+@pytest.fixture
+def import_linter_layout(tmp_path: Path) -> Path:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "rules").mkdir()
+    (tmp_path / "rules" / "layers.mdc").write_text(
+        "# Layers\n\n- The core does not import adapters.\n\n"
+        "## Checks\n- enforced-by: core-is-pure\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "sgconfig.yml").write_text("ruleDirs: []\n", encoding="utf-8")
+    (tmp_path / ".importlinter").write_text(
+        "[importlinter]\nroot_package = app\n\n"
+        "[importlinter:contract:core-is-pure]\nname = core-is-pure\n"
+        "type = forbidden\nsource_modules = app.core\nforbidden_modules = app.adapters\n",
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def coverage_arguments(layout: Path) -> list[str]:
+    return [
+        "--rules-dir",
+        str(layout / "rules"),
+        "--config",
+        str(layout / "sgconfig.yml"),
+        "--importlinter",
+        str(layout / ".importlinter"),
+        "--json",
+    ]
+
+
+def test_import_linter_contract_counts_as_check(run_mstack, import_linter_layout: Path):
+    completed = run_mstack(
+        "coverage",
+        *coverage_arguments(import_linter_layout),
+        working_directory=import_linter_layout,
+    )
+
+    assert completed.returncode == 0, completed.stdout
+    assert json.loads(completed.stdout)["rules"][0]["checks"] == ["core-is-pure"]
+
+
+def test_removed_import_linter_contract_is_unknown_check(
+    run_mstack, import_linter_layout: Path
+):
+    (import_linter_layout / ".importlinter").write_text(
+        "[importlinter]\nroot_package = app\n", encoding="utf-8"
+    )
+
+    completed = run_mstack(
+        "coverage",
+        *coverage_arguments(import_linter_layout),
+        working_directory=import_linter_layout,
+    )
+
+    assert completed.returncode == 1
+    assert [
+        (issue["kind"], issue["check"])
+        for issue in json.loads(completed.stdout)["issues"]
+    ] == [("unknown-check", "core-is-pure")]
