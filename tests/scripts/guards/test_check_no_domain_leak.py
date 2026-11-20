@@ -4,8 +4,8 @@ from pathlib import Path
 def test_example_rules_pass(run_guard):
     completed = run_guard(
         "check_no_domain_leak",
-        "lint-rules",
-        ".cursor/rules",
+        "lint",
+        "rules",
         "--repo",
         ".",
         "--exclude",

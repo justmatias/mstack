@@ -1,18 +1,17 @@
 # mstack
 
-My stack for guiding AI coding agents: one place for the agents, skills, rules, hooks and tools I use to steer them while they write code, plus the logbook of how and why each piece came to be.
+My stack for guiding AI coding agents: one place for the skills, rules, checks and tools I use to steer them while they write code, plus the logbook of how and why each piece came to be.
 
 Agents only follow what they are told and what is checked. Instructions scattered across projects drift, get copied by hand and are forgotten. `mstack` centralizes them so every project can pull the same set, and so each piece is tested and versioned like any other code.
 
 ## What lives here
 
-| Piece | What it is |
-| --- | --- |
-| Rules | Team and personal conventions written in prose (`.cursor/rules/`), the single source of truth agents read before writing code. |
-| Checks | The executable version of those rules (ast-grep, import-linter), run in the agent hook, in pre-commit and in CI. |
-| Skills | Agent skills that keep prose rules and checks in sync and turn corrections into new rules. |
-| Hooks | Agent hooks that run the checks while the agent edits, so mistakes surface before commit. |
-| Tools | Small scripts and a setup CLI that install the pieces you want into a project or your user profile. |
+| Piece | Where | What it is |
+| --- | --- | --- |
+| Rules | `rules/` | Conventions written in prose (`.mdc`), the single source of truth agents read before writing code. |
+| Checks | `lint/` | The executable version of those rules (ast-grep, plus import-linter in `.importlinter`), run in pre-commit and in CI. |
+| Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, and install mstack itself (`setup-mstack`). |
+| Tools | `scripts/` | Guards and generators behind the `make` targets. |
 
 The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review. The reasoning behind it is in [`docs/design.md`](docs/design.md), and decisions taken during implementation are in [`docs/decisions.md`](docs/decisions.md).
 
@@ -21,11 +20,11 @@ The first feature is **rules as checks**: every rule that can be verified become
 Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-make setup        # uv sync, then asks which integrations to install
+make setup        # uv sync (dev dependencies)
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
-make test         # pytest: checks, guards, setup CLI, skills and personal rules
+make test         # pytest: checks, guards and skills
 ```
 
 ## What `make lint-rules` runs
@@ -46,45 +45,23 @@ make test         # pytest: checks, guards, setup CLI, skills and personal rules
 # ast-grep-ignore: no-manual-init-boilerplate
 ```
 
-## Setup options
+## Installing the skills and rules
 
-`make setup` runs `scripts/setup.py`, which asks which integrations you want. Pass flags to skip the questions:
+Open this repo in Claude Code or Cursor and ask the agent to "set up mstack following skills/setup-mstack/SKILL.md". There is no install script: the skill is a set of instructions the agent follows, asking you before every change.
 
-```bash
-uv run python scripts/setup.py --yes                                  # everything, defaults
-uv run python scripts/setup.py --with pre-commit --with claude-hook   # only these
-uv run python scripts/setup.py --without cursor-hook
-uv run python scripts/setup.py --claude-settings project              # hook in the shared .claude/settings.json
-uv run python scripts/setup.py --uninstall --yes                      # remove what install added
-uv run python scripts/setup.py --dry-run --yes                        # show what would change
-```
+1. It asks whether you use Claude Code, Cursor, or both.
+2. It compares every skill in `skills/` (except `setup-mstack` itself) and every rule in `rules/` with what you already have, including similar skills such as pstack `reflect`.
+3. For each one it proposes add, update, replace, discard or combine, shows the diffs, and waits for your answer.
 
-| Component | What it installs |
-| --- | --- |
-| `pre-commit` | `.git/hooks/pre-commit` (via `pre-commit install`), running the static checks and `make lint-rules-changed STAGED=1` |
-| `claude-hook` | `PostToolUse` (`Edit\|Write`) in `.claude/settings.local.json` (default) or `.claude/settings.json` |
-| `cursor-hook` | `postToolUse` (`Write`) in `.cursor/hooks.json`; findings come back as `additional_context` |
+| You use | Skills go to | Rules go to |
+| --- | --- | --- |
+| Claude Code | `~/.claude/skills/` | `~/.claude/rules/<name>.md` |
+| Cursor | `~/.cursor/skills/` | Cursor Settings → Rules (Cursor does not load rule files from `~/.cursor/rules/`; the skill prints them for you to paste) |
+| Both | `~/.claude/skills/` only, because Cursor loads that folder too | both of the above |
 
-Existing JSON files are merged, never overwritten, and backed up as `*.bak-<timestamp>`. Running setup twice changes nothing.
-
-## Installing the skills
-
-`make setup` does not install the skills. Open this repo in Claude Code or Cursor and ask the agent to "set up mstack following skills/setup-mstack/SKILL.md". `setup-mstack` lives in `skills/` with the others, but it is never installed itself: it only makes sense from this checkout.
-
-It asks which tools you use and copies `skills/*` into one user-level folder:
-
-| You use | Skills go to |
-| --- | --- |
-| Claude Code | `~/.claude/skills/` |
-| Cursor | `~/.cursor/skills/` |
-| Both | `~/.claude/skills/` only, because Cursor loads that folder too. A second copy would show every skill twice. |
-
-The deterministic part is `scripts/setup.py skills` (`plan`, `apply`, `verify`). The skill decides what the script cannot: whether a similar skill you already have (for example pstack `reflect`) really overlaps, and whether to keep yours, keep mstack's, keep both (`mstack-<name>`), or combine them into one.
-
-- Copies, not symlinks: `skills/` in this repo stays the source of truth, and `<target>/.mstack-manifest.json` records the hash of every installed skill. A copy you edited is never overwritten without asking.
-- Backups go to `<target>/.mstack-backups/<timestamp>/`, never next to the skills.
+- Copies, not symlinks: `skills/` and `rules/` in this repo stay the source of truth. To update, pull this repo and run the skill again.
+- Anything replaced or removed is backed up to `<folder>/.mstack-backups/<timestamp>/`, never next to the skills or rules.
 - `~/.config/mstack/config.json` records where this repo is. The installed skills read it (or `$MSTACK_HOME`, which takes priority) to find `scripts/`.
-- To update, pull this repo and run `setup-mstack` again.
 
 ## Static checks and releases
 
@@ -97,33 +74,3 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
 
 To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.
-
-## Personal rules (every repo, shared with no one)
-
-Your own checks live in `$MY_RULES_HOME` (default `~/.config/my-rules/`), apply in every repo you work in, and write nothing into those repos. They warn in the agent and at commit time; CI is left out on purpose, because it belongs to each team.
-
-```bash
-uv run python scripts/setup.py user              # asks which parts to install
-uv run python scripts/setup.py user --yes --replace-hooks-path
-uv run python scripts/setup.py user --uninstall --yes
-```
-
-| Component | What it does |
-| --- | --- |
-| `rules` | Copies `user-level/` to `$MY_RULES_HOME` **only if it does not exist**, links every git hook name in `githooks/` to `bin/git-hook-chain`, and copies the example prose rules to `~/.cursor/rules/my-*.mdc` |
-| `claude-hook` | Merges a `PostToolUse` (`Edit\|Write`) hook running `bin/claude-post-edit` into `~/.claude/settings.json` |
-| `cursor-hook` | Merges a `postToolUse` (`Write`) hook running `bin/cursor-after-edit` into `~/.cursor/hooks.json` |
-| `git-hooks` | `git config --global core.hooksPath $MY_RULES_HOME/githooks` |
-
-- `bin/my-rules-check [--with-repo] <files>` is the single command: it filters by the rules' languages, drops anything in `ignore-paths.txt` (`<glob> [rule-id]`), and runs only over the given files, so old mistakes you did not write never show up. `--with-repo` also runs the current repo's `lint-rules/`.
-- The agent hooks run the repo set too, unless the repo already has its own project hook (then only the personal set runs, so nothing runs twice).
-- `MY_RULES_DISABLE=1` turns everything off for one command.
-- Uninstall restores the previous `core.hooksPath`, removes the hook entries (restoring the original bytes of each JSON file), and deletes only the personal-set files you never modified.
-- Optional: `git init` in `$MY_RULES_HOME` to version your set privately. `ignore-paths.txt` is already in its `.gitignore`, because it holds work repo paths.
-
-### Pitfalls of the global git hook
-
-- **`pre-commit install` refuses to run** when a global `core.hooksPath` is set. That is why `git-hook-chain` calls `pre-commit hook-impl` directly, for the hook types the repo would have installed (`default_install_hook_types`, default `pre-commit`).
-- **Repos using husky** set `core.hooksPath` at repo level, which takes precedence over the global one. There the personal git hook does not run; only the agent hooks remain.
-- **An existing global `core.hooksPath`** is never replaced silently: the installer warns and skips unless you pass `--replace-hooks-path`, and the previous value is restored on uninstall.
-- A repo's own `.git/hooks/<name>` still runs through the chain (with the same arguments and stdin), unless pre-commit generated it, in which case pre-commit is called instead.

@@ -4,16 +4,21 @@ from pathlib import Path
 import pytest
 
 
-def test_repository_rules_are_covered(run_guard):
-    completed = run_guard("check_rule_coverage")
+def test_repository_rules_are_covered(run_guard, coverage_arguments):
+    completed = run_guard("check_rule_coverage", *coverage_arguments)
 
     assert completed.returncode == 0, completed.stderr
 
 
 @pytest.mark.usefixtures("_delete_enforced_by_line")
-def test_deleting_enforced_by_line_fails(run_guard, rules_sandbox: Path):
+def test_deleting_enforced_by_line_fails(
+    run_guard, coverage_arguments, rules_sandbox: Path
+):
     completed = run_guard(
-        "check_rule_coverage", "--json", working_directory=rules_sandbox
+        "check_rule_coverage",
+        *coverage_arguments,
+        "--json",
+        working_directory=rules_sandbox,
     )
 
     assert completed.returncode == 1
@@ -24,9 +29,14 @@ def test_deleting_enforced_by_line_fails(run_guard, rules_sandbox: Path):
 
 
 @pytest.mark.usefixtures("_delete_checks_section")
-def test_missing_checks_section_fails(run_guard, rules_sandbox: Path):
+def test_missing_checks_section_fails(
+    run_guard, coverage_arguments, rules_sandbox: Path
+):
     completed = run_guard(
-        "check_rule_coverage", "--json", working_directory=rules_sandbox
+        "check_rule_coverage",
+        *coverage_arguments,
+        "--json",
+        working_directory=rules_sandbox,
     )
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
@@ -35,9 +45,12 @@ def test_missing_checks_section_fails(run_guard, rules_sandbox: Path):
 
 
 @pytest.mark.usefixtures("_add_unknown_check")
-def test_unknown_check_fails(run_guard, rules_sandbox: Path):
+def test_unknown_check_fails(run_guard, coverage_arguments, rules_sandbox: Path):
     completed = run_guard(
-        "check_rule_coverage", "--json", working_directory=rules_sandbox
+        "check_rule_coverage",
+        *coverage_arguments,
+        "--json",
+        working_directory=rules_sandbox,
     )
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
@@ -46,9 +59,12 @@ def test_unknown_check_fails(run_guard, rules_sandbox: Path):
 
 
 @pytest.mark.usefixtures("_point_rule_to_missing_source")
-def test_missing_source_fails(run_guard, rules_sandbox: Path):
+def test_missing_source_fails(run_guard, coverage_arguments, rules_sandbox: Path):
     completed = run_guard(
-        "check_rule_coverage", "--json", working_directory=rules_sandbox
+        "check_rule_coverage",
+        *coverage_arguments,
+        "--json",
+        working_directory=rules_sandbox,
     )
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [

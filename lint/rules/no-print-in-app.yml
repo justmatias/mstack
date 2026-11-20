@@ -6,7 +6,7 @@ note: |
   print output has no level or source and cannot be filtered
   or routed in production.
 metadata:
-  source: .cursor/rules/logging.mdc
+  source: rules/logging.mdc
 files:
   - "**/fixtures/**"
 rule:

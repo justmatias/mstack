@@ -81,7 +81,3 @@ print(banner)
 - `check_exceptions.py` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
 - Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct-rules` looks for this).
-
-## Personal rules
-
-Personal rules use the same format, under `~/.cursor/rules/my-*.mdc`, with checks in `$MY_RULES_HOME` (default `~/.config/my-rules/`) and ids prefixed `my-`. They have no `ast-grep-ignore` exceptions: exceptions go in `$MY_RULES_HOME/ignore-paths.txt`. Rules derived from the conventions store also carry `derived-from: <convention path>` and `derived-sha256: <hash>` in their frontmatter. See `authoring-a-check.md`, "Personal set".

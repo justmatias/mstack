@@ -14,9 +14,5 @@ dist/
 .coverage
 htmlcov/
 
-# Generated per developer by scripts/setup.py
-.claude/skills/
-.cursor/skills/
+# Local agent settings
 .claude/settings.local.json
-.cursor/hooks.json
-*.bak-*

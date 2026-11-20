@@ -60,16 +60,17 @@ Every scenario ran with `HOME` pointing at a temporary folder and `GIT_CONFIG_GL
 | User-level hooks and their coexistence with project hooks | Decision 31; scenario 7. |
 | Invoking pre-commit from a chained hook; husky | Decision 32; scenarios 3 and 5. |
 
-## setup-mstack: installing the skills by copy
+## setup-mstack: installing the skills and rules
 
-Run on 2026-11-19 from the `feat/setup-mstack-skill` worktree. `HOME` pointed at an empty temporary folder, so the real `~/.claude/skills/` was never touched. The skill's steps were followed by the agent acting for the user (tools: Claude Code only). Every other case (updates, local edits, collisions, `keep-both`, merges, symlink migration, both tools, duplicates, a corrupt or missing manifest, dry runs, stale plans) is automated in `tests/scripts/skills_cli/` (`make test`).
+Run on 2026-11-20 from the `feat/setup-mstack-skill` worktree, following `skills/setup-mstack/SKILL.md` by hand, as the agent would. `HOME` pointed at an empty temporary folder, so the real `~/.claude/` and `~/.cursor/` were never touched. Answers were given by the agent acting for the user: tools **both**. The temporary `HOME` was seeded with a pstack-style `reflect` skill in `~/.claude/skills/` and an old setup symlink `~/.cursor/skills/sync-rules` pointing into the checkout.
 
 | Step | Result | Evidence |
 | --- | --- | --- |
-| `skills plan --tools claude` on a clean `HOME` | Pass | `correct-rules`, `reflect-rules`, `sync-rules`: `install`. Target `~/.claude/skills`. `setup-mstack` is not listed. |
-| `skills apply --dry-run` | Pass | Prints "would copy", "would write manifest", "would write toolkit config"; the temporary `HOME` still holds no files. |
-| `skills apply` | Pass | `installed: correct-rules, reflect-rules, sync-rules`, no backups. `~/.claude/skills/` holds the three folders (copies, not symlinks) and `.mstack-manifest.json`. `~/.config/mstack/config.json` has `toolkit_path` and `targets`. |
-| `skills verify --tools claude` | Pass | `problems: []`: frontmatter valid, `../sync-rules/references/` resolves from every skill, config readable. |
-| Second `skills plan` | Pass | Every skill `unchanged`. |
-| `<toolkit>` from an installed copy | Pass | The `# resolve-toolkit` snippet, taken from the installed `authoring-a-check.md` and run with only `HOME` and `PATH` set, prints the checkout path. |
-| Skills show up in a new Claude Code session | Not run | `claude -p` with the temporary `HOME` stops at "Not logged in". Credentials were not copied into the temporary folder. Pending a run on the real `HOME`: `/setup-mstack`, then a new session should list `sync-rules`, `reflect-rules` and `correct-rules`. |
+| 1. Tools | Pass | Both: skills go to `~/.claude/skills/` only; rules go to `~/.claude/rules/` and are printed for Cursor Settings. |
+| 2. Skills inventory | Pass | `correct-rules`, `reflect-rules`, `sync-rules`: `new`. `sync-rules` is also a `duplicate` (the old symlink in `~/.cursor/skills/`). `setup-mstack` is excluded. Similar: `reflect` ↔ `reflect-rules` (known overlap; both `SKILL.md` files mine the transcript for learnings). |
+| 3. Rules inventory | Pass | All five `rules/*.mdc`: `new` as `~/.claude/rules/<name>.md`. |
+| 5. Conflicts | Pass | `reflect`: "Add" (both stay installed). Duplicate: "Discard" (the symlink is unlinked, nothing to back up). |
+| 6. Apply | Pass | Three skill folders copied (not symlinks), five rules written without frontmatter or `## Checks`, with an `Applies to files matching ...` line. `~/.config/mstack/config.json` has `toolkit_path`. `~/.cursor/skills/` is empty. |
+| 8. Verify | Pass | Every skill's `name` matches its folder and has a `description`. `../sync-rules/references/` resolves from every skill. No rule has frontmatter. The config points at a folder with `scripts/`. A second inventory reports `identical`. |
+| Skills and rules show up in a new session | Not run | A temporary `HOME` has no login (`claude -p` stops at "Not logged in"), and credentials were not copied. Pending a run on the real `HOME`. |
+| Cursor rules pasted into Settings | Not run | Cursor is not available on this machine. |

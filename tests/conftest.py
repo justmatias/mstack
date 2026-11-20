@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-SGCONFIG = REPOSITORY_ROOT / "lint-rules" / "sgconfig.yml"
+SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
 
 
 @pytest.fixture
@@ -68,3 +68,42 @@ def read_frontmatter(path: Path) -> dict:
     _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
     data: dict = yaml.safe_load(frontmatter)
     return data
+
+
+@pytest.fixture
+def toolkit_resolver() -> str:
+    text = (
+        REPOSITORY_ROOT
+        / "skills"
+        / "sync-rules"
+        / "references"
+        / "authoring-a-check.md"
+    ).read_text()
+    blocks = text.split("```bash\n")[1:]
+    snippet = next(block for block in blocks if block.startswith("# resolve-toolkit"))
+    return snippet.split("```", 1)[0]
+
+
+@pytest.fixture
+def run_resolver(toolkit_resolver: str, tmp_path: Path):
+    home = tmp_path / "home"
+    home.mkdir(exist_ok=True)
+
+    def run(**variables: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["bash", "-c", toolkit_resolver],
+            env={"HOME": str(home), "PATH": "/usr/bin:/bin", **variables},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    return run
+
+
+@pytest.fixture
+def toolkit_config(tmp_path: Path) -> Path:
+    config = tmp_path / "home" / ".config" / "mstack" / "config.json"
+    config.parent.mkdir(parents=True)
+    config.write_text(json.dumps({"toolkit_path": str(REPOSITORY_ROOT)}))
+    return config

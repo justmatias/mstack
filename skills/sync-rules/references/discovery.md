@@ -40,10 +40,8 @@ git ls-files '.cursor/rules/**' .cursorrules AGENTS.md CLAUDE.md '.claude/rules/
 | --- | --- |
 | `~/.cursor/rules/*.mdc` | Cursor user rules |
 | `~/.claude/CLAUDE.md`, `~/.claude/rules/*.md` | Claude Code user memory |
-| `$MY_RULES_HOME` (default `~/.config/my-rules/`) | The personal check set |
-| `$CONVENTIONS_HOME` (default `~/.dev_brain/conventions/`) | The conventions store (Helix). Read-only, `--from-conventions` only. |
 
-User rules are personal. Read them only when asked (`--user`, or a personal destination in `reflect-rules`/`correct-rules`), and never copy them into a repo without confirmation.
+User rules are personal. Read them only when asked, and never copy them into a repo without confirmation.
 
 ## Transcripts (`reflect-rules`, optionally `correct-rules`)
 

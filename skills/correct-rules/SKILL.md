@@ -47,10 +47,6 @@ Run `check_no_domain_leak.py` over every generated file before committing, and r
 
 Last, regenerate the table that pairs each rule with what enforces it: `make rules-table` writes `docs/rules-table.md` and updates the block between `<!-- rules-table:start -->` and `<!-- rules-table:end -->` in `CLAUDE.md` / `AGENTS.md`. When the operator corrects you, fix the mistake and add the rule. If the rule was already there and nothing enforces it, that's a repeat, so raise it to the highest level in the same change.
 
-## Personal destination
-
-By default, fixes go to the repo. If you cannot change the repo, or the class is yours (it appears only in your own commits: `git log --author="$(git config user.email)"`), offer to move the check to your personal set instead (`~/.cursor/rules/my-<name>.mdc` and `$MY_RULES_HOME`, ids prefixed `my-`, see "Personal set" in the authoring reference). There it stays at the lint level only, because architecture and tests live in the repo and require changing it. Nothing is written to the repo.
-
 **Reply:** each class with its evidence (commit shas, PR numbers, exception counts), the level you picked, why a higher level didn't work, the files touched, and the severity. Then: abstracted (what was generalized) and dropped (`domain-dependent` classes, one line each).
 
 Adapted from pstack/correct (MIT). See THIRD_PARTY_NOTICES.md

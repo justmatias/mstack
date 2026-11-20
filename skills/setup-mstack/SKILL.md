@@ -1,120 +1,122 @@
 ---
 name: setup-mstack
-description: "Install or update the other mstack skills (sync-rules, reflect-rules, correct-rules) in your user-level skill folder for Claude Code and Cursor, by copy, with a manifest, backups and a decision for every conflict. Use when the user says set up mstack, install mstack, update mstack skills, or after pulling a new version of the mstack repo."
+description: "Install or update the mstack skills (skills/) and rules (rules/) into your user-level Claude Code and Cursor folders, asking you what to add, update, replace or discard for each one. Use when the user says set up mstack, install mstack, update mstack skills, update mstack rules, or after pulling a new version of the mstack repo."
 ---
 
 # Set up mstack
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any merged skill. (2) **Practices, not domain**: a merged skill keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the other skill. Details: [principles.md](../sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the user's version. Details: [principles.md](../sync-rules/references/principles.md).
 
-Install the other mstack skills from this repo's `skills/` folder into the one user skill folder your tools load, by copying them. This skill is never installed itself: run it from the mstack repo by asking the agent to follow `skills/setup-mstack/SKILL.md`. Updating is the same flow: pull the repo, then run this skill again.
+Copy the mstack skills and rules from this checkout into the user-level folders that Claude Code and Cursor load. Run it with the mstack repo open: `<mstack>` below is that checkout's root (the folder with `skills/` and `rules/`). Updating is the same flow: pull the repo, then run this skill again.
 
-The deterministic work is done by `scripts/setup.py skills` (plan, apply, verify). You make the judgment calls: whether a similar skill really overlaps, which version to keep, and how to combine two skills. Never write into the skill folders yourself. Every change goes through `apply`.
-
-All commands run from the mstack repo root:
-
-```bash
-uv run python scripts/setup.py skills plan --tools <tools> --json > <scratch>/plan.json
-uv run python scripts/setup.py skills apply --plan <scratch>/plan.json --decisions <scratch>/decisions.json --dry-run
-uv run python scripts/setup.py skills verify --tools <tools> --json
-```
-
-`<scratch>` is a temp folder outside the repo and outside every skill folder.
+You do all the work yourself with ordinary file tools (`ls`, `diff -ru`, `cp -R`, `mkdir -p`, `mv`). Nothing is written until the user approves it. Never overwrite or delete anything without a backup.
 
 ## 1. Ask which tools the user uses
 
-Ask: Claude Code, Cursor, or both. Then explain the target in one line:
+Ask this first, before reading anything else: **Claude Code, Cursor, or both?** Then state in one or two lines where things will go:
 
-| Tools | `--tools` | Target |
+| Tools | Skills go to | Rules go to |
 | --- | --- | --- |
-| Claude Code only | `claude` | `~/.claude/skills/` |
-| Cursor only | `cursor` | `~/.cursor/skills/` |
-| Both | `claude,cursor` | `~/.claude/skills/` only, because Cursor also loads that folder. A second copy in `~/.cursor/skills/` would show every skill twice. |
+| Claude Code | `~/.claude/skills/` | `~/.claude/rules/` |
+| Cursor | `~/.cursor/skills/` | Cursor Settings → Rules (pasted by the user, see step 7) |
+| Both | `~/.claude/skills/` only, because Cursor also loads that folder and a second copy would show every skill twice | `~/.claude/rules/`, plus Cursor Settings → Rules |
 
-## 2. Plan
+The skills target is called `<skills>` below.
 
-Run `plan --json` and read every item. Each item has an `id` (the key for its decision), `skill`, `action`, `path`, `source_hash`, `installed_hash`, `manifest_hash` and `similar_to`.
+## 2. Inventory the skills
 
-| `action` | Meaning | Proposed decision |
+Sources: every folder in `<mstack>/skills/` that has a `SKILL.md`, **except `setup-mstack`** (this skill only runs from the checkout and is never installed). Ignore `.DS_Store` and `__pycache__` when you compare.
+
+For each source skill, look at `<skills>/<name>` and give it one state:
+
+| State | How to tell | Proposed action |
 | --- | --- | --- |
-| `install` | Not present in the target | `install` |
-| `update` | Pristine mstack copy, the source changed | `update` |
-| `unchanged` | Already up to date | none (no decision needed) |
-| `modified-locally` | The installed copy differs from what mstack installed (or the manifest is missing or corrupt) | ask (step 5) |
-| `collision` | Same name, not installed by mstack | ask (step 5) |
-| `migrate-symlink` | An old symlink into an mstack checkout, from the previous setup | `install` (replaces it with a copy) |
-| `duplicate` | An mstack copy or link that the tools would load in addition to the target | `remove-duplicate` (step 6) |
+| `new` | Nothing there | add |
+| `identical` | `diff -ru` shows no difference | none |
+| `differs` | `diff -ru` shows differences | ask (step 5) |
+| `old-symlink` | A symlink into an mstack checkout (left by the old setup) | replace with a copy |
+| `duplicate` | With both tools: a copy or symlink of the same mstack skill in `~/.cursor/skills/` | discard the duplicate |
 
-If `manifest` is `corrupt`, say so: nothing present is overwritten without the user's decision.
+There is no manifest, so a `differs` skill may be the user's own edit or a newer mstack version: show the diff and let the user decide. Never assume.
 
-## 3. Check the similar skills
+Then look for **similar skills**: any other skill in the folders the selected tools load (`~/.claude/skills/`, and `~/.cursor/skills/` with Cursor) that does the same job under another name. Start from [known-overlaps.json](references/known-overlaps.json) (pstack `reflect` ↔ `reflect-rules`, pstack `correct` ↔ `correct-rules`), then compare names and descriptions. For each candidate, read both `SKILL.md` files and keep it only if they really overlap. Say in one line why.
 
-`similar_to` lists candidates only: name-token overlap, description word overlap, and the [known overlaps](references/known-overlaps.json) (pstack `reflect` and `correct`). For each candidate, read both `SKILL.md` files and decide whether they really do the same job. Drop the false positives, and say in one line why each confirmed one overlaps.
+## 3. Inventory the rules (Claude Code)
+
+Skip this step if the user does not use Claude Code.
+
+Sources: every `<mstack>/rules/*.mdc`. Each one installs as `~/.claude/rules/<name>.md`, converted like this:
+
+1. Drop the `.mdc` frontmatter (`description`, `globs`, `alwaysApply`). Claude Code only reads `paths:` from a rule, and `paths:` in user-level rules is unreliable, so the rule is installed without it and always loads.
+2. If the rule had `globs`, start the body with one line: `Applies to files matching <globs>.`
+3. Drop the `## Checks` section: those checks only run inside the mstack repo.
+4. Keep the rest of the body as it is.
+
+Build the converted text, then compare it with what is installed and give each rule a state: `new`, `identical`, or `differs`. Also look for **similar rules** in `~/.claude/rules/` (same topic under another file name) by reading them, and keep only real overlaps.
 
 ## 4. Show the plan and wait
 
-Show one table, one row per item: `id` → `action` → proposed decision (plus "similar to `<name>`" for confirmed overlaps). Wait for the user's approval before going on. Do not ask about rows whose decision follows from the table in step 2.
+Show one table, one row per skill or rule: name, kind (skill or rule), state, proposed action, and "similar to `<name>`" for confirmed overlaps. Wait for the user's approval. Do not ask about rows whose action is obvious (`new` → add, `identical` → nothing, `old-symlink` → replace with a copy).
 
-## 5. Conflicts: keep mine, keep theirs, keep both, or combine
+## 5. Ask about every conflict
 
-For every `collision`, every `modified-locally` item and every confirmed similar skill, ask the user to pick one option. "Mine" is the user's installed skill, "theirs" is mstack's:
+For each `differs` item, each confirmed similar item, and anything the user wants to change in the table, ask the user to pick one option. "Theirs" is mstack's version, "mine" is the installed one:
 
-| Choice | Decision | Effect |
-| --- | --- | --- |
-| Keep mine | `keep-mine` | Leaves the installed folder as it is. The manifest records it as kept. You are asked again only when the mstack source changes. |
-| Keep theirs | `keep-theirs` | Backs up the installed folder, then installs mstack's copy. |
-| Keep both | `keep-both` | Leaves the installed folder in place and installs mstack's copy as `mstack-<name>`, with its frontmatter `name` rewritten. |
-| Combine | `merged:<path>` | Installs a merged skill folder that you drafted and the user approved. |
+| Choice | Effect |
+| --- | --- |
+| **Add** | Install mstack's version. For a similar item with a different name, both stay installed. |
+| **Update** | Back up the installed version, then install mstack's version over it. |
+| **Replace** | For a similar item: back up the user's item and remove it, then install mstack's version. |
+| **Discard** | Do not install mstack's version, and leave what is installed untouched. For a `duplicate`, back it up and remove it. |
+| **Combine** | Draft one merged item (see below) and install it after approval. |
 
-For a confirmed similar skill with a different name (for example pstack `reflect` next to `reflect-rules`), nothing collides on disk. The plan item is still `install` or `update`. "Keep mine" there means `skip`. "Keep both" is the plain `install`. "Combine" is a `merged:<path>` on the mstack item, and afterwards the user can delete their own skill by hand.
+Show the diff (`diff -ru` for a skill, `diff -u` for a rule) before asking.
 
 **Combine:**
 
-1. Draft the merged folder in `<scratch>/merged/<installed name>/`. Start from mstack's copy (`skills/<skill>/` in this repo), and bring over what only the other side has. Keep the frontmatter `name` equal to the folder name the item installs to (`installed_as` in the plan).
-2. If either side had the principles header (`> **Principles (always apply):** ...`), the merged skill keeps it at the top. If either side had the pstack attribution line (`Adapted from pstack/<skill> (MIT). ...`), the merged skill keeps it as its last line.
-3. Relative links into `../sync-rules/references/` must still resolve. The merged folder lands next to `sync-rules` in the target.
-4. Show `diff -ru` of the merged folder against both versions (the installed one at `path`, and mstack's in `skills/<skill>/`).
-5. Pass `merged:<scratch>/merged/<installed name>` only after the user explicitly approves the diff.
+1. Draft the merged item in a temp folder outside the repo and outside every tool folder. Start from mstack's version and bring over what only the user's version has.
+2. A merged skill keeps the frontmatter `name` equal to its folder name. If either side had the principles header (`> **Principles (always apply):** ...`), the merged skill keeps it at the top. If either side had a pstack attribution line (`Adapted from pstack/<skill> (MIT). ...`), it stays as the last line.
+3. Relative links into `../sync-rules/references/` must still resolve: every mstack skill is installed side by side in `<skills>`.
+4. Show the diff of the draft against both versions, and install it only after the user explicitly approves it.
 
-## 6. Duplicates
+## 6. Apply what was approved
 
-For every `duplicate`, propose `remove-duplicate`. For example, with both tools selected, an mstack copy in `~/.cursor/skills/` would make Cursor load the skill twice. Old project-level symlinks in this repo's `.claude/skills/` or `.cursor/skills/` show up here too. Removal backs the folder up first (a symlink is just unlinked).
+- **Back up first.** Move whatever you are about to overwrite or remove into `<folder>/.mstack-backups/<UTC timestamp>/<name>`, inside the folder it came from (for example `~/.claude/skills/.mstack-backups/20261120-101500/sync-rules/`). Never put backups next to the skills or rules as `<name>.bak` or similar: the tools would load them.
+- A symlink is removed with `rm` (its target is the checkout; nothing to back up).
+- Copy skills with `cp -R <mstack>/skills/<name> <skills>/<name>`, then delete any `.DS_Store` or `__pycache__` that came along.
+- Write each converted rule to `~/.claude/rules/<name>.md`.
+- Write the toolkit config, so the installed skills can find `<mstack>/scripts/`. Merge with what is there, and only write it if it changes:
 
-## 7. Old symlinks
+  ```json
+  {"toolkit_path": "<absolute path of <mstack>>"}
+  ```
 
-For every `migrate-symlink`, the decision is `install`: the symlink is removed and a copy is installed in its place.
+  at `~/.config/mstack/config.json`. `$MSTACK_HOME`, if set, takes priority over it (see "toolkit" in `../sync-rules/references/authoring-a-check.md`).
 
-## 8. Apply
+## 7. Cursor rules
 
-Write the decisions as one JSON object keyed by item `id` (items with action `unchanged` need no entry):
+Skip this step if the user does not use Cursor. Cursor has no file-based user rules folder (it does not load `~/.cursor/rules/`), and its user rules live in Cursor Settings → Rules. So:
 
-```json
-{"sync-rules": "install", "reflect-rules": "merged:/tmp/x/merged/reflect-rules", "correct-rules@~/.cursor/skills": "remove-duplicate"}
-```
+1. Ask the user which mstack rules they want in Cursor (default: the ones they approved for Claude Code, or all of them).
+2. Print them as one block of plain text, ready to paste: for each rule, its `description` as a heading, the `Applies to ...` line, and the body without frontmatter or `## Checks`.
+3. Tell the user to paste it into **Cursor Settings → Rules → User Rules**. Do not edit Cursor's settings database.
 
-Run `apply` with `--dry-run` first and check that the output matches the approved table. Then run it again without `--dry-run`. If `apply` reports that the plan is stale, something changed on disk: go back to step 2.
+## 8. Verify
 
-`apply` backs up everything it replaces or removes into `<folder>/.mstack-backups/<timestamp>/<skill>/`, never as sibling folders (the tools would load those as skills). It writes `<target>/.mstack-manifest.json` and the toolkit config `~/.config/mstack/config.json`, which the installed skills use to find this repo's `scripts/`.
+- Every installed skill has a `SKILL.md` whose frontmatter `name` matches its folder and has a `description`.
+- `../sync-rules/references/` resolves from every installed mstack skill.
+- No mstack skill exists in both `~/.claude/skills/` and `~/.cursor/skills/` when the user picked both.
+- Every installed rule exists in `~/.claude/rules/` and has no frontmatter.
+- `~/.config/mstack/config.json` is valid JSON and its `toolkit_path` has a `scripts/` folder.
 
-## 9. Verify
+Tell the user the skills and rules show up in a new session of Claude Code or Cursor.
 
-Run `verify --json` and fix or report every problem. It checks:
+## 9. Reply
 
-- the frontmatter of every installed skill (its `name` matches the folder, and it has a `description`);
-- that `../sync-rules/references/` resolves from every installed skill, since they must land side by side;
-- that the toolkit config is readable and points at a folder with `scripts/`.
+A short list. Leave out empty lines:
 
-Tell the user that the skills show up in a new session of Claude Code or Cursor.
-
-## 10. Reply
-
-Reply with a short list built from `apply --json`. Leave out empty lines:
-
-- Installed: ...
-- Updated: ...
-- Skipped: ...
-- Merged: ...
-- Removed duplicates: ...
-- Kept (edited): ...
-- Kept both: ...
+- Skills added / updated / replaced / combined / discarded: ...
+- Rules added / updated / replaced / combined / discarded: ...
+- Duplicates removed and old symlinks replaced: ...
+- Cursor rules: printed for pasting (or skipped).
 - Backups: `<folder>/.mstack-backups/<timestamp>/`

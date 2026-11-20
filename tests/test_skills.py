@@ -13,9 +13,9 @@ TRIGGER_PHRASES = {
         "sync the rules",
         "after editing .cursor/rules",
         "--check",
-        "--user",
+        "when a rule has no check",
     ],
-    "reflect-rules": ["reflect-rules", "transcript", "personal"],
+    "reflect-rules": ["reflect-rules", "transcript", "approval"],
     "correct-rules": ["/correct-rules", "keep repeating", "real past mistake"],
 }
 SETUP_TRIGGER_PHRASES = ["set up mstack", "install mstack", "update mstack skills"]
@@ -86,3 +86,37 @@ def test_known_overlaps_cover_the_pstack_originals():
     pairs = {(overlap["skill"], overlap["other"]) for overlap in data["overlaps"]}
     assert {("reflect-rules", "reflect"), ("correct-rules", "correct")} <= pairs
     assert all(overlap["reason"] for overlap in data["overlaps"])
+
+
+@pytest.mark.usefixtures("toolkit_config")
+def test_toolkit_resolves_from_the_config(run_resolver):
+    resolved = run_resolver()
+
+    assert resolved.returncode == 0, resolved.stderr
+    assert resolved.stdout.strip() == str(REPOSITORY_ROOT)
+
+
+@pytest.mark.usefixtures("toolkit_config")
+def test_mstack_home_takes_priority_over_the_config(run_resolver, tmp_path):
+    toolkit = tmp_path / "other-toolkit"
+    (toolkit / "scripts").mkdir(parents=True)
+
+    resolved = run_resolver(MSTACK_HOME=str(toolkit))
+
+    assert resolved.stdout.strip() == str(toolkit)
+
+
+def test_toolkit_resolution_fails_clearly_without_either(run_resolver):
+    resolved = run_resolver()
+
+    assert resolved.returncode == 1
+    assert "set MSTACK_HOME" in resolved.stderr
+
+
+@pytest.mark.parametrize(
+    "rule",
+    sorted((REPOSITORY_ROOT / "rules").glob("*.mdc")),
+    ids=lambda path: path.name,
+)
+def test_every_rule_has_a_description(rule):
+    assert read_frontmatter(rule)["description"]
