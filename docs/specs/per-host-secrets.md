@@ -1,7 +1,7 @@
 # Per-host secrets and values
 
 - **Phase:** future
-- **Depends on:** `agent-config-folders` (the `${VAR}` placeholders live in `mcp/` and `settings/`). Better with `host-profiles` and `install-command`.
+- **Depends on:** `agent-config-folders` (the `${VAR}` placeholders live in `mcp/` and `settings/`). Better with `host-profiles`.
 
 ## Problem
 
@@ -23,7 +23,7 @@ Placeholders are resolved per machine at install time, or left for the tool to e
   2. `~/.config/mstack/secrets.env` (`KEY=value` lines; created with mode `0600`; doctor warns if it is group- or world-readable);
   3. the OS keychain through the optional `keyring` extra (`uv tool install 'mstack[keyring]'`);
   4. an interactive prompt, which offers to save to 2 or 3.
-- **Never written** to the manifest, to backups' logs, or to command output. The plan shows `${VAR} → set` or `missing`, never the value.
+- **Never written** to backups' logs or to command output. The plan shows `${VAR} → set` or `missing`, never the value.
 - **Non-secret per-host values** (an editor path, a default model) use the same mechanism, so there's one way to customize a machine.
 - `mstack secrets list` shows each placeholder in the installed items and whether it is resolved, without the values.
 
@@ -40,4 +40,4 @@ Placeholders are resolved per machine at install time, or left for the tool to e
 ## Acceptance criteria
 
 - [ ] An MCP server that needs a token installs on two machines with different tokens from the same repo file.
-- [ ] No secret value appears in the repo, the manifest, backups metadata or command output.
+- [ ] No secret value appears in the repo, backups metadata or command output.

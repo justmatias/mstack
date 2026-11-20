@@ -11,8 +11,8 @@ AGENT_CONFIG_FILES := $(filter-out %/README.md,$(wildcard agents/*.md mcp/*.json
 
 .PHONY: setup lint-rules lint-rules-changed guards repo-guards demo test lint
 
-# Dev dependencies only. To install the skills and rules into your user folders, ask
-# Claude Code or Cursor to follow skills/setup-mstack/SKILL.md.
+# Dev dependencies only. To install the skills and rules into your user folders, run
+# /setup-mstack in Claude Code or Cursor.
 setup:
 	uv sync
 
@@ -40,7 +40,7 @@ guards:
 # Guards for what only this repo has: agent config folders and skills.
 repo-guards:
 	$(MSTACK) config-check
-	$(MSTACK) skills-check skills
+	$(MSTACK) skills-check skills .claude/skills
 	$(if $(AGENT_CONFIG_FILES),$(MSTACK) leak-check $(AGENT_CONFIG_FILES))
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.

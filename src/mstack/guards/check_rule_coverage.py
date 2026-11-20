@@ -10,7 +10,7 @@ import yaml
 
 from mstack.config import resolve_config
 from mstack.guards.credit import credit_problems
-from mstack.install.render import RuleFormatError, split_frontmatter
+from mstack.render import RuleFormatError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-from mstack.install.item_kinds import Tool
+from mstack.doctor.targets import Tool
 from mstack.platform import Platform
 
 Status = Literal["ok", "warn", "error"]

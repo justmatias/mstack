@@ -1,5 +1,5 @@
 from mstack.doctor.model import Context, Result
-from mstack.install.item_kinds import uses_cursor
+from mstack.doctor.targets import uses_cursor
 from mstack.platform import WINDOWS_HOME_VARIABLE
 
 

@@ -13,7 +13,7 @@ The repo is also a Claude Code marketplace with one `mstack` plugin. On any mach
 
 ## Out of scope
 
-- Rules and settings fragments: plugins don't install user rules or merge `settings.json`, so `mstack install` (or `setup-mstack`) still handles those.
+- Rules and settings fragments: plugins don't install user rules or merge `settings.json`, so `setup-mstack` still handles those.
 - Cursor (it loads `~/.claude/skills/`, not Claude Code plugins). Cursor users keep the copy-based install.
 
 ## Design

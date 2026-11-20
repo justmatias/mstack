@@ -81,7 +81,7 @@ If the upstream also ships checks for its rules (ast-grep YAML, a lint config), 
 Never add a skill or a rule before checking that nothing existing should absorb it. A new one is the last resort, because two skills that share a job split the triggers and drift apart, and two rules that say the same thing in different words drift into contradicting each other.
 
 1. **Read everything that exists** in the target:
-   - Skills: every `skills/*/SKILL.md` (`setup-mstack` included) and the references they link to, plus `skills/setup-mstack/references/known-overlaps.json`. Write each one's job in one line: what it reads, what it produces, and when it triggers.
+   - Skills: every `skills/*/SKILL.md` and `.claude/skills/setup-mstack/SKILL.md`, the references they link to, and `.claude/skills/setup-mstack/references/known-overlaps.json`. Write each one's job in one line: what it reads, what it produces, and when it triggers.
    - Rules: every `.mdc` in the rules folder with its `## Checks`, the always-loaded instructions (`instructions/` in the mstack checkout, `AGENTS.md` or `CLAUDE.md` elsewhere), and the linters the repo already runs (`.pre-commit-config.yaml`, `pyproject.toml`). Write each existing rule as its atomic statements.
 2. **Compare each upstream item with every existing one**, not only the ones with a similar name or file. For each pair, classify the overlap:
 
@@ -176,7 +176,7 @@ Draft each rule in `<tmp>/draft/rules/<name>.mdc`, in the format of [rule-format
 - **Skills:** `mstack skills-check <target>` (with `--profile generic` outside the mstack checkout) passes on the target folder, and the principles header is in the first lines of every written reference and template (`skills-check` only checks the `SKILL.md`).
 - **Rules:** `mstack coverage` passes: every written rule has a `## Checks` section whose checks exist, and its credit is complete (`license` with `adapted-from`, and an `upstream-commit` sha for each).
 - In the mstack checkout, also:
-  - add any confirmed overlap to `skills/setup-mstack/references/known-overlaps.json`;
+  - add any confirmed overlap to `.claude/skills/setup-mstack/references/known-overlaps.json`;
   - update the Skills row of `README.md` if the set of skills changed what it says;
   - run `make test` and `make lint-rules-changed`, and fix every error they report.
 

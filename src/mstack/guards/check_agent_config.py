@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from mstack.guards.check_no_domain_leak import SECRETS
-from mstack.install.render import RuleFormatError, split_frontmatter
+from mstack.render import RuleFormatError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 

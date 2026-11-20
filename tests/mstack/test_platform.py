@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 
 from mstack import platform
-from mstack.install.item_kinds import target_locations
 from mstack.platform import detect, tool_homes, wsl_windows_home
 
 NO_OVERRIDE: dict[str, str] = {}
@@ -112,22 +111,3 @@ def test_wsl_without_windows_profile_falls_back_and_warns(windows_commands, capl
 
     assert homes["cursor"] == Path.home()
     assert "MSTACK_WINDOWS_HOME" in caplog.text
-
-
-def test_both_tools_share_one_skills_copy_outside_wsl():
-    assert target_locations("skill", "both") == [Path.home() / ".claude" / "skills"]
-
-
-def test_both_tools_get_a_skills_copy_each_on_wsl(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-):
-    monkeypatch.setenv("MSTACK_PLATFORM", "wsl")
-    monkeypatch.setenv("MSTACK_WINDOWS_HOME", str(tmp_path / "windows"))
-
-    assert target_locations("skill", "both") == [
-        Path.home() / ".claude" / "skills",
-        tmp_path / "windows" / ".cursor" / "skills",
-    ]
-    assert target_locations("mcp", "cursor") == [
-        tmp_path / "windows" / ".cursor" / "mcp.json"
-    ]

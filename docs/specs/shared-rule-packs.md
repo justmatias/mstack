@@ -30,7 +30,7 @@ rules = ["testing"]
 rules = ["shell"]
 ```
 
-The wheel includes `rules/`, `lint/rules/`, `lint/rule-tests/` and `packs.toml` as package data (see `packaged-install` for the build details; an editable install reads them from the checkout).
+The wheel includes `rules/`, `lint/rules/`, `lint/rule-tests/` and `packs.toml` as package data (check whether the `uv_build` backend can include top-level folders; an editable install reads them from the checkout).
 
 **In a work repo:**
 

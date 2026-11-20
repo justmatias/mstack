@@ -1,40 +1,102 @@
+"""Installed copies that no longer match the checkout.
+
+Doctor does not know why a copy differs: the user may have edited it, or the
+checkout may have moved on. The repair skill reads the diff and the checkout's
+history to tell which, and asks before touching the user's edits.
+"""
+
+from pathlib import Path
+
 from mstack.doctor.model import REPAIR_FIX, Context, Result
-from mstack.install.manifest import (
-    ManifestError,
-    compute_status,
-    load_manifest,
-    manifest_path,
+from mstack.doctor.targets import (
+    agent_names,
+    copied_folders,
+    file_content,
+    rule_names,
+    same_tree,
+    skill_names,
+    uses_claude,
 )
+from mstack.render import RuleFormatError, render_rule
+
+
+def drifted(kind: str, name: str, installed: Path) -> Result:
+    return Result(
+        group="drift",
+        check=f"{kind} {name}",
+        status="warn",
+        detail=f"{installed} differs from the checkout",
+        fix=REPAIR_FIX,
+    )
+
+
+def skill_drift(context: Context, checkout: Path) -> list[Result]:
+    results = []
+    for folder in copied_folders(context.tool, context.home, context.cursor, "skills"):
+        for name in skill_names(checkout):
+            installed = folder / name
+            if (installed / "SKILL.md").is_file() and not same_tree(
+                checkout / "skills" / name, installed
+            ):
+                results.append(drifted("skill", name, installed))
+    return results
+
+
+def agent_drift(context: Context, checkout: Path) -> list[Result]:
+    results = []
+    for folder in copied_folders(context.tool, context.home, context.cursor, "agents"):
+        for name in agent_names(checkout):
+            installed = folder / f"{name}.md"
+            source = checkout / "agents" / f"{name}.md"
+            if installed.is_file() and file_content(installed) != file_content(source):
+                results.append(drifted("agent", name, installed))
+    return results
+
+
+def rule_drift(context: Context, checkout: Path) -> list[Result]:
+    if not uses_claude(context.tool):
+        return []
+    results = []
+    folder = context.home / ".claude" / "rules"
+    for name in rule_names(checkout):
+        installed = folder / f"{name}.md"
+        if not installed.is_file():
+            continue
+        try:
+            expected = render_rule(
+                (checkout / "rules" / f"{name}.mdc").read_text(encoding="utf-8")
+            )
+        except RuleFormatError as error:
+            results.append(
+                Result(
+                    group="drift",
+                    check=f"rule {name}",
+                    status="error",
+                    detail=f"the checkout's rule cannot be rendered: {error}",
+                )
+            )
+            continue
+        if file_content(installed).decode("utf-8") != expected:
+            results.append(drifted("rule", name, installed))
+    return results
 
 
 def check_drift(context: Context) -> list[Result]:
-    """Only when the manifest exists: without it there is nothing to compare."""
-    path = manifest_path()
-    if context.checkout is None or not path.is_file():
+    checkout = context.checkout
+    if checkout is None or not checkout.is_dir():
         return []
-    try:
-        rows = compute_status(context.checkout, context.tool, load_manifest(path))
-    except ManifestError as error:
-        return [
-            Result(group="drift", check="manifest", status="error", detail=str(error))
-        ]
-    drifted = [row for row in rows if row.state != "identical"]
-    if not drifted:
-        return [
-            Result(
-                group="drift",
-                check="manifest",
-                status="ok",
-                detail=f"{len(rows)} items identical to the checkout",
-            )
-        ]
+    results = (
+        skill_drift(context, checkout)
+        + rule_drift(context, checkout)
+        + agent_drift(context, checkout)
+    )
+    if results:
+        return results
     return [
         Result(
             group="drift",
-            check=f"{row.kind} {row.name}",
-            status="warn",
-            detail=f"{row.state} at {row.target} ({row.action})",
-            fix=REPAIR_FIX,
+            check="checkout",
+            status="ok",
+            detail="every installed skill, rule and agent matches the checkout",
         )
-        for row in drifted
     ]
