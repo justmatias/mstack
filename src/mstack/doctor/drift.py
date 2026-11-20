@@ -14,7 +14,7 @@ from mstack.doctor.targets import (
     file_content,
     rule_names,
     same_tree,
-    skill_names,
+    skill_sources,
     uses_claude,
 )
 from mstack.render import FrontmatterError, render_rule
@@ -33,11 +33,9 @@ def drifted(kind: str, name: str, installed: Path) -> Result:
 def skill_drift(context: Context, checkout: Path) -> list[Result]:
     results = []
     for folder in copied_folders(context.tool, context.home, context.cursor, "skills"):
-        for name in skill_names(checkout):
+        for name, source in skill_sources(checkout).items():
             installed = folder / name
-            if (installed / "SKILL.md").is_file() and not same_tree(
-                checkout / "skills" / name, installed
-            ):
+            if (installed / "SKILL.md").is_file() and not same_tree(source, installed):
                 results.append(drifted("skill", name, installed))
     return results
 

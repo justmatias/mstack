@@ -3,11 +3,13 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import REPOSITORY_ROOT
+
 PRINCIPLES_LINE = "> **Principles (always apply):**"
 
 
-def test_repository_skills_pass_without_warnings(run_mstack, skills_sandbox: Path):
-    completed = run_mstack("skills-check", str(skills_sandbox), "--json")
+def test_repository_skills_pass_without_warnings(run_mstack):
+    completed = run_mstack("skills-check", str(REPOSITORY_ROOT / "skills"), "--json")
     report = json.loads(completed.stdout)
 
     assert completed.returncode == 0, completed.stderr
@@ -190,3 +192,72 @@ def test_single_skill_folder_is_checked(run_mstack, skills_sandbox: Path):
 
     assert completed.returncode == 0, completed.stderr
     assert json.loads(completed.stdout)["skills"] == ["sync"]
+
+
+GROUPED_SKILL = (
+    '---\nname: {name}\ndescription: "Does {name}."\n---\n\n# {name}\n\n'
+    "> **Principles (always apply):** (1) **English only**. (2) **Practices, not domain**. "
+    "Details: [../sync/references/principles.md](../sync/references/principles.md).\n\n{body}\n"
+)
+
+
+def write_grouped_skill(root: Path, group: str, name: str, body: str = "") -> None:
+    folder = root / group / name
+    folder.mkdir(parents=True)
+    (folder / "SKILL.md").write_text(
+        GROUPED_SKILL.format(name=name, body=body), encoding="utf-8"
+    )
+
+
+@pytest.fixture
+def grouped_skills(tmp_path: Path) -> Path:
+    root = tmp_path / "skills"
+    write_grouped_skill(root, "toolkit", "sync")
+    principles = root / "toolkit" / "sync" / "references" / "principles.md"
+    principles.parent.mkdir()
+    principles.write_text(
+        "> **Principles (always apply):** English only; practices, not domain.\n",
+        encoding="utf-8",
+    )
+    return root
+
+
+def test_skills_in_group_folders_are_found(run_mstack, grouped_skills: Path):
+    write_grouped_skill(grouped_skills, "shipping", "open-pull-request")
+
+    completed = run_mstack("skills-check", str(grouped_skills), "--json")
+
+    assert json.loads(completed.stdout)["skills"] == [
+        "open-pull-request",
+        "sync",
+    ]
+
+
+def test_link_to_a_skill_in_another_group_resolves(run_mstack, grouped_skills: Path):
+    write_grouped_skill(
+        grouped_skills,
+        "shipping",
+        "open-pull-request",
+        body="See [sync](../sync/SKILL.md).",
+    )
+
+    completed = run_mstack("skills-check", str(grouped_skills), "--json")
+
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(completed.stdout)["issues"] == []
+
+
+def test_link_to_a_missing_skill_fails_when_skills_are_grouped(
+    run_mstack, grouped_skills: Path
+):
+    write_grouped_skill(
+        grouped_skills,
+        "shipping",
+        "open-pull-request",
+        body="See [gone](../gone/SKILL.md).",
+    )
+
+    completed = run_mstack("skills-check", str(grouped_skills))
+
+    assert completed.returncode == 1
+    assert "[links] '../gone/SKILL.md' does not exist" in completed.stderr

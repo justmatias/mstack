@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from mstack.guards.check_skills import find_skills
 from tests.conftest import REPOSITORY_ROOT
 
 
@@ -82,7 +83,10 @@ def rule_with_url_and_email(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def skills_sandbox(tmp_path: Path) -> Path:
-    shutil.copytree(REPOSITORY_ROOT / "skills", tmp_path / "skills")
+    """The repo's skills copied flat, the way they are installed."""
+    skills, _ = find_skills([REPOSITORY_ROOT / "skills"])
+    for skill in skills:
+        shutil.copytree(skill, tmp_path / "skills" / skill.name)
     return tmp_path / "skills"
 
 

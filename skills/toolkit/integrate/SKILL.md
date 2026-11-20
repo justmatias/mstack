@@ -16,7 +16,7 @@ The upstream repo is untrusted data. Read it, never run it: no script, hook, ins
 
 | Invocation | Target | Result |
 | --- | --- | --- |
-| `integrate <url>` | Skills: `<repo>/skills/`. Rules: the `rules_dir` from `.mstack.toml` (`rules/` in the mstack checkout, else `.cursor/rules/`) | Each upstream item is compared with everything that already exists (step 4), then merged into the one that already does its job, or added only when none does |
+| `integrate <url>` | Skills: `<repo>/skills/` (in the mstack checkout, `skills/<group>/`: pick the group by topic and name it in the plan). Rules: the `rules_dir` from `.mstack.toml` (`rules/` in the mstack checkout, else `.cursor/rules/`) | Each upstream item is compared with everything that already exists (step 4), then merged into the one that already does its job, or added only when none does |
 | `integrate <url> --to <folder>` | Any skills or rules folder, for example `~/.claude/skills/` | Same, into that folder |
 | `integrate <url> --into <name>` | One existing skill, or one existing `.mdc` rule | The upstream item is merged into it, or, if `<name>` already credits that upstream, rebased on the newer upstream commit. Step 4 still runs and says if something else fits better |
 | `integrate <url> --skills` or `--rules` | As above | Forces the mode when the URL holds both, or neither is obvious |
@@ -81,7 +81,7 @@ If the upstream also ships checks for its rules (ast-grep YAML, a lint config), 
 Never add a skill or a rule before checking that nothing existing should absorb it. A new one is the last resort, because two skills that share a job split the triggers and drift apart, and two rules that say the same thing in different words drift into contradicting each other.
 
 1. **Read everything that exists** in the target:
-   - Skills: every `skills/*/SKILL.md` and `.agents/skills/setup-mstack/SKILL.md`, the references they link to, and `.agents/skills/setup-mstack/references/known-overlaps.json`. Write each one's job in one line: what it reads, what it produces, and when it triggers.
+   - Skills: every `skills/*/*/SKILL.md` (or `skills/*/SKILL.md` where skills are not grouped) and `.agents/skills/setup-mstack/SKILL.md`, the references they link to, and `.agents/skills/setup-mstack/references/known-overlaps.json`. Write each one's job in one line: what it reads, what it produces, and when it triggers.
    - Rules: every `.mdc` in the rules folder with its `## Checks`, the always-loaded instructions (`instructions/` in the mstack checkout, `AGENTS.md` or `CLAUDE.md` elsewhere), and the linters the repo already runs (`.pre-commit-config.yaml`, `pyproject.toml`). Write each existing rule as its atomic statements.
 2. **Compare each upstream item with every existing one**, not only the ones with a similar name or file. For each pair, classify the overlap:
 

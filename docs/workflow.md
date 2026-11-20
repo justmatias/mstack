@@ -115,7 +115,7 @@ make demo                  # fixtures/invalid/ must fail the scan
 ```
 
 - **Add a rule to mstack:** write `rules/<name>.mdc`, then run `/sync` in this repo. It adds the check under `lint/` and its tests. Add a sample that breaks the rule under `fixtures/invalid/`: the tests prove every file there is still caught. Code in `fixtures/valid/` must stay clean.
-- **Add a skill:** a folder in `skills/` with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
+- **Add a skill:** a folder in a topic group, `skills/<group>/<name>/` (`toolkit`, `engineering`, `shipping`, `learning` or `productivity`), with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
 - **Agents, MCP servers, settings and global instructions** go in `agents/`, `mcp/`, `settings/` and `instructions/`; each folder's README gives the format. Secrets are always `${VAR}` placeholders.
 - **Planned work** is in [`docs/specs/`](specs/README.md). When a spec ships, delete it in the same pull request.
 - **Releases** are automatic: every push to `main` runs semantic-release, which reads the Conventional Commits types (`feat` is a minor release, `fix` and `perf` a patch, `!` a major) and moves the `v<major>` tag.
