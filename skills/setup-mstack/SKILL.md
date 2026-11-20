@@ -64,7 +64,7 @@ Show one table, one row per skill or rule: name, kind (skill or rule), purpose (
 
 ## 5. Ask about every conflict
 
-Ask only about `unknown`, `conflict`, `removed` and `orphan` items, each confirmed similar item, and anything the user wants to change in the table, ask the user to pick one option. "Theirs" is mstack's version, "mine" is the installed one:
+For each `unknown`, `conflict`, `removed` and `orphan` item, each confirmed similar item, and anything the user wants to change in the table, ask the user to pick one option. Do not ask about the other states. "Theirs" is mstack's version, "mine" is the installed one:
 
 | Choice | Effect |
 | --- | --- |
