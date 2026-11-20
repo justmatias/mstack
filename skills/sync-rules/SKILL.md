@@ -82,7 +82,6 @@ One commit per synced rule (YAML, tests and `.mdc` together), with a Conventiona
 ```bash
 make lint-rules
 make demo          # when the repo has fixtures/invalid/
-make rules-table
 ```
 
 Run `check_no_domain_leak.py` over every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.

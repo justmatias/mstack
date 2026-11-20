@@ -10,7 +10,7 @@ Where to look for the team's rules, and what to do with each source. Read source
 | --- | --- | --- |
 | `.cursor/rules/**/*.mdc` | Cursor | **Source of truth.** Frontmatter `description`, `globs`, `alwaysApply`. |
 | `.cursorrules` | Cursor (legacy) | One flat file. Propose moving its rules into `.mdc` files. |
-| `AGENTS.md` | Cursor, Claude Code, others | Agent instructions. Skip the block between `<!-- rules-table:start -->` and `<!-- rules-table:end -->`: it is generated. |
+| `AGENTS.md` | Cursor, Claude Code, others | Agent instructions. |
 | `CLAUDE.md`, `.claude/rules/*.md` | Claude Code | Claude Code never reads `.mdc` files, so teams often duplicate rules here. |
 | `.github/copilot-instructions.md` | GitHub Copilot | Same idea as `AGENTS.md`. |
 

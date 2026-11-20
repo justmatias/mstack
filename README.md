@@ -1,6 +1,6 @@
 # mstack
 
-My stack for guiding AI coding agents: one place for the skills, rules, checks and tools I use to steer them while they write code, plus the logbook of how and why each piece came to be.
+My stack for guiding AI coding agents: one place for the skills, rules, checks and tools I use to steer them while they write code.
 
 Agents only follow what they are told and what is checked. Instructions scattered across projects drift, get copied by hand and are forgotten. `mstack` centralizes them so every project can pull the same set, and so each piece is tested and versioned like any other code.
 
@@ -11,9 +11,21 @@ Agents only follow what they are told and what is checked. Instructions scattere
 | Rules | `rules/` | Conventions written in prose (`.mdc`), the single source of truth agents read before writing code. |
 | Checks | `lint/` | The executable version of those rules (ast-grep, plus import-linter in `.importlinter`), run in pre-commit and in CI. |
 | Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, and install mstack itself (`setup-mstack`). |
-| Tools | `src/mstack/`, `scripts/` | The `mstack` CLI (guards and generators) and the repo tooling behind the `make` targets. |
+| Tools | `src/mstack/`, `scripts/` | The `mstack` CLI (guards) and the repo tooling behind the `make` targets. |
 
-The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review. The reasoning behind it is in [`docs/design.md`](docs/design.md), and decisions taken during implementation are in [`docs/decisions.md`](docs/decisions.md).
+The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review.
+
+## Rules
+
+| Rule | What it covers |
+| --- | --- |
+| `architecture-layers.mdc` | Dependency direction between the domain, infra and api layers. |
+| `error-handling.mdc` | No bare `except`, no swallowed exceptions. |
+| `logging.mdc` | Logging instead of `print` in application code. |
+| `naming.mdc` | Naming and function size (judgment only, reviewed by an LLM on the PR). |
+| `python-models.mdc` | How to define data models in Python. |
+
+Each rule ends with a `## Checks` section naming the checks in `lint/` (or `.importlinter`) that enforce it, and each check points back to its rule through `metadata.source`. `mstack coverage` fails when the two sides disagree, so the rule files themselves are the index: there is no separate table to regenerate.
 
 ## Quick start
 
