@@ -7,8 +7,8 @@ from collections.abc import Callable
 from mstack import config, doctor, init, lint, platform, render
 from mstack.guards import (
     check_commit_msg,
+    check_domain,
     check_exceptions,
-    check_no_domain_leak,
     check_rule_coverage,
     check_skills,
 )
@@ -22,7 +22,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "doctor": doctor.main,
     "exceptions": check_exceptions.main,
     "init": init.main,
-    "leak-check": check_no_domain_leak.main,
+    "domain-check": check_domain.main,
     "lint": lint.main,
     "platform": platform.main,
     "render-rule": render.main,

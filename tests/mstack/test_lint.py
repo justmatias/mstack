@@ -127,7 +127,7 @@ def test_only_runs_the_given_steps(run_lint):
 def test_skip_leaves_out_the_given_steps(run_lint):
     _, report = run_lint("--skip", "test", "scan")
 
-    assert list(report) == ["imports", "coverage", "exceptions", "leak-check"]
+    assert list(report) == ["imports", "coverage", "exceptions", "domain-check"]
 
 
 def test_imports_is_skipped_without_importlinter(run_lint, lint_sandbox: Path):

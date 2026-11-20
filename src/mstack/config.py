@@ -14,8 +14,8 @@ PATH_KEYS = {
     "sgconfig",
     "importlinter",
     "pre_commit_config",
-    "leak_check.paths",
-    "leak_check.exclude",
+    "domain_check.paths",
+    "domain_check.exclude",
 }
 
 Source = Literal["default", "file", "flag"]
@@ -34,7 +34,7 @@ class ScanSettings(StrictModel):
     extensions: list[str] = [".py"]
 
 
-class LeakCheckSettings(StrictModel):
+class DomainCheckSettings(StrictModel):
     paths: list[Path] = [Path("lint-rules"), Path(".cursor/rules")]
     exclude: list[Path] = []
 
@@ -65,7 +65,7 @@ class ProjectConfig(StrictModel):
     importlinter: Path = Path(".importlinter")
     pre_commit_config: Path = Path(".pre-commit-config.yaml")
     scan: ScanSettings = ScanSettings()
-    leak_check: LeakCheckSettings = LeakCheckSettings()
+    domain_check: DomainCheckSettings = DomainCheckSettings()
     changed: ChangedSettings = ChangedSettings()
     commits: CommitsSettings = CommitsSettings()
 
@@ -160,7 +160,7 @@ def resolve_config(
 ) -> ResolvedConfig:
     """Merge built-in defaults, the config file and flags, in that order.
 
-    `overrides` maps dotted keys (`rules_dir`, `leak_check.paths`) to flag values;
+    `overrides` maps dotted keys (`rules_dir`, `domain_check.paths`) to flag values;
     None means the flag was not given. Flag paths resolve against the current
     directory, file and default paths against the config file's directory.
     """

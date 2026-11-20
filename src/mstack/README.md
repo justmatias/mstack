@@ -12,7 +12,7 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `mstack platform [--json]` | `platform.py` | Prints the detected platform (`linux`, `macos`, `windows` or `wsl`) and each tool's user folder. On WSL, Cursor's is the Windows profile's `.cursor`, found with `cmd.exe` and `wslpath`; `MSTACK_WINDOWS_HOME` overrides it and `MSTACK_PLATFORM` overrides the detection. `mstack doctor` uses the same folders, so on WSL with both tools skills and agents get a copy in each home. |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. An `.mdc` with an upstream credit in its frontmatter must have it complete (`credit`, the same keys as a skill's). `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
-| `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
+| `mstack domain-check` | `guards/check_domain.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, hosts, IP addresses or emails. It does not look for secrets: use gitleaks. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
 | `mstack render-rule <file.mdc>` | `render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`, and the upstream credit, if any, as its last lines). |
 | `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`) passes the checks below. Errors fail the command; warnings only print. |
 
@@ -46,7 +46,7 @@ mstack lint [--changed [--base-ref REF] [--staged]] [--files FILE ...]
 | `imports` | `lint-imports` | there is no `.importlinter` (the configured `importlinter`) |
 | `coverage` | `mstack coverage` | there is no rules folder |
 | `exceptions` | `mstack exceptions` | never |
-| `leak-check` | `mstack leak-check` over `[leak_check].paths` | none of the paths exist |
+| `domain-check` | `mstack domain-check` over `[domain_check].paths` | none of the paths exist |
 
 - **Modes.** By default the scan covers the whole repo and warnings don't fail. `--changed` scans only the files changed against `[changed].base_ref` (`--base-ref` overrides it, `--staged` uses the staged files), and passes `--error`, so warnings fail on new or touched code. `--files` scans exactly the given files with `--error` (for pre-commit). Both keep only files with a `[scan].extensions` suffix that are not excluded.
 - **Changed files.** Committed changes since the merge base, uncommitted changes and untracked files; deleted files are left out. An explicit `--base-ref` that doesn't exist fails (in CI, check out with `fetch-depth: 0`); the configured default falls back to its local branch (`origin/main` to `main`).
@@ -106,8 +106,8 @@ pre_commit_config = ".pre-commit-config.yaml" # hook ids that enforced-by-hook m
 exclude = []                         # globs the scan skips; mstack exceptions skips them too
 extensions = [".py"]                 # what mstack lint --changed and --files scan
 
-[leak_check]
-paths = ["lint-rules", ".cursor/rules"] # what mstack leak-check checks when given no paths
+[domain_check]
+paths = ["lint-rules", ".cursor/rules"] # what mstack domain-check checks when given no paths
 exclude = []                         # tooling folders that are not analyzed code
 
 [changed]
@@ -117,4 +117,4 @@ base_ref = "origin/main"
 types = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "style", "test"]
 ```
 
-`mstack leak-check --repo` defaults to the git root. Run `mstack config` to see the resolved values; this repo's own `.mstack.toml` is an example.
+`mstack domain-check --repo` defaults to the git root. Run `mstack config` to see the resolved values; this repo's own `.mstack.toml` is an example.

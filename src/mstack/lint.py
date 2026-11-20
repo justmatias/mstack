@@ -1,7 +1,7 @@
 """`mstack lint`: run every check in order, in any repo.
 
 The steps are the same flow `make lint-rules` ran: the ast-grep rule tests, the
-ast-grep scan, import-linter, and the coverage, exceptions and leak-check guards.
+ast-grep scan, import-linter, and the coverage, exceptions and domain-check guards.
 Every step runs even after one fails, so a single run shows every problem.
 """
 
@@ -24,11 +24,11 @@ from pydantic import Field
 
 from mstack.changed_files import ChangedFilesError, changed_files
 from mstack.config import ConfigError, ResolvedConfig, StrictModel, resolve_config
-from mstack.guards import check_exceptions, check_no_domain_leak, check_rule_coverage
+from mstack.guards import check_domain, check_exceptions, check_rule_coverage
 
 logger = logging.getLogger(__name__)
 
-STEPS = ("test", "scan", "imports", "coverage", "exceptions", "leak-check")
+STEPS = ("test", "scan", "imports", "coverage", "exceptions", "domain-check")
 Mode = Literal["full", "changed", "files"]
 
 
@@ -227,10 +227,10 @@ def step_exceptions(_run: LintRun) -> StepResult:
     return run_guard(check_exceptions.main)
 
 
-def step_leak_check(run: LintRun) -> StepResult:
-    if not any(path.exists() for path in run.config.values.leak_check.paths):
-        return StepResult(ok=True, skipped="none of [leak_check].paths exist")
-    return run_guard(check_no_domain_leak.main)
+def step_domain_check(run: LintRun) -> StepResult:
+    if not any(path.exists() for path in run.config.values.domain_check.paths):
+        return StepResult(ok=True, skipped="none of [domain_check].paths exist")
+    return run_guard(check_domain.main)
 
 
 STEP_FUNCTIONS: dict[str, Callable[[LintRun], StepResult]] = {
@@ -239,7 +239,7 @@ STEP_FUNCTIONS: dict[str, Callable[[LintRun], StepResult]] = {
     "imports": step_imports,
     "coverage": step_coverage,
     "exceptions": step_exceptions,
-    "leak-check": step_leak_check,
+    "domain-check": step_domain_check,
 }
 
 
@@ -330,7 +330,7 @@ def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
         prog="mstack lint",
         description=(
             "Run every check in order: ast-grep rule tests, the ast-grep scan, "
-            "import-linter, and the coverage, exceptions and leak-check guards. "
+            "import-linter, and the coverage, exceptions and domain-check guards. "
             "All steps run; the exit code is 1 if any failed."
         ),
     )

@@ -8,7 +8,7 @@ sgconfig = "lint/sgconfig.yml"
 exclude = ["fixtures/invalid/**"]
 extensions = [".py"]
 
-[leak_check]
+[domain_check]
 paths = ["lint", "rules"]
 # Tooling folders, not the analyzed code.
 exclude = ["src", "tests", "fixtures/invalid"]

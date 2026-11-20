@@ -69,10 +69,12 @@ repos:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
       - id: mstack-exceptions  # every ast-grep-ignore has a rule-exception
-      - id: mstack-leak-check  # rules and checks hold no repo details
+      - id: mstack-domain-check  # rules and checks hold no repo details
       - id: mstack-imports     # .importlinter contracts
       - id: mstack-commit-msg  # Conventional Commits messages (commit-msg stage)
 ```
+
+mstack does not scan for secrets: add the [gitleaks](https://github.com/gitleaks/gitleaks) hook for that, pinned to a release tag.
 
 `mstack-commit-msg` runs at the `commit-msg` stage: add `default_install_hook_types: [pre-commit, commit-msg]` at the top of the file so `pre-commit install` installs it too.
 
@@ -122,7 +124,7 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
   # ast-grep-ignore: no-manual-init-boilerplate
   ```
 
-- rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`);
+- rules or checks contain repo identifiers, URLs, hosts or emails (`mstack domain-check`); secrets are gitleaks' job;
 - a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
 

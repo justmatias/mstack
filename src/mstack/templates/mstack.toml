@@ -6,5 +6,5 @@ sgconfig = "{{checks_dir}}/sgconfig.yml"
 [scan]
 exclude = []
 
-[leak_check]
+[domain_check]
 paths = ["{{checks_dir}}", "{{rules_dir}}"]

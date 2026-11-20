@@ -96,7 +96,7 @@ When a check is wrong for one line, suppress it on that line only, with a reason
 ### Two principles every skill follows
 
 - **English only:** everything generated is in English, even when the source is not.
-- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. `mstack leak-check` flags anything that looks like the analyzed repo's identifiers, URLs, emails or secrets.
+- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. `mstack domain-check` flags anything that looks like the analyzed repo's identifiers, and any URL, host or email. Secrets are gitleaks' job: add its pre-commit hook.
 
 ## 4. Keep machines up to date
 
