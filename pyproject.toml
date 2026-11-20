@@ -31,6 +31,8 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# fixtures/ holds sample tests for the rule checks (some break them on purpose).
+norecursedirs = ["fixtures"]
 
 ##################################
 # ruff configuration             #

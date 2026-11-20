@@ -20,7 +20,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | [reusable-ci-action](reusable-ci-action.md) | A GitHub Action that runs `mstack lint` in any repo | runtime-lint-command |
 | [hook-checks](hook-checks.md) | Let a rule be enforced by a pre-commit hook (prerequisite of the shell and git packs) | none |
 | [rule-pack-shell](rule-pack-shell.md) | Shell script rules and checks | hook-checks |
-| [rule-pack-testing](rule-pack-testing.md) | Test-code rules and checks | none |
 | [rule-pack-git-commits](rule-pack-git-commits.md) | Git and commit-message rules, with `mstack commit-msg` | hook-checks |
 | [portability](portability.md) | Linux, macOS, Windows and WSL behave the same | runtime-lint-command (soft) |
 
