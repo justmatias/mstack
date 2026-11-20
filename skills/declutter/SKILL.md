@@ -1,5 +1,5 @@
 ---
-name: code-simplification
+name: declutter
 description: "Simplify code that already works without changing what it does: understand why each piece exists first, look for concrete complexity signals (deep nesting, long functions, nested ternaries, flag parameters, dead code, needless wrappers), apply one change at a time with the tests run after each, and compare before and after. The repo's own rules always win over a signal. Use for /code-simplification, simplify this, clean up this function, reduce the nesting, make this easier to read, or after a feature works but its code is heavier than it needs to be."
 disable-model-invocation: true
 license: MIT
@@ -19,9 +19,9 @@ This skill edits files. It does not commit unless the user asks.
 
 | Invocation | Scope |
 | --- | --- |
-| `code-simplification` | The code changed on the current branch (`git diff <merge-base>...HEAD`) plus uncommitted changes |
-| `code-simplification <path or symbol>` | That file, folder or function only |
-| `code-simplification --report` | Same scope, but only list the opportunities; change nothing |
+| `declutter` | The code changed on the current branch (`git diff <merge-base>...HEAD`) plus uncommitted changes |
+| `declutter <path or symbol>` | That file, folder or function only |
+| `declutter --report` | Same scope, but only list the opportunities; change nothing |
 
 **When not to use it:** the code is already clear; you do not yet understand what it does; the simpler version would be measurably slower on a hot path; or the module is about to be rewritten anyway.
 

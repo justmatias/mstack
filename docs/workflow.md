@@ -71,7 +71,7 @@ flowchart TD
 2. **Check locally.** `mstack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files, and the `mstack-commit-msg` hook, if you add it, checks the message.
 3. **Open the pull request.** CI runs the full scan and the changed-files scan. Commit messages follow Conventional Commits.
 4. **Review.** `/review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
-5. **Simplify, if needed.** `/code-simplification` makes working code easier to read without changing what it does, one tested change at a time.
+5. **Simplify, if needed.** `/declutter` makes working code easier to read without changing what it does, one tested change at a time.
 
 ### When an agent gets something wrong
 

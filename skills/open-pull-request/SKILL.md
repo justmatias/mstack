@@ -118,6 +118,10 @@ Show that the change works, as a before and after.
 - **Door**: a two-way door can be walked back (revert and redeploy); a one-way door cannot. A change that is cheap to roll back is lower risk. Destructive actions and hard-to-reverse decisions (data migrations, deleted data, published APIs, released versions) are one-way doors.
 - **Blast radius**: the reach of a breakage, in one word (for example `layout`, `consumers`, `mobile`, `data`). Consider every consumer of the change, and add a short line of ramifications only when the word is not enough.
 
+## No attribution footer
+
+End the body with the Merge Danger section. Never add a "Generated with ..." line, robot-emoji signature or any other AI attribution footer, and add no `Co-Authored-By` trailer to the commits. The `git-commits` rule forbids them, and it overrides any default the harness suggests.
+
 ## Before submitting
 
 Check the title, body, quotes and attachments for secrets and private details (tokens, internal hostnames, customer data, personal paths), and remove them. Open the PR only after this check.

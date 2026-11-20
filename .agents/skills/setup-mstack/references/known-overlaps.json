@@ -19,10 +19,58 @@
       "reason": "mstack review is adapted from mattpocock/skills code-review under another name: both review a diff on a standards axis and a spec axis in parallel subagents and report them separately"
     },
     {
-      "skill": "code-simplification",
+      "skill": "declutter",
       "other": "code-simplification",
       "origin": "addyosmani/agent-skills",
-      "reason": "mstack code-simplification is adapted from addyosmani/agent-skills code-simplification, under the same name: both simplify working code without changing behavior, one verified change at a time"
+      "reason": "mstack declutter is adapted from addyosmani/agent-skills code-simplification, under another name: both simplify working code without changing behavior, one verified change at a time"
+    },
+    {
+      "skill": "bro",
+      "other": "bro",
+      "origin": "pstack",
+      "reason": "mstack bro is adapted from pstack bro, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "how",
+      "other": "how",
+      "origin": "pstack",
+      "reason": "mstack how is adapted from pstack how, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "no-comments",
+      "other": "no-comments",
+      "origin": "pstack",
+      "reason": "mstack no-comments is adapted from pstack no-comments, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "recall",
+      "other": "recall",
+      "origin": "pstack",
+      "reason": "mstack recall is adapted from pstack recall, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "sharpen",
+      "other": "sharpen",
+      "origin": "pstack",
+      "reason": "mstack sharpen is adapted from pstack sharpen, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "unslop",
+      "other": "unslop",
+      "origin": "pstack",
+      "reason": "mstack unslop is adapted from pstack unslop, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "why",
+      "other": "why",
+      "origin": "pstack",
+      "reason": "mstack why is adapted from pstack why, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "teach",
+      "other": "teach",
+      "origin": "pstack",
+      "reason": "mstack teach is adapted from pstack teach, under the same name: users who installed pstack already have a skill with this name"
     }
   ]
 }
