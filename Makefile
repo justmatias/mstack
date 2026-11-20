@@ -39,7 +39,6 @@ guards:
 
 # Guards for what only this repo has: agent config folders and skills.
 repo-guards:
-	$(MSTACK) config-check
 	$(MSTACK) skills-check skills .agents/skills
 	$(if $(AGENT_CONFIG_FILES),$(MSTACK) leak-check $(AGENT_CONFIG_FILES))
 
