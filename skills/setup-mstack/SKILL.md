@@ -131,14 +131,11 @@ Skip this step if the user does not use Cursor. Cursor has no file-based user ru
 
 ## 9. Verify
 
-- `mstack skills-check <skills> --profile generic` passes: every installed skill has a `SKILL.md` whose frontmatter `name` matches its folder and has a `description`, and every relative link resolves, `../sync-rules/references/` included. Fix every error it reports; mention its warnings to the user.
-- No mstack skill exists in both `~/.claude/skills/` and `~/.cursor/skills/` when the user picked both.
-- Every installed rule exists in `~/.claude/rules/` and has no frontmatter.
-- `mstack --help` runs.
+Run `mstack doctor --tool <tools>` (`uv run mstack doctor` inside `<mstack>` if the CLI is not on `PATH` yet). It checks the tools, that the `mstack` on `PATH` is this version, the checkout, that every skill is installed and passes `skills-check --profile generic` with no duplicate between `~/.claude/skills/` and `~/.cursor/skills/`, that every rule is in `~/.claude/rules/` without frontmatter, and the manifest states. Fix every error it reports and run it again; mention its warnings to the user. Then check by hand what doctor does not:
+
 - Every installed agent has a frontmatter `name` equal to its file name, and no mstack agent exists in both `~/.claude/agents/` and `~/.cursor/agents/` when the user picked both.
 - `claude mcp list` shows the MCP servers installed for Claude Code, and `~/.cursor/mcp.json` is still valid JSON.
 - `~/.claude/settings.json` is still valid JSON and still has the user's own keys, and `~/.claude/CLAUDE.md` has one mstack block.
-- `mstack manifest status --tool <tools>` shows every installed item as `identical` (or `locally-edited` for the ones the user kept).
 
 Tell the user everything shows up in a new session of Claude Code or Cursor, and name every `${VAR}` an installed MCP server or setting needs set on this machine.
 
