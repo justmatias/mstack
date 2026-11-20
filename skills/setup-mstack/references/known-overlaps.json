@@ -17,6 +17,12 @@
       "other": "code-review",
       "origin": "mattpocock/skills",
       "reason": "mstack review is adapted from mattpocock/skills code-review under another name: both review a diff on a standards axis and a spec axis in parallel subagents and report them separately"
+    },
+    {
+      "skill": "code-simplification",
+      "other": "code-simplification",
+      "origin": "addyosmani/agent-skills",
+      "reason": "mstack code-simplification is adapted from addyosmani/agent-skills code-simplification, under the same name: both simplify working code without changing behavior, one verified change at a time"
     }
   ]
 }
