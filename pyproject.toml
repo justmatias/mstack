@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "3.3.0"
+version = "3.4.0"
 description = "Logbook of agent skills, rules, checks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }
@@ -8,7 +8,14 @@ authors = [
   { name = "Matias Gimenez", email = "matiasgimenez.dev@gmail.com" },
 ]
 requires-python = ">=3.12"
-dependencies = ["pydantic>=2", "pyyaml>=6"]
+# ast-grep and import-linter ship with the CLI, so `mstack lint` works in any repo.
+# ast-grep is pinned to a minor range: a new minor can change what a rule matches.
+dependencies = [
+    "ast-grep-cli>=0.51,<0.52",
+    "import-linter>=2.17,<3",
+    "pydantic>=2",
+    "pyyaml>=6",
+]
 
 [project.scripts]
 mstack = "mstack.cli:main"
@@ -18,7 +25,6 @@ repository = "https://github.com/justmatias/mstack"
 
 [dependency-groups]
 dev = [
-    "ast-grep-cli",
     "pre-commit>=4",
     "pytest",
     "types-pyyaml",

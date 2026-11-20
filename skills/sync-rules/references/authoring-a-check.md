@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
+The checks run through the `mstack` command on `PATH`: `mstack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `leak-check` guards), and `mstack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 1. Pick the tool
 
@@ -58,23 +58,23 @@ For an import-linter contract, the "test" is proving the contract breaks: copy t
 ## 4. Run the tests
 
 ```bash
-uv run ast-grep test -c <sgconfig> --skip-snapshot-tests
+mstack lint --only test
 ```
 
-`<sgconfig>` is the configured sgconfig (default `lint-rules/sgconfig.yml`). Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case matches or an invalid case does not; it only skips label snapshots.
+It runs `ast-grep test --skip-snapshot-tests` with the configured sgconfig (default `lint-rules/sgconfig.yml`). Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case matches or an invalid case does not; it only skips label snapshots.
 
 ## 5. Measure existing violations
 
 ```bash
-uv run ast-grep scan -c <sgconfig> --filter '^<id>$' --globs '!fixtures/invalid/**' .
+mstack lint --only scan --json
 ```
 
-Count the findings and look at each one: is it a real violation or a false positive? Fix false positives in the rule (back to step 2).
+The scan skips the `[scan].exclude` globs. Count the findings whose `rule` is `<id>` and look at each one: is it a real violation or a false positive? Fix false positives in the rule (back to step 2).
 
 ## 6. Pick the severity
 
 - `error` if there are 0 violations, or you fix all of them in the same change.
-- Otherwise `warning`, plus a migration issue. `make lint-rules-changed` passes `--error` to ast-grep, so a `warning` rule still fails on new or touched code; only the old instances are tolerated.
+- Otherwise `warning`, plus a migration issue. `mstack lint --changed` (and `make lint-rules-changed`) passes `--error` to ast-grep, so a `warning` rule still fails on new or touched code; only the old instances are tolerated.
 
 Never ship as `error` a rule that would break `main` on the next CI run.
 
@@ -93,11 +93,12 @@ mstack leak-check <every file you generated> --repo .
 ## 9. Run the single command
 
 ```bash
-make lint-rules
-make demo         # only in repos that have fixtures/invalid/
+mstack lint
+mstack lint --changed   # only the changed files, warnings included
+make demo               # only in repos that have fixtures/invalid/
 ```
 
-In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `mstack coverage`, `mstack exceptions` and `mstack leak-check`.
+A repo with `make lint-rules` targets may call them instead; they run the same command.
 
 Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
 
@@ -113,4 +114,4 @@ testConfigs:
   - testDir: rule-tests
 ```
 
-If the checks live anywhere other than `lint-rules/`, or the prose rules anywhere other than `.cursor/rules/`, write a `.mstack.toml` at the repo root with `rules_dir` and `sgconfig`, so every `mstack` command finds them without flags. Then add `ast-grep-cli` (and `import-linter` for architecture rules) to the repo's dev dependencies. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.
+If the checks live anywhere other than `lint-rules/`, or the prose rules anywhere other than `.cursor/rules/`, write a `.mstack.toml` at the repo root with `rules_dir` and `sgconfig`, so every `mstack` command finds them without flags. ast-grep and import-linter come with `mstack`; add `import-linter` to the repo's dev dependencies only when its contracts need the project's own environment to import it. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.
