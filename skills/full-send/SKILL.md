@@ -6,6 +6,9 @@ license: MIT
 metadata:
   adapted-from: "skills/full-send in t3dotgg/tstack (https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a/skills/full-send). Thanks to Theo Browne for the original."
   upstream-commit: "11e37a74d0a6868c121cd0910ab2b3bd9873b92a"
+  adapted-from-implement: "skills/engineering/implement in mattpocock/skills (https://github.com/mattpocock/skills/tree/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/implement). Thanks to Matt Pocock for the original."
+  upstream-commit-implement: "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+  upstream-license-implement: "MIT, Copyright (c) 2026 Matt Pocock, https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/LICENSE"
   upstream-license: "MIT, Copyright (c) 2026 Theo Browne, https://github.com/t3dotgg/tstack/blob/11e37a74d0a6868c121cd0910ab2b3bd9873b92a/LICENSE"
 ---
 
@@ -31,7 +34,7 @@ Rules about *how* to test still apply: follow the ones that name the correct com
 
 ## Steps
 
-1. **Finish the change.** Complete the goal with the smallest change that works, and fix the case that happened, not every case that could. If you are on the default branch, create a branch first.
+1. **Finish the change.** Complete the goal with the smallest change that works, and fix the case that happened, not every case that could. If you are on the default branch, create a branch first. If the goal is a ticket reference, fetch it from the issue tracker and state its title before starting; ask when the reference is ambiguous. While working, run the typecheck regularly and single test files often, and the full suite once at the end. When the change works and its code is heavier than it needs to be, run [declutter](../declutter/SKILL.md) on the changed code before step 2.
 2. **Prove it.** Get proof for every change you made (see "Proof").
 3. **Get feedback.** Run [review-loop](../review-loop/SKILL.md) on the change.
 4. **Open the PR** with [open-pull-request](../open-pull-request/SKILL.md), after rebasing onto the latest default branch. Add one short line to the description saying how you proved the change.
