@@ -13,8 +13,7 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | Spec | Summary | Depends on |
 | --- | --- | --- |
 | [remove-architecture-layers-rule](remove-architecture-layers-rule.md) | Drop the fixture-only rule and everything that exists only for it | none |
-| [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | none |
-| [install-manifest](install-manifest.md) | Record what mstack installed, so updates tell user edits from upstream changes | none |
+| [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | project-config |
 | [skill-validation](skill-validation.md) | `mstack skills-check`: validate every `SKILL.md` and its links in CI | none |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [agent-config-folders](agent-config-folders.md) | `agents/`, `mcp/`, `settings/`, `instructions/` alongside `skills/` and `rules/` | install-manifest (soft) |

@@ -45,7 +45,7 @@ They are copies, not symlinks, and anything replaced is backed up to `<folder>/.
 | `correct-rules` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate-skills` | Bring a skill from a GitHub URL into `skills/`, with its license and credit. |
 
-**4. Update.** Pull this repo and run step 2 again.
+**4. Update.** Pull this repo and run step 2 again. mstack records what it installed, so upstream changes update on their own (with a backup), your own edits are kept, and it only asks about real conflicts.
 
 ## Working on mstack
 
