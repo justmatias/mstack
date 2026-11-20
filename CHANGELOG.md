@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.1.0 (2026-11-20)
+
+### Features
+
+- **skills**: Decide between a static check and llm-review
+  ([#38](https://github.com/justmatias/mstack/pull/38),
+  [`b81b704`](https://github.com/justmatias/mstack/commit/b81b70481b48dabeb1b0bc73c7c4c30ac7414132))
+
+
 ## v4.0.0 (2026-11-20)
 
 ### Features
