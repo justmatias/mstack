@@ -12,7 +12,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [portability](portability.md) | Linux, macOS, Windows and WSL behave the same | runtime-lint-command (soft) |
 
 ### Next

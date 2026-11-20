@@ -1,9 +1,10 @@
 import argparse
+import importlib.metadata
 import logging
 import sys
 from collections.abc import Callable
 
-from mstack import config, init, lint
+from mstack import config, doctor, init, lint
 from mstack.guards import (
     check_agent_config,
     check_commit_msg,
@@ -21,6 +22,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "config": config.main,
     "config-check": check_agent_config.main,
     "coverage": check_rule_coverage.main,
+    "doctor": doctor.main,
     "exceptions": check_exceptions.main,
     "init": init.main,
     "leak-check": check_no_domain_leak.main,
@@ -42,6 +44,11 @@ def main(argv: list[str] | None = None) -> int:
             "mstack installed."
         ),
         epilog="Run 'mstack <command> --help' for what each command does.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"mstack {importlib.metadata.version('mstack')}",
     )
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])

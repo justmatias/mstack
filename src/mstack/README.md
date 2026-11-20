@@ -8,6 +8,7 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `mstack lint` | `lint.py`, `changed_files.py` | Runs every check in order (see below). |
 | `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
 | `mstack init` | `init.py`, `templates/` | Scaffolds the rules-as-checks layout in a repo (see below). |
+| `mstack doctor [--tool claude\|cursor\|both] [--checkout DIR] [--online] [--json]` | `doctor/` | Checks that this machine is set up (see below). |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
 | `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
@@ -73,6 +74,23 @@ mstack init [--rules-dir DIR] [--checks-dir DIR]
 - `--makefile`: the `lint-rules` and `lint-rules-changed` targets, each only when the Makefile doesn't define it yet.
 
 It prints every file as `create`, `append` or `exists, skipped` and asks before writing, unless `--yes`; `--dry-run` only prints. It never overwrites a file and appends only missing entries, so a second run changes nothing. If the repo already has a `.mstack.toml` (or `[tool.mstack]`) or a `lint-rules/sgconfig.yml`, the layout is left as it is and only missing optional pieces are added. After writing it runs `mstack lint` once; an empty layout passes. The templates are in `templates/` and ship in the wheel.
+
+### `mstack doctor`
+
+Reports only, and prints the fix for each problem. `--tool` defaults to the tools whose folders exist (`~/.claude`, `~/.cursor`); the checkout defaults to the one the CLI was installed from. Exit 1 on any `error`; `--json` prints the report to stdout, and the table goes to stderr.
+
+| Group | Checks | Status when it fails |
+| --- | --- | --- |
+| `tools` | `uv` and `git` on `PATH`; `gh` (used by `correct-rules` and `integrate-skills`) | error; warn for `gh` |
+| `cli` | `mstack` on `PATH` reports this version (`mstack --version`); the bundled ast-grep runs | error |
+| `source` | the checkout exists and is a git repo; uncommitted changes | error; warn |
+| `skills` | every mstack skill is in the tool's skills folder; every skill there passes `skills-check --profile generic`; none is in both `~/.claude/skills/` and `~/.cursor/skills/` | error; warn for duplicates |
+| `rules` | every mstack rule is in `~/.claude/rules/` without frontmatter (Claude Code only) | error |
+| `drift` | when the manifest exists: every `mstack manifest status` state other than `identical` | warn |
+| `platform` | on WSL with Cursor: Cursor on Windows reads the Windows profile's `.cursor`, not the WSL one | warn |
+| `version` | with `--online` only: the latest `v*` tag on the checkout's `origin` (`git ls-remote`) is not newer | warn |
+
+Each check is a function from a `Context` to a list of results, registered in `doctor/__init__.py`'s `CHECKS`. Without `--online`, doctor uses no network.
 
 Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `rules/logging.mdc` asks.
 
