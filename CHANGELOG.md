@@ -2,6 +2,38 @@
 
 <!-- version list -->
 
+## v2.0.0 (2026-11-20)
+
+### Documentation
+
+- Record the setup-mstack end-to-end run ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+- **setup-mstack**: Summarize each item's purpose before asking
+  ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+### Features
+
+- Add setup-mstack skill that installs the skills by copy
+  ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+### Refactoring
+
+- Make setup a skill-only workflow and drop hooks and user-level rules
+  ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+- Move setup-mstack into skills/ ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+### Testing
+
+- Drop third-party notices file and its tests ([#15](https://github.com/justmatias/mstack/pull/15),
+  [`a3fcde1`](https://github.com/justmatias/mstack/commit/a3fcde14241329b2292222c5a0e83ccf07838497))
+
+
 ## v1.9.0 (2026-11-19)
 
 ### Documentation
