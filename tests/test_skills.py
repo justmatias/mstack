@@ -7,7 +7,8 @@ from tests.conftest import REPOSITORY_ROOT, read_frontmatter
 
 SKILLS = REPOSITORY_ROOT / "skills"
 SETUP_SKILL = SKILLS / "setup-mstack"
-ON_REQUEST_SKILLS = {"reflect-rules", "correct-rules"}
+ON_REQUEST_SKILLS = {"reflect-rules", "correct-rules", "integrate-skills"}
+PSTACK_ADAPTED_SKILLS = {"reflect-rules", "correct-rules"}
 TRIGGER_PHRASES = {
     "sync-rules": [
         "sync the rules",
@@ -17,6 +18,7 @@ TRIGGER_PHRASES = {
     ],
     "reflect-rules": ["reflect-rules", "transcript", "approval", "--deep"],
     "correct-rules": ["/correct-rules", "keep repeating", "real past mistake"],
+    "integrate-skills": ["/integrate-skills", "GitHub URL", "upstream", "approval"],
 }
 SETUP_TRIGGER_PHRASES = ["set up mstack", "install mstack", "update mstack skills"]
 FRONTMATTER = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
@@ -36,7 +38,7 @@ def test_skill_frontmatter_is_valid(skill: str):
     )
 
 
-@pytest.mark.parametrize("skill", sorted(ON_REQUEST_SKILLS))
+@pytest.mark.parametrize("skill", sorted(PSTACK_ADAPTED_SKILLS))
 def test_adapted_skills_credit_pstack_in_frontmatter(skill: str):
     frontmatter = read_frontmatter(SKILLS / skill / "SKILL.md")
     metadata = frontmatter["metadata"]
