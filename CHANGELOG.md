@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.8.0 (2026-11-20)
+
+### Features
+
+- **rules**: Add test-code rules and checks ([#34](https://github.com/justmatias/mstack/pull/34),
+  [`bda9b66`](https://github.com/justmatias/mstack/commit/bda9b66b017c3ea90068cd9ade306bbd6cdc13a6))
+
+
 ## v3.7.0 (2026-11-20)
 
 ### Bug Fixes
