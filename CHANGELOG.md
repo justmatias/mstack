@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v4.0.0 (2026-11-20)
+
+### Features
+
+- **integrate**: Integrate rules from GitHub, not only skills
+  ([#37](https://github.com/justmatias/mstack/pull/37),
+  [`e2a3120`](https://github.com/justmatias/mstack/commit/e2a31201e7d3a62562e491a4e2af2601f53b882b))
+
+- **skills**: Integrate rules, and shorten the skill names
+  ([#37](https://github.com/justmatias/mstack/pull/37),
+  [`e2a3120`](https://github.com/justmatias/mstack/commit/e2a31201e7d3a62562e491a4e2af2601f53b882b))
+
+- **skills**: Shorten the skill names ([#37](https://github.com/justmatias/mstack/pull/37),
+  [`e2a3120`](https://github.com/justmatias/mstack/commit/e2a31201e7d3a62562e491a4e2af2601f53b882b))
+
+
 ## v3.13.0 (2026-11-20)
 
 ### Features
