@@ -52,7 +52,7 @@ On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows prof
 | `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
 | `open-pull-request` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |
-| `code-simplification` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
+| `declutter` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
 | `bro` | Restate the last message in plain language, shorter and without jargon. |
 | `how` | Explain how a part of the codebase works, from one read-only subagent, so you can change it with a clear mental model. |
