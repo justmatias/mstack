@@ -54,6 +54,14 @@ On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows prof
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |
 | `code-simplification` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
+| `bro` | Restate the last message in plain language, shorter and without jargon. |
+| `how` | Explain how a part of the codebase works, from one read-only subagent, so you can change it with a clear mental model. |
+| `why` | Answer why code is the way it is from its commits and PR discussions, citing what the authors wrote and marking inferences. |
+| `teach` | Explain a change or subsystem plainly in one account, built on `how` and `why`. |
+| `unslop` | Cut AI tells from any writing, by numbered rules. |
+| `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
+| `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
+| `no-comments` | Delete comments that should not exist with the `comment-sicko` subagent, fix the code that caused them, and offer to encode real constraints as types, tests or lints. |
 | `repair` | Close the gaps `mstack doctor` reports: reinstall the CLI, update drifted skills and rules with a backup, and rerun doctor until it is clean. |
 
 **3. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and whether an installed copy drifted from the checkout. It prints the fix for each problem and exits 1 on any error; run `/repair` to apply them. `--online` also compares with the latest release.
