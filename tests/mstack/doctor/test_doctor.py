@@ -68,7 +68,7 @@ def test_broken_skill_is_an_error(context, installed_home: Path):
 
 
 def test_rule_with_frontmatter_is_an_error(context, installed_home: Path):
-    rule = installed_home / ".claude" / "rules" / "logging.md"
+    rule = installed_home / ".claude" / "rules" / "error-handling.md"
     text = rule.read_text(encoding="utf-8")
     rule.write_text("---\nalwaysApply: true\n---\n" + text, encoding="utf-8")
 
@@ -106,7 +106,9 @@ def apply_drift(state: str, checkout: Path, home: Path) -> None:
         edit(checkout / "skills" / "sync-rules" / "SKILL.md")
     if state == "unknown":
         # Installed and different from upstream, but never recorded.
-        record(checkout, "rule", "logging", home / ".claude/rules/logging.md")
+        record(
+            checkout, "rule", "error-handling", home / ".claude/rules/error-handling.md"
+        )
         edit(skill / "SKILL.md")
     if state == "removed":
         shutil.rmtree(skill)

@@ -52,6 +52,8 @@ line-length = 88
 extend-exclude = ["fixtures/invalid"]
 preview = true
 fix = true
+# T20: no print() left in code; use logging (replaces the old no-print-in-app check).
+lint.extend-select = ["T20"]
 format.indent-style = "space"
 format.quote-style = "double"
 format.line-ending = "auto"

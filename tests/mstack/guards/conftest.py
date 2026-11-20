@@ -34,7 +34,7 @@ def _delete_checks_section(rules_sandbox: Path) -> None:
 
 @pytest.fixture
 def _add_unknown_check(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / "rules" / "logging.mdc"
+    mdc = rules_sandbox / "rules" / "error-handling.mdc"
     mdc.write_text(mdc.read_text() + "- enforced-by: no-such-check\n")
 
 
@@ -99,7 +99,7 @@ def edit_skill(skills_sandbox: Path):
 
 @pytest.fixture
 def add_hook_line(rules_sandbox: Path):
-    def add(hook_id: str, mdc_name: str = "logging.mdc") -> None:
+    def add(hook_id: str, mdc_name: str = "error-handling.mdc") -> None:
         mdc = rules_sandbox / "rules" / mdc_name
         mdc.write_text(
             mdc.read_text(encoding="utf-8") + f"- enforced-by-hook: {hook_id}\n",

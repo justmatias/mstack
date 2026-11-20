@@ -93,7 +93,7 @@ Reports only, and prints the fix for each problem. `--tool` defaults to the tool
 
 Each check is a function from a `Context` to a list of results, registered in `doctor/__init__.py`'s `CHECKS`. Without `--online`, doctor uses no network.
 
-Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `rules/logging.mdc` asks.
+Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`.
 
 ## Configuration
 
