@@ -211,7 +211,9 @@ def display_value(value: Any, root: Path) -> Any:
         return [display_value(item, root) for item in value]
     if isinstance(value, Path):
         return (
-            str(value.relative_to(root)) if value.is_relative_to(root) else str(value)
+            value.relative_to(root).as_posix()
+            if value.is_relative_to(root)
+            else str(value)
         )
     return value
 
