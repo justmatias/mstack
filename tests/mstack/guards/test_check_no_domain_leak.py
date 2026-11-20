@@ -1,9 +1,9 @@
 from pathlib import Path
 
 
-def test_example_rules_pass(run_guard):
-    completed = run_guard(
-        "check_no_domain_leak",
+def test_example_rules_pass(run_mstack):
+    completed = run_mstack(
+        "leak-check",
         "lint",
         "rules",
         "--repo",
@@ -19,9 +19,9 @@ def test_example_rules_pass(run_guard):
     assert completed.returncode == 0, completed.stderr
 
 
-def test_repo_identifier_is_caught(run_guard, leaking_rule: Path):
-    completed = run_guard(
-        "check_no_domain_leak",
+def test_repo_identifier_is_caught(run_mstack, leaking_rule: Path):
+    completed = run_mstack(
+        "leak-check",
         str(leaking_rule),
         "--repo",
         ".",
@@ -38,9 +38,9 @@ def test_repo_identifier_is_caught(run_guard, leaking_rule: Path):
     assert f"{leaking_rule}:3" in completed.stderr
 
 
-def test_url_and_email_are_caught(run_guard, rule_with_url_and_email: Path):
-    completed = run_guard(
-        "check_no_domain_leak",
+def test_url_and_email_are_caught(run_mstack, rule_with_url_and_email: Path):
+    completed = run_mstack(
+        "leak-check",
         str(rule_with_url_and_email),
         "--repo",
         ".",

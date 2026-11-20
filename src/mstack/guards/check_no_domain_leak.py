@@ -2,10 +2,13 @@ import argparse
 import ast
 import builtins
 import importlib.metadata
+import logging
 import re
 import sys
 import tomllib
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 GENERIC_NAMES_FILE = Path(__file__).with_name("generic_names.txt")
 SKIPPED_DIRECTORIES = {
@@ -273,12 +276,13 @@ def find_leaks(
     return findings
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
+        prog="mstack leak-check",
         description=(
             "Flag domain information (repo identifiers, URLs, emails, secrets) "
             "in generated files."
-        )
+        ),
     )
     parser.add_argument(
         "paths", nargs="+", type=Path, help="Generated files or folders to check."
@@ -298,7 +302,7 @@ def main() -> int:
             "analyzed project. Repeatable."
         ),
     )
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     repository = arguments.repo.expanduser().resolve()
     findings = find_leaks(
@@ -307,17 +311,13 @@ def main() -> int:
         [repository / directory for directory in arguments.exclude],
     )
     for finding in findings:
-        print(finding, file=sys.stderr)
+        logger.error("%s", finding)
     if findings:
-        print(
-            f"check_no_domain_leak: {len(findings)} finding(s). Rewrite them as "
-            "generic practices or drop them as domain-dependent.",
-            file=sys.stderr,
+        logger.error(
+            "check_no_domain_leak: %d finding(s). Rewrite them as generic practices "
+            "or drop them as domain-dependent.",
+            len(findings),
         )
         return 1
-    print("check_no_domain_leak: OK")
+    logger.info("check_no_domain_leak: OK")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -1,12 +1,14 @@
 ---
 description: Logging instead of print in application code
-globs: "fixtures/valid/**/*.py"
+globs: "**/*.py"
 alwaysApply: false
 ---
 
 # Logging
 
-- Do not use `print` in `fixtures/valid/`. Use a module-level logger: `logger = logging.getLogger(__name__)`.
+- Do not use `print` in application code. Use a module-level logger: `logger = logging.getLogger(__name__)`.
+- Tests and scripts (any `tests/` or `scripts/` folder) may print.
+- A command-line tool writes its data output with `sys.stdout.write` and its messages through the logger.
 
 Why: `print` output has no level, no source and cannot be filtered or routed in production.
 

@@ -7,7 +7,9 @@ note: |
   or routed in production.
 metadata:
   source: rules/logging.mdc
-files:
-  - "**/fixtures/**"
+# Tests and scripts may print; everything else is application code.
+ignores:
+  - "**/tests/**"
+  - "**/scripts/**"
 rule:
   pattern: print($$$ARGS)

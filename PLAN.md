@@ -99,7 +99,6 @@ rules-as-checks/
 │   ├── check_language.py             # principle 1: generated output is English only
 │   ├── generic_names.txt             # allowlist for check_no_domain_leak.py
 │   ├── rules_table.py
-│   ├── conventions_inventory.py      # Phase 7.4: reads ~/.dev_brain/conventions, read-only
 │   ├── changed_files.sh
 │   ├── install_skills.sh
 │   ├── install_user_rules.sh         # Phase 7: installs the personal set and global hooks
@@ -118,7 +117,6 @@ rules-as-checks/
 │       ├── cursor-after-edit         # Cursor hook (user level)
 │       └── git-hook-chain            # global git hook that chains to each repo's hooks
 └── skills/
-    ├── THIRD_PARTY_NOTICES.md        # MIT attribution for pstack
     ├── sync-rules/
     │   ├── SKILL.md
     │   └── references/
@@ -259,7 +257,7 @@ rules-as-checks/
    - pstack's Claude Code adapter, which maps Cursor names to Claude Code (transcripts, subagents).
 
    **[VERIFY the paths: the layout may have changed]**. The adaptations **start from the original text** and extend it. Do not rewrite them from memory.
-2. `skills/THIRD_PARTY_NOTICES.md`: pstack's MIT license (Lauren Tan / Cursor), which files derive from which, and the date and commit of the copy. At the end of each adapted SKILL.md, one line: `Adapted from pstack/<skill> (MIT). See THIRD_PARTY_NOTICES.md`.
+2. Attribution in the frontmatter of each adapted SKILL.md: `license: MIT` and a `metadata` block with `adapted-from` (the pstack skill, thanking its author), `upstream-commit` (plus `upstream-commit-deep` for the `--deep` mode of `reflect-rules`) and `upstream-license` (MIT, Copyright (c) 2026 Lauren Tan, linking pstack's LICENSE). Adapted reference files end with a comment pointing to that frontmatter.
 3. Shared references in `skills/sync-rules/references/`. The other two skills cite them by relative path, `../sync-rules/references/...`, which is why all three are always installed together:
    - `rule-format.md`: `.mdc` frontmatter, the `## Checks` section (`enforced-by:` / `enforcement: llm-review`), `metadata.source` and the exception format.
    - `authoring-a-check.md`: the recipe for a new check. Step by step:
@@ -312,8 +310,7 @@ rules-as-checks/
 **`--user` mode** (see Phase 7): the same procedure, but between the user's prose rules (`~/.cursor/rules/*.mdc` and `~/.claude/CLAUDE.md`) and `~/.config/my-rules/`. In this mode it:
 - never touches the current repo;
 - prefixes check ids with `my-`;
-- reports contradictions between your personal rules and the rules of the repo you are in. On conflict the repo wins: the skill proposes adding that repo to `ignore-paths.txt` for that rule, and never edits the repo's rules;
-- with `--from-conventions`, also takes the local conventions store (`~/.dev_brain/conventions/`) as a read-only prose source (see 7.4).
+- reports contradictions between your personal rules and the rules of the repo you are in. On conflict the repo wins: the skill proposes adding that repo to `ignore-paths.txt` for that rule, and never edits the repo's rules.
 
 Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 
@@ -334,7 +331,7 @@ Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 
    Only what truly cannot be checked with any available tool, or what requires a large architecture change, goes to Backlog.
 3. **Conflict detection.** If a learning contradicts an existing rule, the proposal shows both side by side and asks for a decision; it never resolves the conflict on its own.
-4. **Configurable cost.** By default, parallel reviewers as in pstack; with `--light`, a single reviewer plus the synthesizer. If `~/.cursor/rules/pstack-models.mdc` exists, honor its per-role models, as pstack does.
+4. **Configurable cost.** By default, the parent reads the transcript in one pass, as the current pstack `reflect` does; with `--deep`, parallel reviewers plus the synthesizer, as the earlier pstack version did (decision 51). If `~/.cursor/rules/pstack-models.mdc` exists, honor its per-role models, as pstack does.
 5. **Destination of each rule: repo or personal.** In the proposal, each new rule carries a suggested destination:
    - **repo**, if the correction is a team convention or the repo already has rules on that topic;
    - **personal**, if it is your own preference or the repo is not yours.
@@ -373,7 +370,7 @@ Commits go to the `~/.config/my-rules/` repo, if it is a git repo.
 **Phase 5 acceptance:**
 - `install_skills.sh` creates the symlinks in both environments.
 - All three skills have valid frontmatter and descriptions that trigger on the expected phrases.
-- `THIRD_PARTY_NOTICES.md` exists and every adapted skill references it.
+- Every adapted skill credits pstack in its frontmatter (`license`, `metadata.adapted-from`, `metadata.upstream-commit`).
 - `check_language.py` passes over `skills/`.
 
 ## Phase 6: End-to-end tests
@@ -443,22 +440,7 @@ The changes are already described in 5.1 (`sync-rules --user`), 5.2 (repo or per
 - `authoring-a-check.md` gains a "personal set" section: `my-` prefix, tests in `$MY_RULES_HOME/rule-tests/`, exceptions in `ignore-paths.txt`, and the Checks section in the `.mdc` under `~/.cursor/rules/`.
 - `check_rule_coverage.py` accepts `--rules-dir` and `--config` to run over the personal set (`~/.cursor/rules` ↔ `$MY_RULES_HOME`).
 
-### 7.4 Extract checks from the local conventions store
-
-This machine already has a store of personal coding conventions at `~/.dev_brain/conventions/` (overridable with `$CONVENTIONS_HOME`). It is the store behind the Helix `recall`/`remember` tools. Each convention is one Markdown file with YAML frontmatter (`name`, `tags`), a prose body and, often, `Why:` and `How to apply:` paragraphs. `~/.dev_brain/INDEX.md` is only an index. It is never a source. These conventions apply across all your projects, so what is extracted from them goes to the **personal set** and never to a repo.
-
-1. `scripts/conventions_inventory.py [--dir <path>] --json`: reads the store and does nothing else. For each `conventions/*.md` it outputs `name`, `tags`, `path`, a `sha256` of the body, the rule text, `why` and `how_to_apply`. Malformed files are reported and skipped. It never modifies the store.
-2. `sync-rules --user --from-conventions [<dir>]` consumes that inventory and runs the normal `--user` procedure (5.1) with one extra classification step. Each convention is split into atomic rules, and each rule gets one category:
-   - **pattern / architecture**: checkable. It gets a `my-<name>` YAML with tests in `$MY_RULES_HOME`, following `authoring-a-check.md` (personal set section). Expected candidates from the current store: `no-test-classes`, `no-module-docstrings`, `imports-no-parent-relative`, and the part of `test-fixtures-conftest` that says "no `@pytest.fixture` in `test_*.py`".
-   - **judgment**: the `.mdc` is created with `enforcement: llm-review` and no YAML (for example `avoid-unnecessary-indirection` and `no-abbreviations-in-names`).
-   - **tooling note**: a workaround for a tool's quirk, not a coding rule (for example the `pylint-*`, `ruff-*` and `hookpin-*` entries). It gets no check and no `.mdc`. It is reported as "skipped: tooling note".
-   - **non-code**: a rule about commits, process or workflow (for example `conventional-commits`). It gets no ast-grep check. Where a hook can enforce it, the skill proposes a step in `bin/git-hook-chain` (for example a `commit-msg` regex), and only with approval. Otherwise it is reported as skipped.
-3. **The prose source stays in the store.** For each checkable or judgment rule, the skill generates `~/.cursor/rules/my-<name>.mdc`, written in English. Its frontmatter has `derived-from: <convention path>` and `derived-sha256: <hash>`, and the file ends with the usual `## Checks` section. The skill never edits files under `~/.dev_brain/`. If you want to change a rule, you change the convention, and the next run picks it up.
-4. **Drift**: if a convention's hash no longer matches `derived-sha256`, its `.mdc` and check are `stale`. If the convention file was deleted, they are `orphan`. Both go into the sync plan like any other drift. `check_rule_coverage.py --rules-dir ~/.cursor/rules --config $MY_RULES_HOME/sgconfig.yml` also checks that every `derived-from` path exists.
-5. **Principles 1 and 2 still apply.** Conventions may mention specific projects or tools by name (repo slugs, package names). Those details are abstracted or dropped before anything is written, and `check_no_domain_leak.py` and `check_language.py` run over the generated `.mdc`, YAML and tests.
-6. As always, the sync plan is shown and nothing is written without approval. It is idempotent: a second run with an unchanged store reports everything as `ok`.
-
-### 7.5 Tests
+### 7.4 Tests
 
 Run in a temporary directory, with `HOME` pointing at a test folder so your real configuration is never touched:
 1. Install twice in a row: the second run changes nothing. Uninstalling leaves everything as it was, including any previous `core.hooksPath`.
@@ -470,15 +452,8 @@ Run in a temporary directory, with `HOME` pointing at a test folder so your real
 7. **Claude Code**: editing any repo to introduce a bare `except:` triggers the user hook with `my-no-bare-except`'s message.
 8. **`sync-rules --user`**: adding `~/.cursor/rules/my-http.mdc` generates `my-http-client` with its tests in `$MY_RULES_HOME`, without touching the current repo.
 9. **`reflect-rules`**: a correction marked as a personal preference ends up in the personal set, and a team convention ends up in the repo.
-10. **`sync-rules --user --from-conventions`**: point `$CONVENTIONS_HOME` at a copy of `~/.dev_brain/conventions/`. Expected:
-    - `my-no-test-classes` and `my-no-module-docstrings` are generated with passing tests;
-    - judgment conventions get an `llm-review` `.mdc`;
-    - tooling notes are reported as skipped;
-    - the store is byte-for-byte unchanged;
-    - a second run changes nothing;
-    - editing one convention makes only its rule `stale`.
 
-**Acceptance:** all 10 scenarios pass and are recorded in `docs/e2e-results.md`.
+**Acceptance:** all 9 scenarios pass and are recorded in `docs/e2e-results.md`.
 
 ## Things to verify before closing
 
@@ -492,4 +467,3 @@ Run in a temporary directory, with `HOME` pointing at a test folder so your real
 - How `ruleDirs` resolves when `-c` points outside the current directory.
 - User-level hooks in Claude Code and Cursor, and how they coexist with project hooks.
 - The correct way to invoke pre-commit from a chained hook, and the behavior with husky.
-- That `sync-rules --from-conventions` never writes under `~/.dev_brain/`, and that the frontmatter format of the conventions store still matches what `conventions_inventory.py` parses.

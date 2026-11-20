@@ -15,10 +15,11 @@ TRIGGER_PHRASES = {
         "--check",
         "when a rule has no check",
     ],
-    "reflect-rules": ["reflect-rules", "transcript", "approval"],
+    "reflect-rules": ["reflect-rules", "transcript", "approval", "--deep"],
     "correct-rules": ["/correct-rules", "keep repeating", "real past mistake"],
 }
 SETUP_TRIGGER_PHRASES = ["set up mstack", "install mstack", "update mstack skills"]
+FRONTMATTER = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 PRINCIPLES_HEADER = re.compile(r"English only.*Practices, not domain", re.DOTALL)
 
 
@@ -35,13 +36,27 @@ def test_skill_frontmatter_is_valid(skill: str):
     )
 
 
+@pytest.mark.parametrize("skill", sorted(ON_REQUEST_SKILLS))
+def test_adapted_skills_credit_pstack_in_frontmatter(skill: str):
+    frontmatter = read_frontmatter(SKILLS / skill / "SKILL.md")
+    metadata = frontmatter["metadata"]
+
+    assert frontmatter["license"] == "MIT"
+    assert metadata["adapted-from"].startswith(
+        f"pstack/skills/{skill.removesuffix('-rules')} in cursor/plugins"
+    )
+    assert re.fullmatch(r"[0-9a-f]{40}", metadata["upstream-commit"])
+    assert "Copyright (c) 2026 Lauren Tan" in metadata["upstream-license"]
+
+
 @pytest.mark.parametrize(
     "document",
     sorted(SKILLS.rglob("*.md")),
     ids=lambda path: str(path.relative_to(SKILLS)),
 )
 def test_every_skill_document_states_both_principles(document):
-    head = "\n".join(document.read_text().splitlines()[:12])
+    body = FRONTMATTER.sub("", document.read_text(), count=1)
+    head = "\n".join(body.splitlines()[:12])
 
     assert PRINCIPLES_HEADER.search(head)
 
@@ -88,29 +103,17 @@ def test_known_overlaps_cover_the_pstack_originals():
     assert all(overlap["reason"] for overlap in data["overlaps"])
 
 
-@pytest.mark.usefixtures("toolkit_config")
-def test_toolkit_resolves_from_the_config(run_resolver):
-    resolved = run_resolver()
+@pytest.mark.parametrize(
+    "document",
+    sorted(SKILLS.rglob("*.md")),
+    ids=lambda path: str(path.relative_to(SKILLS)),
+)
+def test_skills_run_the_guards_through_the_cli(document):
+    text = document.read_text()
 
-    assert resolved.returncode == 0, resolved.stderr
-    assert resolved.stdout.strip() == str(REPOSITORY_ROOT)
-
-
-@pytest.mark.usefixtures("toolkit_config")
-def test_mstack_home_takes_priority_over_the_config(run_resolver, tmp_path):
-    toolkit = tmp_path / "other-toolkit"
-    (toolkit / "scripts").mkdir(parents=True)
-
-    resolved = run_resolver(MSTACK_HOME=str(toolkit))
-
-    assert resolved.stdout.strip() == str(toolkit)
-
-
-def test_toolkit_resolution_fails_clearly_without_either(run_resolver):
-    resolved = run_resolver()
-
-    assert resolved.returncode == 1
-    assert "set MSTACK_HOME" in resolved.stderr
+    assert "<toolkit>" not in text
+    assert ".config/mstack" not in text
+    assert "scripts/guards" not in text
 
 
 @pytest.mark.parametrize(

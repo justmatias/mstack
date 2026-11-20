@@ -9,7 +9,7 @@ description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, 
 
 Keep `.cursor/rules/` (prose, source of truth) and `lint-rules/` (checks) saying the same thing. Every checkable rule gets a check, every check points to its rule, and every judgment rule is marked as such.
 
-References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). `<toolkit>` is resolved as described in the authoring reference (`$MSTACK_HOME`, then `~/.config/mstack/config.json`).
+References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
 
 ## Modes
 
@@ -43,7 +43,7 @@ When a rule sits on the border, prefer the kind whose check has no false positiv
 Run the mechanical part:
 
 ```bash
-PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage --json
+mstack coverage --json
 ```
 
 It reports `missing-checks-section`, `unknown-check`, `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:

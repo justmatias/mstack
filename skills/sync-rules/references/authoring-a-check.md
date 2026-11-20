@@ -4,25 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync-rules`, `reflect-rules` and `correct-rules` all follow it.
 
-`<toolkit>` below is the mstack repo checkout that holds `scripts/`. The skills are installed as copies, so it cannot be found from this file's path. Resolve it in this order, and stop with the error if neither works:
-
-1. `$MSTACK_HOME`, if it is set;
-2. `toolkit_path` in `~/.config/mstack/config.json`, written by `setup-mstack`.
-
-```bash
-# resolve-toolkit
-toolkit="${MSTACK_HOME:-}"
-if [ -z "$toolkit" ] && [ -f "$HOME/.config/mstack/config.json" ]; then
-  toolkit="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["toolkit_path"])' "$HOME/.config/mstack/config.json" 2>/dev/null)"
-fi
-if [ -z "$toolkit" ] || [ ! -d "$toolkit/scripts" ]; then
-  echo "mstack toolkit not found: set MSTACK_HOME to your mstack checkout, or run skills/setup-mstack/SKILL.md from it" >&2
-  exit 1
-fi
-echo "$toolkit"
-```
-
-Run it once, then use the printed path wherever `<toolkit>` appears. If it fails, show the error to the user and stop: do not guess the path.
+The guards run through the `mstack` command on `PATH` (`mstack coverage`, `mstack exceptions`, `mstack leak-check`; `mstack <command> --help` lists the options). It works from any repo and needs nothing installed in the repo's own environment. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 1. Pick the tool
 
@@ -100,10 +82,10 @@ Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule 
 ## 8. Verify what you generated
 
 ```bash
-uv run python <toolkit>/scripts/guards/check_no_domain_leak.py <every file you generated> --repo .
+mstack leak-check <every file you generated> --repo .
 ```
 
-In the mstack repo itself, add `--exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+In the mstack repo itself, add `--exclude src --exclude scripts --exclude tests` (tooling, not analyzed code). If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
 
 ## 9. Run the single command
 
@@ -113,7 +95,7 @@ make demo         # only in repos that have fixtures/invalid/
 make rules-table
 ```
 
-In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `PYTHONPATH=<toolkit> uv run python -m scripts.guards.check_rule_coverage`, `check_exceptions.py` and `check_no_domain_leak.py`.
+In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `mstack coverage`, `mstack exceptions` and `mstack leak-check`.
 
 Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
 

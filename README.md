@@ -11,7 +11,7 @@ Agents only follow what they are told and what is checked. Instructions scattere
 | Rules | `rules/` | Conventions written in prose (`.mdc`), the single source of truth agents read before writing code. |
 | Checks | `lint/` | The executable version of those rules (ast-grep, plus import-linter in `.importlinter`), run in pre-commit and in CI. |
 | Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, and install mstack itself (`setup-mstack`). |
-| Tools | `scripts/` | Guards and generators behind the `make` targets. |
+| Tools | `src/mstack/`, `scripts/` | The `mstack` CLI (guards and generators) and the repo tooling behind the `make` targets. |
 
 The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review. The reasoning behind it is in [`docs/design.md`](docs/design.md), and decisions taken during implementation are in [`docs/decisions.md`](docs/decisions.md).
 
@@ -27,16 +27,22 @@ make demo         # scans fixtures/invalid/ and expects it to fail
 make test         # pytest: checks, guards and skills
 ```
 
+The skills call the guards as `mstack <command>` from whatever repo they run in. Install the CLI once, on your `PATH`:
+
+```bash
+uv tool install --editable .   # from this checkout; `mstack --help` lists the commands
+```
+
 ## What `make lint-rules` runs
 
 1. `ast-grep test`: every check passes its valid and invalid cases.
 2. `ast-grep scan`: the code follows every check (`fixtures/invalid/` excluded).
 3. `lint-imports`: architecture contracts in `.importlinter`.
-4. `scripts/guards/check_rule_coverage.py`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
-5. `scripts/guards/check_exceptions.py`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
-6. `scripts/guards/check_no_domain_leak.py`: rules and checks contain no repo identifiers, URLs, emails or secrets.
+4. `mstack coverage`: every `.mdc` lists its checks, and every check points to an existing `.mdc` that lists it.
+5. `mstack exceptions`: every `ast-grep-ignore` has a `rule-exception` with reason, expiry and approval.
+6. `mstack leak-check`: rules and checks contain no repo identifiers, URLs, emails or secrets.
 
-`make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main`, and warnings count as errors there.
+`make lint-rules-changed` runs the same, but the scan only covers files changed relative to `origin/main` (`BASE_REF` overrides it and must exist), and warnings count as errors there. CI runs it on every pull request against the PR's base branch, so a `warning` rule fails on new or touched code even when pre-commit was skipped.
 
 ## Exceptions
 
@@ -61,7 +67,7 @@ Open this repo in Claude Code or Cursor and ask the agent to "set up mstack foll
 
 - Copies, not symlinks: `skills/` and `rules/` in this repo stay the source of truth. To update, pull this repo and run the skill again.
 - Anything replaced or removed is backed up to `<folder>/.mstack-backups/<timestamp>/`, never next to the skills or rules.
-- `~/.config/mstack/config.json` records where this repo is. The installed skills read it (or `$MSTACK_HOME`, which takes priority) to find `scripts/`.
+- The installed skills run the guards as `mstack <command>`, so the skill also installs the `mstack` CLI from this checkout (`uv tool install --editable .`).
 
 ## Static checks and releases
 
@@ -71,6 +77,6 @@ Versioning is automated with [python-semantic-release](https://python-semantic-r
 
 ## CI and branch protection
 
-The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make demo` and `make test`.
+The `static-checks` job in `.github/workflows/ci.yml` runs every pre-commit hook (`make lint`), then `make lint-rules` on the whole repo, `make lint-rules-changed` on the files a pull request changes (warnings fail there), `make demo` and `make test`.
 
 To make it block merges: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets**) for `main`, enable **Require status checks to pass before merging**, and add both `Static checks` jobs (one per Python version) as required checks.

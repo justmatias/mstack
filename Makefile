@@ -2,7 +2,7 @@ SHELL := /usr/bin/env bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 AST_GREP := uv run ast-grep
-PYTHON := uv run python
+MSTACK := uv run mstack
 SGCONFIG := lint/sgconfig.yml
 # This repo keeps its prose rules in rules/ and its checks in lint/; the guards default
 # to a work repo's .cursor/rules/ and lint-rules/, so the paths are passed explicitly.
@@ -29,9 +29,11 @@ lint-rules:
 # Same as lint-rules, but the scan only covers files changed relative to origin/main
 # (BASE_REF overrides it; STAGED=1 uses the staged files). On changed files every
 # rule fails, warnings included: only new or touched code has to follow new rules.
+# CI runs it on pull requests with BASE_REF=origin/<base branch>.
 lint-rules-changed:
 	$(AST_GREP) test -c $(SGCONFIG) --skip-snapshot-tests
-	@files="$$(scripts/git/changed_files.sh $(if $(STAGED),--staged) | grep -v '^fixtures/invalid/' || true)"; \
+	@changed="$$(scripts/git/changed_files.sh $(if $(STAGED),--staged))"; \
+	files="$$(grep -v '^fixtures/invalid/' <<< "$$changed" || true)"; \
 	if [[ -z "$$files" ]]; then \
 		echo "lint-rules-changed: no changed Python files to scan"; \
 	else \
@@ -41,9 +43,9 @@ lint-rules-changed:
 
 guards:
 	uv run lint-imports
-	$(PYTHON) -m scripts.guards.check_rule_coverage $(RULE_PATHS)
-	$(PYTHON) -m scripts.guards.check_exceptions
-	$(PYTHON) -m scripts.guards.check_no_domain_leak lint rules --repo . --exclude scripts --exclude tests --exclude fixtures/invalid
+	$(MSTACK) coverage $(RULE_PATHS)
+	$(MSTACK) exceptions
+	$(MSTACK) leak-check lint rules --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:
@@ -54,7 +56,7 @@ demo:
 	fi
 
 rules-table:
-	$(PYTHON) -m scripts.generate.rules_table $(RULE_PATHS)
+	$(MSTACK) rules-table $(RULE_PATHS)
 
 test:
 	uv run pytest -q

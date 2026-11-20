@@ -80,7 +80,7 @@ Ask about one item at a time, and give the user what they need to decide without
 **Combine:**
 
 1. Draft the merged item in a temp folder outside the repo and outside every tool folder. Start from mstack's version and bring over what only the user's version has.
-2. A merged skill keeps the frontmatter `name` equal to its folder name. If either side had the principles header (`> **Principles (always apply):** ...`), the merged skill keeps it at the top. If either side had a pstack attribution line (`Adapted from pstack/<skill> (MIT). ...`), it stays as the last line.
+2. A merged skill keeps the frontmatter `name` equal to its folder name. If either side had the principles header (`> **Principles (always apply):** ...`), the merged skill keeps it at the top. If either side credits pstack (`license` and `metadata.adapted-from` in the frontmatter, or an `Adapted from pstack/<skill> (MIT)` line), the merged skill keeps that credit in its frontmatter.
 3. Relative links into `../sync-rules/references/` must still resolve: every mstack skill is installed side by side in `<skills>`.
 4. Show the diff of the draft against both versions, and install it only after the user explicitly approves it.
 
@@ -90,13 +90,7 @@ Ask about one item at a time, and give the user what they need to decide without
 - A symlink is removed with `rm` (its target is the checkout; nothing to back up).
 - Copy skills with `cp -R <mstack>/skills/<name> <skills>/<name>`, then delete any `.DS_Store` or `__pycache__` that came along.
 - Write each converted rule to `~/.claude/rules/<name>.md`.
-- Write the toolkit config, so the installed skills can find `<mstack>/scripts/`. Merge with what is there, and only write it if it changes:
-
-  ```json
-  {"toolkit_path": "<absolute path of <mstack>>"}
-  ```
-
-  at `~/.config/mstack/config.json`. `$MSTACK_HOME`, if set, takes priority over it (see "toolkit" in `../sync-rules/references/authoring-a-check.md`).
+- Install the `mstack` CLI, which the installed skills call to run the guards (see `../sync-rules/references/authoring-a-check.md`). If `mstack --help` already works, leave it. Otherwise ask the user, then run `uv tool install --editable <mstack>`.
 
 ## 7. Cursor rules
 
@@ -112,7 +106,7 @@ Skip this step if the user does not use Cursor. Cursor has no file-based user ru
 - `../sync-rules/references/` resolves from every installed mstack skill.
 - No mstack skill exists in both `~/.claude/skills/` and `~/.cursor/skills/` when the user picked both.
 - Every installed rule exists in `~/.claude/rules/` and has no frontmatter.
-- `~/.config/mstack/config.json` is valid JSON and its `toolkit_path` has a `scripts/` folder.
+- `mstack --help` runs.
 
 Tell the user the skills and rules show up in a new session of Claude Code or Cursor.
 

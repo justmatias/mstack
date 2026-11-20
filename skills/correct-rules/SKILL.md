@@ -2,6 +2,11 @@
 name: correct-rules
 description: "Find the coding mistakes that keep repeating in this repo (commits, reverts, PR review comments, ast-grep-ignore exceptions, warnings) and make each one impossible. Try architecture first (import-linter), then types and lints (ast-grep, Fixit) whose error names the fix, then a test, and write the .cursor/rules prose last. Prove each check fails on a synthetic copy of a real past mistake. Use for /correct-rules, correct the rules, stop this mistake from happening again, or when the operator keeps correcting the same thing."
 disable-model-invocation: true
+license: MIT
+metadata:
+  adapted-from: "pstack/skills/correct in cursor/plugins (https://github.com/cursor/plugins/tree/main/pstack). Thanks to Lauren Tan for the original skill."
+  upstream-commit: "e58dd043600587dbaf58ba315e7f2b38373eeb43"
+  upstream-license: "MIT, Copyright (c) 2026 Lauren Tan, https://github.com/cursor/plugins/blob/main/pstack/LICENSE"
 ---
 
 # Correct rules
@@ -12,14 +17,14 @@ The operator keeps correcting agents in this repo for the same mistakes. Change 
 
 Assume every contributor is an agent that sees only the files it opened, copies the nearest example, and takes the shortest path that compiles. Design the repo so a change that looks right from one file is right for the whole repo.
 
-Shared references: [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md). `<toolkit>` is resolved as described in the authoring reference (`$MSTACK_HOME`, then `~/.config/mstack/config.json`).
+Shared references: [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
 
 ## Find the mistake classes
 
 First, read recent commits, reverts, review comments, agent instruction files, and comments that explain workarounds. Also read:
 
 - **PR review comments:** `gh pr list --state merged --limit 50 --json number,title` and `gh api repos/{owner}/{repo}/pulls/<number>/comments --jq '.[].body'`.
-- **Existing exceptions:** `uv run python <toolkit>/scripts/guards/check_exceptions.py --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
+- **Existing exceptions:** `mstack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
 - **Accumulated warnings:** `uv run ast-grep scan -c lint-rules/sgconfig.yml --json=stream --globs '!fixtures/invalid/**' .`, counted per rule id.
 - **Optionally, recent agent transcripts** for this workspace only (see discovery).
 - **Search helpers:** `git log --oneline -n 200`, `git log --grep='revert\|fix' -i`, `git log -S '<construct>'`, `rg -n 'workaround|HACK|XXX|do not|don.t use'`.
@@ -48,5 +53,3 @@ Run `check_no_domain_leak.py` over every generated file before committing, and r
 Last, regenerate the table that pairs each rule with what enforces it: `make rules-table` writes `docs/rules-table.md` and updates the block between `<!-- rules-table:start -->` and `<!-- rules-table:end -->` in `CLAUDE.md` / `AGENTS.md`. When the operator corrects you, fix the mistake and add the rule. If the rule was already there and nothing enforces it, that's a repeat, so raise it to the highest level in the same change.
 
 **Reply:** each class with its evidence (commit shas, PR numbers, exception counts), the level you picked, why a higher level didn't work, the files touched, and the severity. Then: abstracted (what was generalized) and dropped (`domain-dependent` classes, one line each).
-
-Adapted from pstack/correct (MIT). See THIRD_PARTY_NOTICES.md

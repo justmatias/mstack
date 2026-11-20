@@ -10,6 +10,16 @@ REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
 
 
+def run_command(command: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(command, cwd=cwd, capture_output=True, text=True, check=False)
+
+
+def read_frontmatter(path: Path) -> dict:
+    _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
+    data: dict = yaml.safe_load(frontmatter)
+    return data
+
+
 @pytest.fixture
 def repository_root() -> Path:
     return REPOSITORY_ROOT
@@ -18,7 +28,7 @@ def repository_root() -> Path:
 @pytest.fixture
 def scan_findings():
     def scan(*paths: Path) -> list[dict]:
-        completed = subprocess.run(
+        completed = run_command(
             [
                 "ast-grep",
                 "scan",
@@ -27,10 +37,7 @@ def scan_findings():
                 "--json=stream",
                 *[str(path) for path in paths],
             ],
-            cwd=REPOSITORY_ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
+            REPOSITORY_ROOT,
         )
         return [json.loads(line) for line in completed.stdout.splitlines() if line]
 
@@ -53,57 +60,6 @@ def import_linter_sandbox(tmp_path: Path) -> Path:
 @pytest.fixture
 def run_lint_imports():
     def run(working_directory: Path) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            ["lint-imports"],
-            cwd=working_directory,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        return run_command(["lint-imports"], working_directory)
 
     return run
-
-
-def read_frontmatter(path: Path) -> dict:
-    _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
-    data: dict = yaml.safe_load(frontmatter)
-    return data
-
-
-@pytest.fixture
-def toolkit_resolver() -> str:
-    text = (
-        REPOSITORY_ROOT
-        / "skills"
-        / "sync-rules"
-        / "references"
-        / "authoring-a-check.md"
-    ).read_text()
-    blocks = text.split("```bash\n")[1:]
-    snippet = next(block for block in blocks if block.startswith("# resolve-toolkit"))
-    return snippet.split("```", 1)[0]
-
-
-@pytest.fixture
-def run_resolver(toolkit_resolver: str, tmp_path: Path):
-    home = tmp_path / "home"
-    home.mkdir(exist_ok=True)
-
-    def run(**variables: str) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            ["bash", "-c", toolkit_resolver],
-            env={"HOME": str(home), "PATH": "/usr/bin:/bin", **variables},
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-
-    return run
-
-
-@pytest.fixture
-def toolkit_config(tmp_path: Path) -> Path:
-    config = tmp_path / "home" / ".config" / "mstack" / "config.json"
-    config.parent.mkdir(parents=True)
-    config.write_text(json.dumps({"toolkit_path": str(REPOSITORY_ROOT)}))
-    return config
