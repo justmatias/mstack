@@ -79,6 +79,19 @@ jobs:
       - name: Slow tests (pre-commit hooks from a clean environment)
         run: uv run pytest -q -m slow
 
+  # Runs the reusable action (action.yml) on this repo, as another repo would,
+  # so a broken action fails here first.
+  action-self-test:
+    name: Action self-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run the mstack lint action
+        uses: ./
+
   security:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest
@@ -102,7 +115,7 @@ jobs:
     name: Versioning
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [static-checks, security]
+    needs: [static-checks, action-self-test, security]
     # Pushes the release commit and tag, and creates the GitHub release.
     permissions:
       contents: write
@@ -130,3 +143,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           uvx --from python-semantic-release semantic-release version
+
+      # Callers of the action may pin `@v<major>` to follow fixes. Move that tag
+      # to the release just made; skip when semantic-release made no release.
+      - name: Move the major version tag
+        run: |
+          tag="$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n 1)"
+          if [[ -z "$tag" ]]; then
+            echo "No release tag on HEAD; the major tag stays where it is."
+            exit 0
+          fi
+          major="${tag%%.*}"
+          git tag --force "$major" "$tag"
+          git push --force origin "refs/tags/$major"
