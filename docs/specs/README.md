@@ -14,7 +14,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | --- | --- | --- |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | runtime-lint-command |
-| [pre-commit-hooks](pre-commit-hooks.md) | `.pre-commit-hooks.yaml` so other repos use the guards as hooks | runtime-lint-command |
 | [reusable-ci-action](reusable-ci-action.md) | A GitHub Action that runs `mstack lint` in any repo | runtime-lint-command |
 | [portability](portability.md) | Linux, macOS, Windows and WSL behave the same | runtime-lint-command (soft) |
 

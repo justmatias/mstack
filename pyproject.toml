@@ -36,6 +36,9 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Slow tests install mstack from scratch (pre-commit try-repo); CI runs them with -m slow.
+markers = ["slow: installs packages; run with -m slow"]
+addopts = "-m 'not slow'"
 # fixtures/ holds sample tests for the rule checks (some break them on purpose).
 norecursedirs = ["fixtures"]
 

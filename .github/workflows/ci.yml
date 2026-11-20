@@ -74,6 +74,11 @@ jobs:
       - name: Tests
         run: make test
 
+      # The slow tests install the hooks in .pre-commit-hooks.yaml from this
+      # checkout with `pre-commit try-repo`, as another repo would.
+      - name: Slow tests (pre-commit hooks from a clean environment)
+        run: uv run pytest -q -m slow
+
   security:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest
