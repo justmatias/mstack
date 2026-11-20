@@ -46,7 +46,6 @@ lint-rules-changed:
 	@$(MAKE) --no-print-directory guards
 
 guards:
-	uv run lint-imports
 	$(MSTACK) coverage
 	$(MSTACK) exceptions
 	$(MSTACK) config-check

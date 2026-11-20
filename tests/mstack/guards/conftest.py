@@ -10,7 +10,6 @@ from tests.conftest import REPOSITORY_ROOT
 def rules_sandbox(tmp_path: Path) -> Path:
     shutil.copytree(REPOSITORY_ROOT / "rules", tmp_path / "rules")
     shutil.copytree(REPOSITORY_ROOT / "lint", tmp_path / "lint")
-    shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
     shutil.copy(REPOSITORY_ROOT / ".mstack.toml", tmp_path / ".mstack.toml")
     return tmp_path
 
