@@ -50,6 +50,7 @@ guards:
 	$(MSTACK) coverage
 	$(MSTACK) exceptions
 	$(MSTACK) config-check
+	$(MSTACK) skills-check skills
 	$(MSTACK) leak-check lint rules $(AGENT_CONFIG_FILES)
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.

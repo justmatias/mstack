@@ -14,7 +14,6 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | --- | --- | --- |
 | [remove-architecture-layers-rule](remove-architecture-layers-rule.md) | Drop the fixture-only rule and everything that exists only for it | none |
 | [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | project-config |
-| [skill-validation](skill-validation.md) | `mstack skills-check`: validate every `SKILL.md` and its links in CI | none |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | runtime-lint-command |
 | [pre-commit-hooks](pre-commit-hooks.md) | `.pre-commit-hooks.yaml` so other repos use the guards as hooks | runtime-lint-command |

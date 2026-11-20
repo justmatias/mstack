@@ -15,8 +15,25 @@ The `mstack` command: the guards that `make lint-rules` and the skills run. Inst
 | `mstack merge-settings <fragment> <target> [--under <key>]... --dry-run\|--write` | `install/merge.py` | Deep-merge a JSON fragment into a JSON file: objects by key, arrays as unions, mstack's scalars win, keys it does not define untouched. Prints every change as JSON; a dry run writes nothing. |
 | `mstack merge-block <file> <target> --dry-run\|--write` | `install/merge.py` | Put a file's text in the `<!-- mstack:begin -->` … `<!-- mstack:end -->` block of the target, appending the block when missing. Text outside the markers is kept. |
 | `mstack render-rule <file.mdc>` | `install/render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`). |
+| `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`) passes the checks below. Errors fail the command; warnings only print. |
 
 The manifest is machine state, never committed: `${XDG_STATE_HOME:-~/.local/state}/mstack/manifest.json` (`%LOCALAPPDATA%\mstack\manifest.json` on Windows). Hashes are sha256 over the sorted relative paths and contents of a skill's files (ignoring `.DS_Store` and `__pycache__`), a rule's rendered text or an agent file. For merged items, the installed hash covers only what mstack owns: the managed block, or the part of the JSON file that the fragment defines, so the user's own keys and text never change the state. Their records also list the JSON keys mstack wrote (`keys`). Writes are atomic, and a manifest with an unknown `schema` fails with a clear message.
+
+`mstack skills-check [DIR ...] [--profile mstack|generic] [--json]` takes folders of skills, or a single skill folder. Relative links resolve as if the skills were installed side by side, so a link to a sibling skill works and a link out of the skills folder fails.
+
+| Check | Profile | Reports when |
+| --- | --- | --- |
+| `frontmatter` | both | the `---` block is missing, is not YAML, or is not a mapping |
+| `name` | both | `name` is missing, not kebab-case, or not the folder name |
+| `description` | both | `description` is missing, empty, or longer than 1024 characters |
+| `keys` | both | a frontmatter key is unknown. An error under `mstack`, which allows `name`, `description`, `license`, `metadata` and `disable-model-invocation`; a warning under `generic`, which also allows the optional Claude Code and Cursor keys |
+| `links` | both | a relative Markdown link outside code points to a missing file, or out of the skills folder |
+| `unused-files` | both | a file under `references/` or `scripts/` is neither linked nor named by its path (warning) |
+| `principles` | mstack | the first block after the title is not the `> **Principles (always apply):**` header |
+| `credit` | mstack | `license` without `metadata.adapted-from`, or the reverse; an `adapted-from[-<label>]` without an `upstream-commit[-<label>]` that is a 40-character sha |
+| `english` | mstack | a non-ASCII letter outside code and double-quoted examples (warning) |
+
+Use `--profile generic` for skills that aren't mstack's, such as a user's `~/.claude/skills/`.
 
 Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `rules/logging.mdc` asks.
 

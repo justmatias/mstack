@@ -75,3 +75,20 @@ def rule_with_url_and_email(tmp_path: Path) -> Path:
         "  Ask someone@internal-team.example.com or see https://wiki.internal.corp/page\n"
     )
     return path
+
+
+@pytest.fixture
+def skills_sandbox(tmp_path: Path) -> Path:
+    shutil.copytree(REPOSITORY_ROOT / "skills", tmp_path / "skills")
+    return tmp_path / "skills"
+
+
+@pytest.fixture
+def edit_skill(skills_sandbox: Path):
+    def edit(relative_path: str, old: str, new: str) -> None:
+        path = skills_sandbox / relative_path
+        text = path.read_text(encoding="utf-8")
+        assert old in text, f"{old!r} not found in {relative_path}"
+        path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+    return edit

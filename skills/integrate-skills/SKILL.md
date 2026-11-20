@@ -129,15 +129,15 @@ Draft every skill in a temp folder (`<tmp>/draft/<name>/`), never in the target.
 
 ## 7. Review the draft and apply
 
-1. Run the leak check over the draft against the upstream clone: `mstack leak-check <tmp>/draft --repo <tmp>/upstream`. The only findings allowed are the upstream names in the frontmatter credit keys; rewrite or drop anything else it flags, and never ignore a finding.
-2. Show the user, per skill, `diff -ru` against the upstream skill and, for a merge or rebase, against the current target skill. For a long diff, show the parts that matter and offer the rest.
-3. After explicit approval, write into the target. Before overwriting or removing anything there, move it to `<target>/.mstack-backups/<UTC timestamp>/<name>` (never `<name>.bak` next to the skills, or the tools would load it). Copy with `cp -R <tmp>/draft/<name> <target>/<name>`.
+1. Run `mstack skills-check <tmp>/draft` (add `--profile generic` when the target is not the mstack checkout) and fix every error it reports before showing the draft. It checks the frontmatter, the name, the description, the credit, the principles header and every relative link. A link to a sibling skill only resolves when that skill is in the draft folder too, so copy the target's other skills there, or run it on the target folder after writing.
+2. Run the leak check over the draft against the upstream clone: `mstack leak-check <tmp>/draft --repo <tmp>/upstream`. The only findings allowed are the upstream names in the frontmatter credit keys; rewrite or drop anything else it flags, and never ignore a finding.
+3. Show the user, per skill, `diff -ru` against the upstream skill and, for a merge or rebase, against the current target skill. For a long diff, show the parts that matter and offer the rest.
+4. After explicit approval, write into the target. Before overwriting or removing anything there, move it to `<target>/.mstack-backups/<UTC timestamp>/<name>` (never `<name>.bak` next to the skills, or the tools would load it). Copy with `cp -R <tmp>/draft/<name> <target>/<name>`.
 
 ## 8. Verify
 
-- Every written skill has a `SKILL.md` whose frontmatter parses, whose `name` equals its folder, and that has a `description`, and, for an adapted skill, `license`, `metadata.adapted-from` and a 40-character `metadata.upstream-commit`.
-- Every relative link in every written file resolves.
-- The principles header is in the first lines of every written `.md` file.
+- `mstack skills-check <target>` (with `--profile generic` outside the mstack checkout) passes on the target folder.
+- The principles header is in the first lines of every written reference and template (`skills-check` only checks the `SKILL.md`).
 - In the mstack checkout, also:
   - add any confirmed overlap to `skills/setup-mstack/references/known-overlaps.json`;
   - update the Skills row of `README.md` if the set of skills changed what it says;

@@ -9,6 +9,7 @@ from mstack.guards import (
     check_exceptions,
     check_no_domain_leak,
     check_rule_coverage,
+    check_skills,
 )
 from mstack.install import manifest, merge, render
 
@@ -24,6 +25,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "merge-block": merge.merge_block_main,
     "merge-settings": merge.merge_settings_main,
     "render-rule": render.main,
+    "skills-check": check_skills.main,
 }
 
 

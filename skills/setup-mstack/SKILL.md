@@ -131,8 +131,7 @@ Skip this step if the user does not use Cursor. Cursor has no file-based user ru
 
 ## 9. Verify
 
-- Every installed skill has a `SKILL.md` whose frontmatter `name` matches its folder and has a `description`.
-- `../sync-rules/references/` resolves from every installed mstack skill.
+- `mstack skills-check <skills> --profile generic` passes: every installed skill has a `SKILL.md` whose frontmatter `name` matches its folder and has a `description`, and every relative link resolves, `../sync-rules/references/` included. Fix every error it reports; mention its warnings to the user.
 - No mstack skill exists in both `~/.claude/skills/` and `~/.cursor/skills/` when the user picked both.
 - Every installed rule exists in `~/.claude/rules/` and has no frontmatter.
 - `mstack --help` runs.
