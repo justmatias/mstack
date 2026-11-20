@@ -45,16 +45,6 @@ HOST = re.compile(
 )
 IP_ADDRESS = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b")
-SECRETS = (
-    re.compile(
-        r"(?i)\b(?:api[_-]?key|secret|token|password|passwd)\b\s*[:=]\s*['\"]?[^\s'\"]{8,}"
-    ),
-    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
-    re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b"),
-    re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}\b"),
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-)
 
 
 def load_generic_names() -> tuple[set[str], set[str]]:
@@ -214,8 +204,6 @@ def pattern_findings(location: str, line: str, allowed_hosts: set[str]) -> list[
     findings.extend(
         f"{location}: email '{match[0]}'" for match in EMAIL.finditer(line_without_urls)
     )
-    if any(secret.search(line) for secret in SECRETS):
-        findings.append(f"{location}: looks like a secret")
     return findings
 
 
@@ -280,9 +268,9 @@ def find_leaks(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="mstack leak-check",
+        prog="mstack domain-check",
         description=(
-            "Flag domain information (repo identifiers, URLs, emails, secrets) "
+            "Flag domain information (repo identifiers, URLs, hosts, emails) "
             "in generated files."
         ),
     )
@@ -290,7 +278,7 @@ def main(argv: list[str] | None = None) -> int:
         "paths",
         nargs="*",
         type=Path,
-        help="Generated files or folders to check (default: [leak_check].paths).",
+        help="Generated files or folders to check (default: [domain_check].paths).",
     )
     parser.add_argument(
         "--repo",
@@ -303,11 +291,11 @@ def main(argv: list[str] | None = None) -> int:
         default=[],
         help=(
             "Repo folder (relative to --repo) whose code is tooling, not the "
-            "analyzed project. Repeatable (default: [leak_check].exclude)."
+            "analyzed project. Repeatable (default: [domain_check].exclude)."
         ),
     )
     arguments = parser.parse_args(argv)
-    config = resolve_config({"leak_check.paths": arguments.paths or None})
+    config = resolve_config({"domain_check.paths": arguments.paths or None})
 
     repository = (
         arguments.repo.expanduser().resolve()
@@ -317,10 +305,10 @@ def main(argv: list[str] | None = None) -> int:
     excluded_directories = (
         [repository / directory for directory in arguments.exclude]
         if arguments.exclude
-        else config.values.leak_check.exclude
+        else config.values.domain_check.exclude
     )
     findings = find_leaks(
-        generated_files(config.values.leak_check.paths),
+        generated_files(config.values.domain_check.paths),
         repository,
         excluded_directories,
     )
@@ -328,10 +316,10 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("%s", finding)
     if findings:
         logger.error(
-            "check_no_domain_leak: %d finding(s). Rewrite them as generic practices "
+            "check_domain: %d finding(s). Rewrite them as generic practices "
             "or drop them as domain-dependent.",
             len(findings),
         )
         return 1
-    logger.info("check_no_domain_leak: OK")
+    logger.info("check_domain: OK")
     return 0

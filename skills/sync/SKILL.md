@@ -69,7 +69,7 @@ Show one table, then wait for explicit approval. The user may approve a subset.
 | Rule (file:line) | Category | Action | Files |
 | --- | --- | --- | --- |
 
-In `--check` mode, print the table, write nothing, and fail if any row is not `ok`. In CI, `check_rule_coverage.py` alone is the mechanical gate.
+In `--check` mode, print the table, write nothing, and fail if any row is not `ok`. In CI, `mstack lint` (its `coverage` step) is the mechanical gate.
 
 ## 6. Apply what was approved
 
@@ -88,7 +88,7 @@ mstack lint
 make demo          # when the repo has fixtures/invalid/
 ```
 
-Run `check_no_domain_leak.py` over every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
+Run `mstack domain-check` over every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
 
 ## 8. Reply
 

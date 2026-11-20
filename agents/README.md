@@ -13,6 +13,6 @@ model: inherit        # optional
 The subagent's prompt.
 ```
 
-`setup-mstack` copies each file to `~/.claude/agents/<name>.md` for Claude Code, or to `~/.cursor/agents/<name>.md` when the user only uses Cursor. Cursor also loads `~/.claude/agents/`, so with both tools there is one copy. `mstack config-check` checks that `name` equals the file name and that `description` is there.
+`setup-mstack` copies each file to `~/.claude/agents/<name>.md` for Claude Code, or to `~/.cursor/agents/<name>.md` when the user only uses Cursor. Cursor also loads `~/.claude/agents/`, so with both tools there is one copy. The agent's `name` must equal the file name, and `description` must say when to use it.
 
 No agents are shipped yet. Add one only after deciding it belongs on every machine.

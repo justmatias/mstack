@@ -10,7 +10,7 @@ import yaml
 
 from mstack.config import resolve_config
 from mstack.guards.credit import credit_problems
-from mstack.render import RuleFormatError, split_frontmatter
+from mstack.render import FrontmatterError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ def unknown_hook_issues(
 def frontmatter_issues(mdc_path: Path, mdc: str) -> list[dict]:
     try:
         frontmatter, _ = split_frontmatter(mdc_path.read_text(encoding="utf-8"))
-    except RuleFormatError as error:
+    except FrontmatterError as error:
         return [{"kind": "invalid-frontmatter", "file": mdc, "detail": str(error)}]
     return [
         {"kind": "credit", "file": mdc, "detail": problem}

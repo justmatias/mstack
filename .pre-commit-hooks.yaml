@@ -22,10 +22,10 @@
   language: python
   types_or: [python, shell]
 
-- id: mstack-leak-check
-  name: mstack leak-check
-  description: Rules and checks hold no repo identifiers, URLs, emails or secrets ([leak_check] in .mstack.toml).
-  entry: mstack leak-check
+- id: mstack-domain-check
+  name: mstack domain-check
+  description: Rules and checks hold no repo identifiers, URLs, hosts or emails ([domain_check] in .mstack.toml).
+  entry: mstack domain-check
   language: python
   pass_filenames: false
   files: \.(mdc|ya?ml)$

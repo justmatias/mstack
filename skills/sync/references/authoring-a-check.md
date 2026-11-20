@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync`, `reflect` and `correct` all follow it.
 
-The checks run through the `mstack` command on `PATH`: `mstack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `leak-check` guards), and `mstack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
+The checks run through the `mstack` command on `PATH`: `mstack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `domain-check` guards), and `mstack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 0. Static check or LLM review?
 
@@ -106,10 +106,10 @@ Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule 
 ## 8. Verify what you generated
 
 ```bash
-mstack leak-check <every file you generated> --repo .
+mstack domain-check <every file you generated> --repo .
 ```
 
-`--repo` defaults to the git root, and `[leak_check].exclude` in `.mstack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `mstack leak-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+`--repo` defaults to the git root, and `[domain_check].exclude` in `.mstack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `mstack domain-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
 
 ## 9. Run the single command
 

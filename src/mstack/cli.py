@@ -6,10 +6,9 @@ from collections.abc import Callable
 
 from mstack import config, doctor, init, lint, platform, render
 from mstack.guards import (
-    check_agent_config,
     check_commit_msg,
+    check_domain,
     check_exceptions,
-    check_no_domain_leak,
     check_rule_coverage,
     check_skills,
 )
@@ -19,12 +18,11 @@ logger = logging.getLogger(__name__)
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "commit-msg": check_commit_msg.main,
     "config": config.main,
-    "config-check": check_agent_config.main,
     "coverage": check_rule_coverage.main,
     "doctor": doctor.main,
     "exceptions": check_exceptions.main,
     "init": init.main,
-    "leak-check": check_no_domain_leak.main,
+    "domain-check": check_domain.main,
     "lint": lint.main,
     "platform": platform.main,
     "render-rule": render.main,

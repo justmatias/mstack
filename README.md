@@ -4,6 +4,8 @@ My stack for guiding AI coding agents: the skills, rules and checks I use to ste
 
 Agents follow what they are told and what is checked. So every rule that can be verified becomes an automated check (**rules as checks**), and conventions are enforced instead of re-flagged in code review.
 
+**New here?** [`docs/workflow.md`](docs/workflow.md) walks through the whole workflow: setting up a machine, adopting rules as checks in a repo, and the daily loop.
+
 ## What's inside
 
 | Folder | What it is |
@@ -67,10 +69,12 @@ repos:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
       - id: mstack-exceptions  # every ast-grep-ignore has a rule-exception
-      - id: mstack-leak-check  # rules and checks hold no repo details
+      - id: mstack-domain-check  # rules and checks hold no repo details
       - id: mstack-imports     # .importlinter contracts
       - id: mstack-commit-msg  # Conventional Commits messages (commit-msg stage)
 ```
+
+mstack does not scan for secrets: add the [gitleaks](https://github.com/gitleaks/gitleaks) hook for that, pinned to a release tag.
 
 `mstack-commit-msg` runs at the `commit-msg` stage: add `default_install_hook_types: [pre-commit, commit-msg]` at the top of the file so `pre-commit install` installs it too.
 
@@ -120,13 +124,13 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
   # ast-grep-ignore: no-manual-init-boilerplate
   ```
 
-- rules or checks contain repo identifiers, URLs, emails or secrets (`mstack leak-check`);
+- rules or checks contain repo identifiers, URLs, hosts or emails (`mstack domain-check`); secrets are gitleaks' job;
 - a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
-Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into now, next and future.
+Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into next and future.
 
 ## CI and releases
 

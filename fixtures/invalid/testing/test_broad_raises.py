@@ -1,6 +1,6 @@
 import pytest
 
-from fixtures.valid.domain import Item
+from fixtures.valid.models import Item
 
 
 def test_item_rejects_a_negative_price():

@@ -7,9 +7,8 @@ from collections.abc import Iterator
 from pathlib import Path
 from urllib.parse import unquote
 
-import yaml
-
 from mstack.guards.credit import credit_problems
+from mstack.render import FRONTMATTER_DELIMITER, FrontmatterError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -80,16 +79,6 @@ def find_skills(directories: list[Path]) -> tuple[list[Path], list[Path]]:
     return skills, missing
 
 
-def split_frontmatter(text: str) -> tuple[str | None, str]:
-    lines = text.splitlines(keepends=True)
-    if not lines or lines[0].strip() != "---":
-        return None, text
-    for index, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
-            return "".join(lines[1:index]), "".join(lines[index + 1 :])
-    return None, text
-
-
 def prose_lines(text: str) -> Iterator[tuple[int, str]]:
     """Yield each line outside fenced code blocks, with its code spans removed."""
     in_fence = False
@@ -106,15 +95,12 @@ def markdown_files(skill: Path) -> list[Path]:
 
 
 def load_frontmatter(skill: Path, text: str) -> tuple[dict | None, list[dict]]:
-    raw, _ = split_frontmatter(text)
-    if raw is None:
+    if text.split("\n", 1)[0].strip() != FRONTMATTER_DELIMITER:
         return None, [issue(skill, "frontmatter", "no '---' frontmatter block")]
     try:
-        frontmatter = yaml.safe_load(raw)
-    except yaml.YAMLError as error:
-        return None, [issue(skill, "frontmatter", f"not valid YAML ({error})")]
-    if not isinstance(frontmatter, dict):
-        return None, [issue(skill, "frontmatter", "is not a YAML mapping")]
+        frontmatter, _ = split_frontmatter(text)
+    except FrontmatterError as error:
+        return None, [issue(skill, "frontmatter", str(error))]
     return frontmatter, []
 
 
@@ -159,7 +145,10 @@ def credit_issues(skill: Path, frontmatter: dict) -> list[dict]:
 
 
 def principles_issues(skill: Path, text: str) -> list[dict]:
-    _, body = split_frontmatter(text)
+    try:
+        _, body = split_frontmatter(text)
+    except FrontmatterError:
+        body = text
     lines = [line.strip() for line in body.splitlines() if line.strip()]
     title = next(
         (index for index, line in enumerate(lines) if line.startswith("# ")), None

@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 import sys
 import tomllib
 from pathlib import Path
@@ -8,18 +7,15 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-logger = logging.getLogger(__name__)
-
 CONFIG_FILE_NAME = ".mstack.toml"
-PYPROJECT_FILE_NAME = "pyproject.toml"
 # Keys whose values are paths (or lists of paths) relative to the config file.
 PATH_KEYS = {
     "rules_dir",
     "sgconfig",
     "importlinter",
     "pre_commit_config",
-    "leak_check.paths",
-    "leak_check.exclude",
+    "domain_check.paths",
+    "domain_check.exclude",
 }
 
 Source = Literal["default", "file", "flag"]
@@ -38,7 +34,7 @@ class ScanSettings(StrictModel):
     extensions: list[str] = [".py"]
 
 
-class LeakCheckSettings(StrictModel):
+class DomainCheckSettings(StrictModel):
     paths: list[Path] = [Path("lint-rules"), Path(".cursor/rules")]
     exclude: list[Path] = []
 
@@ -69,7 +65,7 @@ class ProjectConfig(StrictModel):
     importlinter: Path = Path(".importlinter")
     pre_commit_config: Path = Path(".pre-commit-config.yaml")
     scan: ScanSettings = ScanSettings()
-    leak_check: LeakCheckSettings = LeakCheckSettings()
+    domain_check: DomainCheckSettings = DomainCheckSettings()
     changed: ChangedSettings = ChangedSettings()
     commits: CommitsSettings = CommitsSettings()
 
@@ -113,35 +109,14 @@ def read_toml(path: Path) -> dict[str, Any]:
         raise ConfigError(f"{path}: invalid TOML ({error})") from error
 
 
-def pyproject_table(directory: Path) -> dict[str, Any] | None:
-    pyproject = directory / PYPROJECT_FILE_NAME
-    if not pyproject.is_file():
-        return None
-    table = read_toml(pyproject).get("tool", {}).get("mstack")
-    if table is None or isinstance(table, dict):
-        return table
-    raise ConfigError(f"{pyproject}: [tool.mstack] must be a table")
-
-
 def find_config_file(
     start: Path, git_root: Path | None
 ) -> tuple[Path, dict[str, Any]] | None:
     """Walk up from start to the git root; never read a config above the repo."""
     for directory in candidate_directories(start, git_root):
         config_file = directory / CONFIG_FILE_NAME
-        table = pyproject_table(directory)
         if config_file.is_file():
-            if table is not None:
-                logger.warning(
-                    "%s: both %s and [tool.mstack] in %s exist; using %s",
-                    directory,
-                    CONFIG_FILE_NAME,
-                    PYPROJECT_FILE_NAME,
-                    CONFIG_FILE_NAME,
-                )
             return config_file, read_toml(config_file)
-        if table is not None:
-            return directory / PYPROJECT_FILE_NAME, table
     return None
 
 
@@ -185,7 +160,7 @@ def resolve_config(
 ) -> ResolvedConfig:
     """Merge built-in defaults, the config file and flags, in that order.
 
-    `overrides` maps dotted keys (`rules_dir`, `leak_check.paths`) to flag values;
+    `overrides` maps dotted keys (`rules_dir`, `domain_check.paths`) to flag values;
     None means the flag was not given. Flag paths resolve against the current
     directory, file and default paths against the config file's directory.
     """
@@ -254,8 +229,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="mstack config",
         description=(
-            f"Print the resolved project config ({CONFIG_FILE_NAME} or [tool.mstack] "
-            "in pyproject.toml) and where each value comes from."
+            f"Print the resolved project config ({CONFIG_FILE_NAME}) and where "
+            "each value comes from."
         ),
     )
     parser.add_argument("--rules-dir", type=Path)

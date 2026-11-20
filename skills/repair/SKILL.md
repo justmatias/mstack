@@ -60,7 +60,7 @@ Before changing anything, show one table: each doctor result, the fix you will a
 Apply the approved fixes in this order: tools, CLI, checkout and version, platform, then installed items (a reinstalled CLI or a pulled checkout changes what drifts). Then run `mstack doctor` again.
 
 - Repeat from step 2 for any new or remaining error. Stop after two rounds that fix nothing, and report what is left and why.
-- A warning may stay when it is the user's choice: their uncommitted work, a `locally-edited` item, a declined optional tool. Name each one.
+- A warning may stay when it is the user's choice: their uncommitted work, an item they chose to keep (it stays as `drift`), a declined optional tool. Name each one.
 
 ## 6. Reply
 

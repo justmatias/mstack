@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from mstack.render import RuleFormatError, render_rule, split_frontmatter
+from mstack.render import FrontmatterError, render_rule, split_frontmatter
 from tests.conftest import REPOSITORY_ROOT
 
 RULE_FILES = sorted((REPOSITORY_ROOT / "rules").glob("*.mdc"))
@@ -46,7 +46,7 @@ def test_section_after_checks_is_kept():
 
 
 def test_unclosed_frontmatter_is_rejected():
-    with pytest.raises(RuleFormatError):
+    with pytest.raises(FrontmatterError):
         split_frontmatter("---\ndescription: x\n# Rule\n")
 
 

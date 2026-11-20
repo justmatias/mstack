@@ -35,7 +35,7 @@ mcp = []
 tools = ["claude"]
 [include]
 skills = ["sync", "reflect"]
-rules = ["error-handling", "logging", "git-commits"]
+rules = ["error-handling", "git-commits"]
 ```
 
 **Per machine:** `~/.config/mstack/config.toml` (never committed):
@@ -53,7 +53,7 @@ settings = { "statusLine.command" = "..." }
 
 ## Changes
 
-- `profiles/`, a validator (part of `skills-check` or `config-check`), and `src/mstack/profiles.py`.
+- `profiles/`, a validator (part of `skills-check`, or its own guard), and `src/mstack/profiles.py`.
 - `setup-mstack`: a step that reads the profile.
 - `doctor`: shows the active profile, warns when there is none, and checks only the profile's items.
 

@@ -46,7 +46,7 @@ Group the mistakes into classes. A class counts once it has happened twice.
 
 Then fix the most frequent classes now, one commit each, most frequent first, with Conventional Commits messages (`feat(rules): add <id> check`). Prove each new check fails on a real past mistake: read it with `git show <sha>`, rewrite it as a synthetic snippet with generic names (`Foo`, `Item`, `do_work`) that keeps its structure, and make it an `invalid` case. Cite the sha in your reply, never in the test. Run the same command locally and in CI (`mstack lint`). Exceptions go on the offending line with a reason, an expiry date, and a human's approval, in the `rule-exception` format from the rule-format reference. Never invent the approval.
 
-Run `check_no_domain_leak.py` over every generated file before committing, and reread everything for English.
+Run `mstack domain-check` over every generated file before committing, and reread everything for English.
 
 ## Repeats
 

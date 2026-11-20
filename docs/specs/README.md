@@ -6,31 +6,26 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 ## Phases
 
-### Now
-
-Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
-
-| Spec | Summary | Depends on |
-| --- | --- | --- |
-
 ### Next
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [agent-hooks](agent-hooks.md) | Agent hooks that run the checks while the agent edits | agent-config-folders, runtime-lint-command |
-| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | runtime-lint-command |
+| [agent-hooks](agent-hooks.md) | Agent hooks that run the checks while the agent edits | |
+| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | |
 
 ### Future
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [claude-code-plugin](claude-code-plugin.md) | Distribute skills, agents and hooks as a Claude Code plugin | agent-config-folders, skill-validation |
+| [claude-code-plugin](claude-code-plugin.md) | Distribute skills, agents and hooks as a Claude Code plugin | |
 | [host-profiles](host-profiles.md) | Per-machine profiles (personal, work) choosing what gets installed | |
-| [per-host-secrets](per-host-secrets.md) | `${VAR}` placeholders resolved per machine, never stored in the repo | agent-config-folders |
+| [per-host-secrets](per-host-secrets.md) | `${VAR}` placeholders resolved per machine, never stored in the repo | |
 | [more-agent-tools](more-agent-tools.md) | Codex, opencode, Gemini CLI and Copilot targets, with one shared `~/.agents/skills/` copy | |
-| [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect` | agent-config-folders, doctor |
+| [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect` | |
 
 ## Writing a spec
+
+The "Depends on" column lists only specs that are still open: everything else they build on (`mstack lint`, `doctor`, `skills-check`, the `agents/`, `mcp/`, `settings/` and `instructions/` folders) already exists.
 
 Every spec follows the same sections, so it can be implemented without reading the others:
 

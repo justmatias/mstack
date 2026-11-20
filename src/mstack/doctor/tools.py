@@ -1,26 +1,27 @@
 import shutil
 
-from mstack.doctor.model import Context, Result, StrictModel
+from mstack.config import StrictModel
+from mstack.doctor.model import Context, Result
 
 
-class Tool(StrictModel):
+class ExternalTool(StrictModel):
     required: bool
     used_by: str
     link: str
 
 
 TOOLS = {
-    "uv": Tool(
+    "uv": ExternalTool(
         required=True,
         used_by="mstack and the checks",
         link="https://docs.astral.sh/uv/",
     ),
-    "git": Tool(
+    "git": ExternalTool(
         required=True,
         used_by="mstack and the checks",
         link="https://git-scm.com/downloads",
     ),
-    "gh": Tool(
+    "gh": ExternalTool(
         required=False,
         used_by="correct and integrate",
         link="https://cli.github.com/",

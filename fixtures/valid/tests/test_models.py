@@ -1,7 +1,7 @@
 import pydantic
 import pytest
 
-from fixtures.valid.domain import Item, Order, order_total
+from fixtures.valid.models import Item, Order, order_total
 
 
 def test_total_sums_price_times_quantity_when_order_has_items() -> None:
@@ -14,10 +14,6 @@ def test_total_sums_price_times_quantity_when_order_has_items() -> None:
     )
 
     assert order_total(order) == pytest.approx(11.0)
-
-
-def test_total_is_zero_when_order_is_empty() -> None:
-    assert not order_total(Order(order_id="A-2", items=[]))
 
 
 def test_item_rejects_a_negative_price() -> None:

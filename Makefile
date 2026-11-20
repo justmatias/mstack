@@ -34,14 +34,13 @@ lint-rules-changed:
 	@$(MAKE) --no-print-directory repo-guards
 
 guards:
-	$(MSTACK) lint --only imports coverage exceptions leak-check
+	$(MSTACK) lint --only imports coverage exceptions domain-check
 	@$(MAKE) --no-print-directory repo-guards
 
 # Guards for what only this repo has: agent config folders and skills.
 repo-guards:
-	$(MSTACK) config-check
 	$(MSTACK) skills-check skills .agents/skills
-	$(if $(AGENT_CONFIG_FILES),$(MSTACK) leak-check $(AGENT_CONFIG_FILES))
+	$(if $(AGENT_CONFIG_FILES),$(MSTACK) domain-check $(AGENT_CONFIG_FILES))
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:

@@ -4,5 +4,5 @@
     - id: mstack-lint
     - id: mstack-rules
     - id: mstack-exceptions
-    - id: mstack-leak-check
+    - id: mstack-domain-check
     - id: mstack-imports
