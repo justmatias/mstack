@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 IGNORE_COMMENT = re.compile(r"^#\s*ast-grep-ignore\b(?::\s*(?P<rule_ids>.*))?$")
 EXCEPTION_COMMENT = re.compile(r"^#\s*rule-exception:\s*(?P<fields>.*)$")
 REQUIRED_FIELDS = ("reason", "expires", "approved-by")
+# Files whose `#` comments may carry an ast-grep-ignore.
+SUFFIXES = (".py", ".sh")
 
 
 def is_excluded(path: Path, root: Path, exclude_globs: list[str]) -> bool:
@@ -28,10 +30,18 @@ def is_excluded(path: Path, root: Path, exclude_globs: list[str]) -> bool:
     return any(fnmatch.fnmatch(relative, pattern) for pattern in exclude_globs)
 
 
-def python_files(paths: list[Path], root: Path, exclude_globs: list[str]) -> list[Path]:
+def source_files(paths: list[Path], root: Path, exclude_globs: list[str]) -> list[Path]:
     if not paths:
+        patterns = [f"*{suffix}" for suffix in SUFFIXES]
         listed = subprocess.run(
-            ["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.py"],
+            [
+                "git",
+                "ls-files",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                *patterns,
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -43,11 +53,28 @@ def python_files(paths: list[Path], root: Path, exclude_globs: list[str]) -> lis
         ]
     files: list[Path] = []
     for path in paths:
-        files.extend(sorted(path.rglob("*.py")) if path.is_dir() else [path])
+        if path.is_dir():
+            files.extend(
+                sorted(file for file in path.rglob("*") if file.suffix in SUFFIXES)
+            )
+        else:
+            files.append(path)
     return files
 
 
-def comments_by_line(source: str) -> dict[int, str]:
+def shell_comments_by_line(source: str) -> dict[int, str]:
+    """Line-based: a whole-line `#` comment, or a trailing ` # ...` one."""
+    comments: dict[int, str] = {}
+    for line_number, line in enumerate(source.splitlines(), start=1):
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            comments[line_number] = stripped
+        elif (index := line.find(" #")) != -1:
+            comments[line_number] = line[index + 1 :].strip()
+    return comments
+
+
+def python_comments_by_line(source: str) -> dict[int, str]:
     comments: dict[int, str] = {}
     try:
         for token in tokenize.generate_tokens(io.StringIO(source).readline):
@@ -108,7 +135,11 @@ def file_exceptions(path: Path, today: datetime.date) -> tuple[list[dict], list[
     exceptions: list[dict] = []
     problems: list[str] = []
     source = path.read_text(encoding="utf-8")
-    comments = comments_by_line(source)
+    comments = (
+        shell_comments_by_line(source)
+        if path.suffix == ".sh"
+        else python_comments_by_line(source)
+    )
     lines = source.splitlines()
     for line_number, comment in sorted(comments.items()):
         ignore = IGNORE_COMMENT.match(comment)
@@ -180,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
     config = resolve_config()
 
     exceptions, problems = collect_exceptions(
-        python_files(arguments.paths, config.root, config.values.scan.exclude),
+        source_files(arguments.paths, config.root, config.values.scan.exclude),
         arguments.today,
     )
     if arguments.json:

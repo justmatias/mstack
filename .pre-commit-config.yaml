@@ -36,6 +36,13 @@ repos:
         args: ['-r', '-lll']
         exclude: ^fixtures/invalid/
 
+  # Enforces part of rules/shell.mdc (enforced-by-hook: shellcheck).
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        exclude: ^fixtures/invalid/
+
   - repo: https://github.com/justmatias/hookpin
     rev: v7.0.2
     hooks:

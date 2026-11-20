@@ -10,7 +10,11 @@ DOMAIN_IMPORTS_INFRA = (
     INVALID_DIRECTORY / "architecture-layers" / "domain_imports_infra.py"
 )
 AST_GREP_INVALID_FILES = sorted(
-    path for path in INVALID_DIRECTORY.rglob("*.py") if path != DOMAIN_IMPORTS_INFRA
+    path
+    for path in INVALID_DIRECTORY.rglob("*")
+    if path.is_file()
+    and "__pycache__" not in path.parts
+    and path != DOMAIN_IMPORTS_INFRA
 )
 
 

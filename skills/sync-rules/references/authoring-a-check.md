@@ -27,7 +27,7 @@ If no tool fits, the rule is judgment: mark it `enforcement: llm-review` and sto
 `lint-rules/rules/<id>.yml`, one rule per file, `id` in kebab-case and equal to the file name:
 
 - `id`, `language`, `severity`, `message` (what to use instead), `note` (why), `metadata.source` (the `.mdc` path from the repo root), and `files`/`ignores` only with structural globs (`"**/domain/**"`).
-- Find node names with `ast-grep run -l <language> -p '<snippet>' --debug-query=ast`. Python facts: a bare `except:` is an `except_clause` with no `value` field; `kind` does not take a regex; a pattern such as `self.$A = $A` matches the `assignment` node, not its `expression_statement`.
+- Find node names with `ast-grep run -l <language> -p '<snippet>' --debug-query=ast`. Python facts: a bare `except:` is an `except_clause` with no `value` field; `kind` does not take a regex; a pattern such as `self.$A = $A` matches the `assignment` node, not its `expression_statement`. Bash facts (`language: Bash`): a call is a `command` whose `name` field is the program (`has: {field: name, regex: "^eval$"}`); `$(...)` and backticks are both `command_substitution` (tell them apart with `regex: "^\`"`); a script's top-level commands are direct children of `program`.
 - Quote a YAML string that contains `: ` or starts with a backtick.
 - The pattern never names a domain identifier. Match the construct (`print($$$ARGS)`), not a business class.
 

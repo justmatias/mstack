@@ -7,6 +7,7 @@ importlinter = ".importlinter"
 [scan]
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 exclude = ["fixtures/invalid/**"]
+extensions = [".py", ".sh"]
 
 [leak_check]
 paths = ["lint", "rules"]

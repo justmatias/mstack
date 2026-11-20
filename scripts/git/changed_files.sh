@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# List the .py files changed relative to the base branch (default origin/main),
+# List the .py and .sh files changed relative to the base branch (default origin/main),
 # including uncommitted and untracked files. With --staged, list the staged files.
 # Only files that still exist are printed, one per line, relative to the repo root.
 set -euo pipefail
@@ -7,7 +7,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 if [[ "${1:-}" == "--staged" ]]; then
-  git diff --cached --name-only --diff-filter=ACMR -- '*.py'
+  git diff --cached --name-only --diff-filter=ACMR -- '*.py' '*.sh'
   exit 0
 fi
 
@@ -28,12 +28,12 @@ fi
 
 {
   if merge_base="$(git merge-base "$base_ref" HEAD 2>/dev/null)"; then
-    git diff --name-only --diff-filter=ACMR "$merge_base" -- '*.py'
+    git diff --name-only --diff-filter=ACMR "$merge_base" -- '*.py' '*.sh'
   elif [[ -n "${BASE_REF:-}" ]]; then
     echo "changed_files.sh: no merge base between '$base_ref' and HEAD (shallow clone?)." >&2
     exit 1
   fi
-  git ls-files --others --exclude-standard -- '*.py'
+  git ls-files --others --exclude-standard -- '*.py' '*.sh'
 } | sort -u | while IFS= read -r file; do
   if [[ -f "$file" ]]; then printf "%s\n" "$file"; fi
 done
