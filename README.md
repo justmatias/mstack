@@ -9,7 +9,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | Folder | What it is |
 | --- | --- |
 | `rules/` | Conventions in prose (`.mdc`), the source of truth agents read before writing code. |
-| `lint/` | The checks that enforce those rules (ast-grep), plus architecture contracts in `.importlinter`. |
+| `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills that keep rules and checks in sync and turn corrections into new rules. |
 | `agents/` | Subagent definitions. |
 | `mcp/` | MCP servers, one per file, with `${VAR}` placeholders for secrets. |
@@ -55,7 +55,7 @@ Skills, rules and agents are copies, not symlinks. MCP servers, instructions and
 
 ```bash
 make lint                 # every pre-commit hook on every file
-make lint-rules           # mstack lint: check tests, full scan, contracts and guards
+make lint-rules           # mstack lint: check tests, full scan and guards
 make lint-rules-changed   # mstack lint --changed: the scan covers only changed files and warnings fail
 make test                 # pytest
 make demo                 # scans fixtures/invalid/, which must fail
@@ -66,7 +66,6 @@ make demo                 # scans fixtures/invalid/, which must fail
 Each rule ends with a `## Checks` section naming its checks, and each check points back to its rule through `metadata.source`. `make lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
-- an `.importlinter` contract is broken (`lint-imports`);
 - a rule and its checks don't point to each other (`mstack coverage`);
 - an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
 
