@@ -45,7 +45,7 @@ Every `.mdc` ends with a `## Checks` section. Each line is one of:
 
 Use `enforced-by-hook:` only when no ast-grep rule or import-linter contract can express the rule and a pinned linter already does; it is its own keyword, so a hook and an ast-grep rule may share an id. `mstack coverage` reports `unknown-hook` when the id is not configured (or there is no `.pre-commit-config.yaml`; the path is `pre_commit_config` in `.mstack.toml`). Hooks have no `metadata.source`, so only rule → hook is checked, and a hook skipped with `SKIP` still counts as configured.
 
-A file may mix these when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `check_rule_coverage.py` fails on it.
+A file may mix these when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `mstack coverage` fails on it.
 
 ## `metadata.source` in the YAML
 
@@ -66,7 +66,7 @@ rule:
   pattern: print($$$ARGS)
 ```
 
-`check_rule_coverage.py` fails when `metadata.source` is missing or does not exist, or when that `.mdc` does not list the id in its Checks section.
+`mstack coverage` fails when `metadata.source` is missing or does not exist, or when that `.mdc` does not list the id in its Checks section.
 
 Path-matching facts (ast-grep 0.51): `files`/`ignores` globs match the path exactly as it was passed to `ast-grep scan`. Write them as `**/<folder>/**` so relative and absolute paths both match.
 
@@ -82,6 +82,6 @@ print(banner)
 
 - `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule and is rejected.
 - The trailing form (`code  # ast-grep-ignore: <id>`) is allowed; the `rule-exception` then goes on the line above the code.
-- `check_exceptions.py` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
+- `mstack exceptions` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
 - Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct` looks for this).

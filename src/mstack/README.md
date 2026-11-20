@@ -80,7 +80,7 @@ Reports only, and prints the fix for each problem. `--tool` defaults to the tool
 | `source` | the checkout exists and is a git repo; uncommitted changes | error; warn |
 | `skills` | every mstack skill is in the tool's skills folder; every skill there passes `skills-check --profile generic`; none is in both `~/.claude/skills/` and `~/.cursor/skills/` | error; warn for duplicates |
 | `rules` | every mstack rule is in `~/.claude/rules/` without frontmatter (Claude Code only) | error |
-| `drift` | every installed mstack skill, agent and Claude Code rule equals the checkout's (a rule as `render-rule` prints it), ignoring `.DS_Store`, `__pycache__`, `.mstack-backups` and line endings. Doctor does not say which side changed; `repair` works that out | warn |
+| `drift` | every installed mstack skill, agent and Claude Code rule equals the checkout's (a rule as `render-rule` prints it), ignoring `.DS_Store`, `__pycache__`, `.mstack-backups` and line endings. Doctor does not say which side changed; `repair` works that out | warn; error when the checkout's own rule does not render |
 | `platform` | on WSL with Cursor: the Windows profile was found (from `mstack.platform`), so Cursor's files are checked there | warn |
 | `version` | with `--online` only: the latest `v*` tag on the checkout's `origin` (`git ls-remote`) is not newer | warn |
 
