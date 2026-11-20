@@ -10,7 +10,7 @@ RULE_PATHS := --rules-dir rules --config $(SGCONFIG)
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 
-.PHONY: setup lint-rules lint-rules-changed guards demo rules-table test lint
+.PHONY: setup lint-rules lint-rules-changed guards demo test lint
 
 # Dev dependencies only. To install the skills and rules into your user folders, ask
 # Claude Code or Cursor to follow skills/setup-mstack/SKILL.md.
@@ -54,9 +54,6 @@ demo:
 	else \
 		echo "demo: OK, the scan failed on fixtures/invalid/ as expected"; \
 	fi
-
-rules-table:
-	$(MSTACK) rules-table $(RULE_PATHS)
 
 test:
 	uv run pytest -q

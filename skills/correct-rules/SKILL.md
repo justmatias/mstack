@@ -48,8 +48,8 @@ Then fix the most frequent classes now, one commit each, most frequent first, wi
 
 Run `check_no_domain_leak.py` over every generated file before committing, and reread everything for English.
 
-## Keep the rule table
+## Repeats
 
-Last, regenerate the table that pairs each rule with what enforces it: `make rules-table` writes `docs/rules-table.md` and updates the block between `<!-- rules-table:start -->` and `<!-- rules-table:end -->` in `CLAUDE.md` / `AGENTS.md`. When the operator corrects you, fix the mistake and add the rule. If the rule was already there and nothing enforces it, that's a repeat, so raise it to the highest level in the same change.
+When the operator corrects you, fix the mistake and add the rule. If the rule was already there and nothing enforces it, that's a repeat, so raise it to the highest level in the same change.
 
 **Reply:** each class with its evidence (commit shas, PR numbers, exception counts), the level you picked, why a higher level didn't work, the files touched, and the severity. Then: abstracted (what was generalized) and dropped (`domain-dependent` classes, one line each).

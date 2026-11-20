@@ -3,14 +3,12 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack.generate import rules_table
 from mstack.guards import check_exceptions, check_no_domain_leak, check_rule_coverage
 
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "coverage": check_rule_coverage.main,
     "exceptions": check_exceptions.main,
     "leak-check": check_no_domain_leak.main,
-    "rules-table": rules_table.main,
 }
 
 

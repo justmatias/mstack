@@ -92,7 +92,6 @@ In the mstack repo itself, add `--exclude src --exclude scripts --exclude tests`
 ```bash
 make lint-rules
 make demo         # only in repos that have fixtures/invalid/
-make rules-table
 ```
 
 In a repo without these targets, run the steps directly: `ast-grep test`, `ast-grep scan`, `lint-imports` (if `.importlinter` exists), and `mstack coverage`, `mstack exceptions` and `mstack leak-check`.
