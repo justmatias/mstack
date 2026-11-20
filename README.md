@@ -10,7 +10,7 @@ Agents only follow what they are told and what is checked. Instructions scattere
 | --- | --- | --- |
 | Rules | `rules/` | Conventions written in prose (`.mdc`), the single source of truth agents read before writing code. |
 | Checks | `lint/` | The executable version of those rules (ast-grep, plus import-linter in `.importlinter`), run in pre-commit and in CI. |
-| Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, and install mstack itself (`setup-mstack`). |
+| Skills | `skills/` | Agent skills that keep prose rules and checks in sync, turn corrections into new rules, integrate skills from GitHub with their credit (`integrate-skills`), and install mstack itself (`setup-mstack`). |
 | Tools | `src/mstack/`, `scripts/` | The `mstack` CLI (guards) and the repo tooling behind the `make` targets. |
 
 The first feature is **rules as checks**: every rule that can be verified becomes an automated check, so conventions are enforced instead of re-flagged in code review.
@@ -36,7 +36,7 @@ make setup        # uv sync (dev dependencies)
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
-make test         # pytest: checks, guards and skills
+make test         # pytest: checks and guards
 ```
 
 The skills call the guards as `mstack <command>` from whatever repo they run in. Install the CLI once, on your `PATH`:

@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path
 
 import pytest
-import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
@@ -12,12 +11,6 @@ SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
 
 def run_command(command: list[str], cwd: Path) -> subprocess.CompletedProcess:
     return subprocess.run(command, cwd=cwd, capture_output=True, text=True, check=False)
-
-
-def read_frontmatter(path: Path) -> dict:
-    _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
-    data: dict = yaml.safe_load(frontmatter)
-    return data
 
 
 @pytest.fixture
