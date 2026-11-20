@@ -1,13 +1,13 @@
 ---
 name: setup-mstack
-description: "Install or update the mstack skills (sync-rules, reflect-rules, correct-rules) in your user-level skill folder for Claude Code and Cursor, by copy, with a manifest, backups and a decision for every conflict. Use when the user says set up mstack, install mstack, update mstack skills, /setup-mstack, or after pulling a new version of the mstack repo."
+description: "Install or update the other mstack skills (sync-rules, reflect-rules, correct-rules) in your user-level skill folder for Claude Code and Cursor, by copy, with a manifest, backups and a decision for every conflict. Use when the user says set up mstack, install mstack, update mstack skills, or after pulling a new version of the mstack repo."
 ---
 
 # Set up mstack
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any merged skill. (2) **Practices, not domain**: a merged skill keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the other skill. Details: [principles.md](../../../skills/sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any merged skill. (2) **Practices, not domain**: a merged skill keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the other skill. Details: [principles.md](../sync-rules/references/principles.md).
 
-Install the mstack skills from this repo's `skills/` folder into the one user skill folder your tools load, by copying them. Run it from the mstack repo. Updating is the same flow: pull the repo, then run this skill again.
+Install the other mstack skills from this repo's `skills/` folder into the one user skill folder your tools load, by copying them. This skill is never installed itself: run it from the mstack repo by asking the agent to follow `skills/setup-mstack/SKILL.md`. Updating is the same flow: pull the repo, then run this skill again.
 
 The deterministic work is done by `scripts/setup.py skills` (plan, apply, verify). You make the judgment calls: whether a similar skill really overlaps, which version to keep, and how to combine two skills. Never write into the skill folders yourself. Every change goes through `apply`.
 

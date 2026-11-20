@@ -14,7 +14,7 @@ SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 setup:
 	uv sync
 	uv run python scripts/setup.py $(SETUP_ARGS)
-	@echo "skills: run /setup-mstack in Claude Code or Cursor"
+	@echo "skills: in Claude Code or Cursor, ask the agent to follow skills/setup-mstack/SKILL.md"
 
 lint:
 	uv run pre-commit run --all-files

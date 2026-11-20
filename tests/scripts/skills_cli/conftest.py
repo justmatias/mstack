@@ -11,7 +11,7 @@ import pytest
 from tests.conftest import REPOSITORY_ROOT
 
 SKILL_NAMES = ["correct-rules", "reflect-rules", "sync-rules"]
-KNOWN_OVERLAPS = REPOSITORY_ROOT / ".claude" / "skills" / "setup-mstack" / "references"
+KNOWN_OVERLAPS = REPOSITORY_ROOT / "skills" / "setup-mstack" / "references"
 
 
 def write_skill(folder: Path, name: str, description: str) -> None:
@@ -60,7 +60,7 @@ def toolkit_root(tmp_path: Path) -> Path:
     )
     shutil.copytree(
         KNOWN_OVERLAPS,
-        root / ".claude" / "skills" / "setup-mstack" / "references",
+        root / "skills" / "setup-mstack" / "references",
     )
     return root
 

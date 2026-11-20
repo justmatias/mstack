@@ -22,7 +22,6 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
 make setup        # uv sync, then asks which integrations to install
-/setup-mstack     # in Claude Code or Cursor, with this repo open: installs the skills
 make lint         # every pre-commit hook on every file
 make lint-rules   # the single command: tests, scan, contracts and guards
 make demo         # scans fixtures/invalid/ and expects it to fail
@@ -70,7 +69,7 @@ Existing JSON files are merged, never overwritten, and backed up as `*.bak-<time
 
 ## Installing the skills
 
-`make setup` does not install the skills. Open this repo in Claude Code or Cursor and run `/setup-mstack` (or say "set up mstack"). The skill lives in `.claude/skills/setup-mstack/`, so it is only visible inside this repo and is never installed itself.
+`make setup` does not install the skills. Open this repo in Claude Code or Cursor and ask the agent to "set up mstack following skills/setup-mstack/SKILL.md". `setup-mstack` lives in `skills/` with the others, but it is never installed itself: it only makes sense from this checkout.
 
 It asks which tools you use and copies `skills/*` into one user-level folder:
 
@@ -85,7 +84,7 @@ The deterministic part is `scripts/setup.py skills` (`plan`, `apply`, `verify`).
 - Copies, not symlinks: `skills/` in this repo stays the source of truth, and `<target>/.mstack-manifest.json` records the hash of every installed skill. A copy you edited is never overwritten without asking.
 - Backups go to `<target>/.mstack-backups/<timestamp>/`, never next to the skills.
 - `~/.config/mstack/config.json` records where this repo is. The installed skills read it (or `$MSTACK_HOME`, which takes priority) to find `scripts/`.
-- To update, pull this repo and run `/setup-mstack` again.
+- To update, pull this repo and run `setup-mstack` again.
 
 ## Static checks and releases
 

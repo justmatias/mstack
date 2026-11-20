@@ -547,14 +547,7 @@ def toolkit_config_path() -> Path:
 
 
 def known_overlaps_path() -> Path:
-    return (
-        REPOSITORY_ROOT
-        / ".claude"
-        / "skills"
-        / SETUP_SKILL
-        / "references"
-        / "known-overlaps.json"
-    )
+    return SKILLS_SOURCE / SETUP_SKILL / "references" / "known-overlaps.json"
 
 
 def parse_tools(value: str) -> list[str]:
@@ -1301,7 +1294,7 @@ def add_skills_parser(subcommands: Any) -> None:
         "skills",
         help=(
             "Install or update the mstack skills in your user skill folder by copy. "
-            "Driven by the /setup-mstack skill."
+            "Driven by skills/setup-mstack/SKILL.md."
         ),
     )
     actions = skills.add_subparsers(dest="skills_command", required=True)

@@ -6,7 +6,7 @@ import pytest
 from tests.conftest import REPOSITORY_ROOT, read_frontmatter
 
 SKILLS = REPOSITORY_ROOT / "skills"
-SETUP_SKILL = REPOSITORY_ROOT / ".claude" / "skills" / "setup-mstack"
+SETUP_SKILL = SKILLS / "setup-mstack"
 ON_REQUEST_SKILLS = {"reflect-rules", "correct-rules"}
 TRIGGER_PHRASES = {
     "sync-rules": [
@@ -37,8 +37,8 @@ def test_skill_frontmatter_is_valid(skill: str):
 
 @pytest.mark.parametrize(
     "document",
-    sorted((*SKILLS.rglob("*.md"), *SETUP_SKILL.rglob("*.md"))),
-    ids=lambda path: str(path.relative_to(REPOSITORY_ROOT)),
+    sorted(SKILLS.rglob("*.md")),
+    ids=lambda path: str(path.relative_to(SKILLS)),
 )
 def test_every_skill_document_states_both_principles(document):
     head = "\n".join(document.read_text().splitlines()[:12])
@@ -74,9 +74,10 @@ def test_setup_skill_links_to_the_principles():
     )
 
 
-def test_setup_skill_lives_only_in_the_claude_folder():
+def test_setup_skill_lives_with_the_other_skills():
+    assert (SETUP_SKILL / "SKILL.md").is_file()
+    assert not (REPOSITORY_ROOT / ".claude" / "skills" / "setup-mstack").exists()
     assert not (REPOSITORY_ROOT / ".cursor" / "skills" / "setup-mstack").exists()
-    assert not (SKILLS / "setup-mstack").exists()
 
 
 def test_known_overlaps_cover_the_pstack_originals():
