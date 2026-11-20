@@ -11,4 +11,4 @@ exclude = ["fixtures/invalid/**"]
 [leak_check]
 paths = ["lint", "rules"]
 # Tooling folders, not the analyzed code.
-exclude = ["src", "scripts", "tests", "fixtures/invalid"]
+exclude = ["src", "tests", "fixtures/invalid"]
