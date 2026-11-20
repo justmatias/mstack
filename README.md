@@ -73,6 +73,8 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
+Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into now, next and future.
+
 ## CI and releases
 
 `.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
