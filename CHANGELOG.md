@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.3.0 (2026-11-20)
+
+### Features
+
+- **guards**: Add mstack skills-check to validate skills
+  ([#24](https://github.com/justmatias/mstack/pull/24),
+  [`1b016e7`](https://github.com/justmatias/mstack/commit/1b016e77dcf8e5c23f45992e76f4befeff6051f8))
+
+
 ## v3.2.0 (2026-11-20)
 
 ### Documentation
