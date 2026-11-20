@@ -84,7 +84,7 @@ def lint_sandbox(tmp_path: Path) -> Path:
     ignore = shutil.ignore_patterns("__pycache__")
     for folder in ("rules", "lint", "fixtures"):
         shutil.copytree(REPOSITORY_ROOT / folder, sandbox / folder, ignore=ignore)
-    for name in (".mstack.toml", ".importlinter"):
+    for name in (".mstack.toml", ".importlinter", ".pre-commit-config.yaml"):
         if (REPOSITORY_ROOT / name).is_file():
             shutil.copy(REPOSITORY_ROOT / name, sandbox / name)
     return init_git_repository(sandbox)

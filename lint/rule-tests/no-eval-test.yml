@@ -1,0 +1,16 @@
+id: no-eval
+valid:
+  - |
+    command=(git status --short)
+    "${command[@]}"
+  # Near misses: a function whose name starts with eval, and eval as an argument.
+  - |
+    evaluate() { echo "$1"; }
+    evaluate "input"
+    echo eval
+invalid:
+  - |
+    eval "$1"
+  - |
+    cmd="rm -rf $target"
+    eval $cmd

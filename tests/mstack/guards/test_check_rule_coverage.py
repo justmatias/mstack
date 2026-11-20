@@ -56,10 +56,9 @@ def coverage_issues(run_mstack, rules_sandbox: Path) -> tuple[int, list[tuple]]:
     ]
 
 
-@pytest.mark.usefixtures("pre_commit_config")
-@pytest.mark.parametrize(
-    "hook_id", ["gitleaks", "check-something"], ids=["remote", "local"]
-)
+# The sandbox has this repo's .pre-commit-config.yaml: gitleaks is a remote hook,
+# lint-rules a local one.
+@pytest.mark.parametrize("hook_id", ["gitleaks", "lint-rules"], ids=["remote", "local"])
 def test_configured_hook_counts_as_check(
     run_mstack, rules_sandbox: Path, add_hook_line, hook_id: str
 ):
@@ -76,7 +75,6 @@ def test_configured_hook_counts_as_check(
     assert logging_rule["hooks"] == [hook_id]
 
 
-@pytest.mark.usefixtures("pre_commit_config")
 def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):
     add_hook_line("no-such-hook")
 
@@ -89,14 +87,17 @@ def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):
 def test_missing_pre_commit_config_makes_every_hook_unknown(
     run_mstack, rules_sandbox: Path, add_hook_line
 ):
+    (rules_sandbox / ".pre-commit-config.yaml").unlink()
     add_hook_line("gitleaks")
 
     exit_code, issues = coverage_issues(run_mstack, rules_sandbox)
 
-    assert (exit_code, issues) == (1, [("unknown-hook", "gitleaks")])
+    assert exit_code == 1
+    assert ("unknown-hook", "gitleaks") in issues
+    assert {kind for kind, _ in issues} == {"unknown-hook"}
 
 
-@pytest.mark.usefixtures("pre_commit_config", "_only_hook_in_checks_section")
+@pytest.mark.usefixtures("_only_hook_in_checks_section")
 def test_checks_section_with_only_hooks_is_not_missing(run_mstack, rules_sandbox: Path):
     assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
 

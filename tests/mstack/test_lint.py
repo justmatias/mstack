@@ -68,7 +68,7 @@ def test_json_reports_every_step_with_ok_skipped_and_findings(run_lint):
 
 
 def test_invalid_file_fails_scan(run_lint, lint_sandbox: Path):
-    shutil.copy(BARE_EXCEPT, lint_sandbox / "fixtures" / "valid" / "bad.py")
+    shutil.copy(BARE_EXCEPT, lint_sandbox / "fixtures" / "valid" / "zz_scan_target.py")
 
     exit_code, report = run_lint()
 

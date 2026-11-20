@@ -42,3 +42,25 @@ def test_unjustified_exception_fails(
 
     assert completed.returncode == 1
     assert expected_problem in completed.stderr
+
+
+def test_justified_shell_exception_passes(run_mstack, shell_exception_file):
+    completed = run_mstack("exceptions", str(shell_exception_file(VALID_HEADER)))
+
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_unjustified_shell_exception_fails(run_mstack, shell_exception_file):
+    completed = run_mstack("exceptions", str(shell_exception_file("")))
+
+    assert completed.returncode == 1
+    assert "needs a '# rule-exception:'" in completed.stderr
+
+
+def test_shell_files_in_a_folder_are_checked(run_mstack, shell_exception_file):
+    folder = shell_exception_file("").parent
+
+    completed = run_mstack("exceptions", str(folder))
+
+    assert completed.returncode == 1
+    assert "task.sh" in completed.stderr

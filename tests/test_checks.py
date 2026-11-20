@@ -6,7 +6,11 @@ from tests.conftest import REPOSITORY_ROOT
 
 VALID_DIRECTORY = REPOSITORY_ROOT / "fixtures" / "valid"
 INVALID_DIRECTORY = REPOSITORY_ROOT / "fixtures" / "invalid"
-INVALID_FILES = sorted(INVALID_DIRECTORY.rglob("*.py"))
+INVALID_FILES = sorted(
+    path
+    for path in INVALID_DIRECTORY.rglob("*")
+    if path.is_file() and "__pycache__" not in path.parts
+)
 
 
 def test_valid_fixtures_have_no_errors(scan_findings):
