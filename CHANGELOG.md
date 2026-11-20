@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.13.0 (2026-11-20)
+
+### Features
+
+- **platform**: Behave the same on Linux, macOS, Windows and WSL
+  ([#31](https://github.com/justmatias/mstack/pull/31),
+  [`4c846e4`](https://github.com/justmatias/mstack/commit/4c846e438e328b5012a436886c5567a8d42b4d06))
+
+
 ## v3.12.0 (2026-11-20)
 
 ### Features
