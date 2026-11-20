@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v3.2.0 (2026-11-20)
+
+### Documentation
+
+- **setup-mstack**: Reword which items step 5 asks about
+  ([#23](https://github.com/justmatias/mstack/pull/23),
+  [`378b672`](https://github.com/justmatias/mstack/commit/378b6723f0f233eebb6c1fb7554cc0894c0e318c))
+
+### Features
+
+- **install**: Add agents, MCP servers, instructions and settings folders
+  ([#23](https://github.com/justmatias/mstack/pull/23),
+  [`378b672`](https://github.com/justmatias/mstack/commit/378b6723f0f233eebb6c1fb7554cc0894c0e318c))
+
+- **install**: Record installed items in a manifest
+  ([#23](https://github.com/justmatias/mstack/pull/23),
+  [`378b672`](https://github.com/justmatias/mstack/commit/378b6723f0f233eebb6c1fb7554cc0894c0e318c))
+
+
 ## v3.1.0 (2026-11-20)
 
 ### Continuous Integration
