@@ -4,22 +4,13 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    types: [opened, synchronize, reopened, edited]
 
+# Read-only by default: these jobs run code from the PR branch. Only the
+# versioning job gets write access.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
-  pr-title:
-    name: Conventional PR title
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   static-checks:
     name: Static checks (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
@@ -37,14 +28,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Every pre-commit hook on every file, including this repo's own
-      # lint-rules hook: the toolkit checks itself.
+      # Every pre-commit hook on every file except this repo's own lint-rules
+      # hook: it scans staged files only, so on a clean checkout it scans
+      # nothing. The next two steps run the rules properly.
       - name: Run pre-commit on all files
+        env:
+          SKIP: lint-rules
         run: make lint
 
-      # The pre-commit hook scans staged files only, so on a clean checkout it
-      # scans nothing: scan the whole repo here.
-      - name: Scan the code with the rules
+      - name: Scan the whole repo with the rules
         run: make lint-rules
 
       # The full scan above does not fail on warning-level rules (old instances
@@ -57,9 +49,8 @@ jobs:
           BASE_REF: origin/${{ github.base_ref }}
         run: make lint-rules-changed
 
-      - name: The checks still catch the invalid fixtures
-        run: make demo
-
+      # Includes test_every_invalid_fixture_is_caught: each file in
+      # fixtures/invalid/ must still be flagged, so the checks can't go silent.
       - name: Tests
         run: make test
 
@@ -74,14 +65,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run pip-audit
-        run: uvx pip-audit --local
+      # Audit what uv.lock pins. `uvx pip-audit --local` would audit pip-audit's
+      # own isolated environment instead of the project's dependencies.
+      - name: Run pip-audit on the locked dependencies
+        run: |
+          requirements="$RUNNER_TEMP/requirements-audit.txt"
+          uv export --frozen --all-groups --no-emit-project --format requirements-txt -o "$requirements"
+          uvx pip-audit -r "$requirements" --disable-pip --require-hashes
 
   versioning:
     name: Versioning
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [static-checks, security]
+    # Pushes the release commit and tag, and creates the GitHub release.
+    permissions:
+      contents: write
     concurrency:
       group: release
       cancel-in-progress: false
