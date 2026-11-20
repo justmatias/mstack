@@ -99,7 +99,7 @@ For skill rows, follow the Routing exactly, as in pstack:
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): the parent does it directly.
 - Substantive existing-skill edit, `tune description:` or `new skill via create-skill:`: use the environment's skill-creation workflow (Cursor's `create-skill`; in Claude Code, the `skill-creator` skill if installed) instead of inventing the shape ad hoc.
 
-After applying, run `make lint-rules`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Never open a PR or push.
+After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Never open a PR or push.
 
 ## 6. Summarize for the user
 
