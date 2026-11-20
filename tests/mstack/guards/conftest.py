@@ -1,40 +1,38 @@
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
-from tests.conftest import REPOSITORY_ROOT
+from tests.conftest import REPOSITORY_ROOT, run_command
 
 
 @pytest.fixture
 def run_mstack():
     def run(command: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
-        return subprocess.run(
-            [sys.executable, "-m", "mstack", command, *arguments],
-            cwd=working_directory,
-            capture_output=True,
-            text=True,
-            check=False,
+        return run_command(
+            [sys.executable, "-m", "mstack", command, *arguments], working_directory
         )
 
     return run
 
 
 @pytest.fixture
+def coverage_arguments() -> list[str]:
+    return ["--rules-dir", "rules", "--config", "lint/sgconfig.yml"]
+
+
+@pytest.fixture
 def rules_sandbox(tmp_path: Path) -> Path:
-    shutil.copytree(
-        REPOSITORY_ROOT / ".cursor" / "rules", tmp_path / ".cursor" / "rules"
-    )
-    shutil.copytree(REPOSITORY_ROOT / "lint-rules", tmp_path / "lint-rules")
+    shutil.copytree(REPOSITORY_ROOT / "rules", tmp_path / "rules")
+    shutil.copytree(REPOSITORY_ROOT / "lint", tmp_path / "lint")
     shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
     return tmp_path
 
 
 @pytest.fixture
 def _delete_enforced_by_line(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / ".cursor" / "rules" / "error-handling.mdc"
+    mdc = rules_sandbox / "rules" / "error-handling.mdc"
     mdc.write_text(
         mdc.read_text().replace("- enforced-by: no-swallowed-exception\n", "")
     )
@@ -42,19 +40,19 @@ def _delete_enforced_by_line(rules_sandbox: Path) -> None:
 
 @pytest.fixture
 def _delete_checks_section(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / ".cursor" / "rules" / "naming.mdc"
+    mdc = rules_sandbox / "rules" / "naming.mdc"
     mdc.write_text(mdc.read_text().split("## Checks")[0])
 
 
 @pytest.fixture
 def _add_unknown_check(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / ".cursor" / "rules" / "logging.mdc"
+    mdc = rules_sandbox / "rules" / "logging.mdc"
     mdc.write_text(mdc.read_text() + "- enforced-by: no-such-check\n")
 
 
 @pytest.fixture
 def _point_rule_to_missing_source(rules_sandbox: Path) -> None:
-    rule = rules_sandbox / "lint-rules" / "rules" / "no-bare-except.yml"
+    rule = rules_sandbox / "lint" / "rules" / "no-bare-except.yml"
     rule.write_text(rule.read_text().replace("error-handling.mdc", "missing.mdc"))
 
 

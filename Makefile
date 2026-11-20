@@ -3,22 +3,24 @@ SHELL := /usr/bin/env bash
 
 AST_GREP := uv run ast-grep
 MSTACK := uv run mstack
-SGCONFIG := lint-rules/sgconfig.yml
+SGCONFIG := lint/sgconfig.yml
+# This repo keeps its prose rules in rules/ and its checks in lint/; the guards default
+# to a work repo's .cursor/rules/ and lint-rules/, so the paths are passed explicitly.
+RULE_PATHS := --rules-dir rules --config $(SGCONFIG)
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 
 .PHONY: setup lint-rules lint-rules-changed guards demo rules-table test lint
 
-# Interactive unless SETUP_ARGS has flags, e.g. make setup SETUP_ARGS="--yes" or
-# SETUP_ARGS="--with pre-commit --with claude-hook". See: uv run python scripts/setup.py --help
+# Dev dependencies only. To install the skills and rules into your user folders, ask
+# Claude Code or Cursor to follow skills/setup-mstack/SKILL.md.
 setup:
 	uv sync
-	uv run python scripts/setup.py $(SETUP_ARGS)
 
 lint:
 	uv run pre-commit run --all-files
 
-# The single command. Hooks, pre-commit and CI call this target (or lint-rules-changed) and nothing else.
+# The single command. pre-commit and CI call this target (or lint-rules-changed) and nothing else.
 lint-rules:
 	$(AST_GREP) test -c $(SGCONFIG) --skip-snapshot-tests
 	$(AST_GREP) scan -c $(SGCONFIG) $(SCAN_EXCLUDES) .
@@ -41,9 +43,9 @@ lint-rules-changed:
 
 guards:
 	uv run lint-imports
-	$(MSTACK) coverage
+	$(MSTACK) coverage $(RULE_PATHS)
 	$(MSTACK) exceptions
-	$(MSTACK) leak-check lint-rules .cursor/rules --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
+	$(MSTACK) leak-check lint rules --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:
@@ -54,7 +56,7 @@ demo:
 	fi
 
 rules-table:
-	$(MSTACK) rules-table
+	$(MSTACK) rules-table $(RULE_PATHS)
 
 test:
 	uv run pytest -q

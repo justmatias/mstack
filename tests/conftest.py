@@ -7,7 +7,17 @@ import pytest
 import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-SGCONFIG = REPOSITORY_ROOT / "lint-rules" / "sgconfig.yml"
+SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
+
+
+def run_command(command: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(command, cwd=cwd, capture_output=True, text=True, check=False)
+
+
+def read_frontmatter(path: Path) -> dict:
+    _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
+    data: dict = yaml.safe_load(frontmatter)
+    return data
 
 
 @pytest.fixture
@@ -18,7 +28,7 @@ def repository_root() -> Path:
 @pytest.fixture
 def scan_findings():
     def scan(*paths: Path) -> list[dict]:
-        completed = subprocess.run(
+        completed = run_command(
             [
                 "ast-grep",
                 "scan",
@@ -27,10 +37,7 @@ def scan_findings():
                 "--json=stream",
                 *[str(path) for path in paths],
             ],
-            cwd=REPOSITORY_ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
+            REPOSITORY_ROOT,
         )
         return [json.loads(line) for line in completed.stdout.splitlines() if line]
 
@@ -53,18 +60,6 @@ def import_linter_sandbox(tmp_path: Path) -> Path:
 @pytest.fixture
 def run_lint_imports():
     def run(working_directory: Path) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            ["lint-imports"],
-            cwd=working_directory,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        return run_command(["lint-imports"], working_directory)
 
     return run
-
-
-def read_frontmatter(path: Path) -> dict:
-    _, frontmatter, _ = path.read_text(encoding="utf-8").split("---", 2)
-    data: dict = yaml.safe_load(frontmatter)
-    return data

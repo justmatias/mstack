@@ -1,12 +1,13 @@
-id: my-no-print
+id: no-print-in-app
 language: Python
 severity: error
 message: Use a module logger (logging.getLogger(__name__)) instead of print
 note: |
-  Personal rule. print output has no level or source and is easy to
-  leave behind after debugging.
+  print output has no level or source and cannot be filtered
+  or routed in production.
 metadata:
-  source: ~/.cursor/rules/my-no-print.mdc
+  source: rules/logging.mdc
+# Tests and scripts may print; everything else is application code.
 ignores:
   - "**/tests/**"
   - "**/scripts/**"

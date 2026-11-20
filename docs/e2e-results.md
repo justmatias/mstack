@@ -59,3 +59,18 @@ Every scenario ran with `HOME` pointing at a temporary folder and `GIT_CONFIG_GL
 | How `ruleDirs` resolves when `-c` points outside the current directory | Relative to the config file (decision 34). |
 | User-level hooks and their coexistence with project hooks | Decision 31; scenario 7. |
 | Invoking pre-commit from a chained hook; husky | Decision 32; scenarios 3 and 5. |
+
+## setup-mstack: installing the skills and rules
+
+Run on 2026-11-20 from the `feat/setup-mstack-skill` worktree, following `skills/setup-mstack/SKILL.md` by hand, as the agent would. `HOME` pointed at an empty temporary folder, so the real `~/.claude/` and `~/.cursor/` were never touched. Answers were given by the agent acting for the user: tools **both**. The temporary `HOME` was seeded with a pstack-style `reflect` skill in `~/.claude/skills/` and an old setup symlink `~/.cursor/skills/sync-rules` pointing into the checkout.
+
+| Step | Result | Evidence |
+| --- | --- | --- |
+| 1. Tools | Pass | Both: skills go to `~/.claude/skills/` only; rules go to `~/.claude/rules/` and are printed for Cursor Settings. |
+| 2. Skills inventory | Pass | `correct-rules`, `reflect-rules`, `sync-rules`: `new`. `sync-rules` is also a `duplicate` (the old symlink in `~/.cursor/skills/`). `setup-mstack` is excluded. Similar: `reflect` ↔ `reflect-rules` (known overlap; both `SKILL.md` files mine the transcript for learnings). |
+| 3. Rules inventory | Pass | All five `rules/*.mdc`: `new` as `~/.claude/rules/<name>.md`. |
+| 5. Conflicts | Pass | `reflect`: "Add" (both stay installed). Duplicate: "Discard" (the symlink is unlinked, nothing to back up). |
+| 6. Apply | Pass | Three skill folders copied (not symlinks), five rules written without frontmatter or `## Checks`, with an `Applies to files matching ...` line. `~/.config/mstack/config.json` has `toolkit_path`. `~/.cursor/skills/` is empty. |
+| 8. Verify | Pass | Every skill's `name` matches its folder and has a `description`. `../sync-rules/references/` resolves from every skill. No rule has frontmatter. The config points at a folder with `scripts/`. A second inventory reports `identical`. |
+| Skills and rules show up in a new session | Not run | A temporary `HOME` has no login (`claude -p` stops at "Not logged in"), and credentials were not copied. Pending a run on the real `HOME`. |
+| Cursor rules pasted into Settings | Not run | Cursor is not available on this machine. |

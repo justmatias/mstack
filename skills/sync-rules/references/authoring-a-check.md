@@ -112,26 +112,3 @@ testConfigs:
 ```
 
 and add `ast-grep-cli` (and `import-linter` for architecture rules) to the repo's dev dependencies. Propose the Makefile targets and CI job from the mstack README; do not add them without approval.
-
-## Personal set
-
-Checks for your own preferences live outside every repo, in `$MY_RULES_HOME` (default `~/.config/my-rules/`). Same recipe, with these differences:
-
-- Ids are prefixed `my-` (`my-no-print`), and the prose rule is `~/.cursor/rules/my-<name>.mdc`, whose Checks section lists the `my-` ids.
-- YAML goes to `$MY_RULES_HOME/rules/`, tests to `$MY_RULES_HOME/rule-tests/`. `metadata.source` is the `.mdc` path with `~` (`~/.cursor/rules/my-<name>.mdc`).
-- No repo paths at all: no `files` globs naming a repo, no examples from a repo.
-- Exceptions are lines in `$MY_RULES_HOME/ignore-paths.txt` (`<glob> [rule-id]`), never `ast-grep-ignore` comments, because nothing is written into other people's repos.
-- Only the lint level exists: architecture contracts and tests live in a repo and require changing it.
-- Ship personal rules as `error`. `my-rules-check` fails only on errors and nothing passes `--error` to it, so a `warning` in the personal set never blocks anything and the rule becomes advisory. Do not downgrade a rule because of a known glob limitation (for example `files: "**/test_*.py"` also matching files under a folder named `test_*`, since `*` matches `/`): record the limitation in the rule's `note`, and keep test sandboxes out of such folders.
-- Test and verify with:
-
-  ```bash
-  uv run ast-grep test -c "$MY_RULES_HOME/sgconfig.yml" --skip-snapshot-tests
-  mstack coverage --rules-dir ~/.cursor/rules \
-    --config "$MY_RULES_HOME/sgconfig.yml" --glob 'my-*.mdc' --root ~ --importlinter /dev/null
-  mstack leak-check <generated files> --repo <the repo you were working in>
-  ```
-
-- Check a file by hand with `$MY_RULES_HOME/bin/my-rules-check <files>` (add `--with-repo` to also run the current repo's `lint-rules/`).
-- Commit in `$MY_RULES_HOME` only if it is a git repo; `ignore-paths.txt` stays in its `.gitignore`.
-- The personal set is installed from the mstack checkout with `uv run python scripts/setup.py user` (see the mstack README).

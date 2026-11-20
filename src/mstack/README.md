@@ -9,4 +9,4 @@ The `mstack` command: the guards and generators that `make lint-rules` and the s
 | `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
 | `mstack rules-table` | `generate/rules_table.py` | Writes `docs/rules-table.md` and updates the table between the `rules-table` markers in `CLAUDE.md` / `AGENTS.md`. |
 
-Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `.cursor/rules/logging.mdc` asks.
+Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `rules/logging.mdc` asks.

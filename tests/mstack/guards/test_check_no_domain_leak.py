@@ -4,8 +4,8 @@ from pathlib import Path
 def test_example_rules_pass(run_mstack):
     completed = run_mstack(
         "leak-check",
-        "lint-rules",
-        ".cursor/rules",
+        "lint",
+        "rules",
         "--repo",
         ".",
         "--exclude",

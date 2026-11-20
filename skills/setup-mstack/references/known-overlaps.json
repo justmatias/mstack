@@ -1,0 +1,16 @@
+{
+  "overlaps": [
+    {
+      "skill": "reflect-rules",
+      "other": "reflect",
+      "origin": "pstack",
+      "reason": "reflect-rules is adapted from pstack reflect: both mine the transcript for durable learnings and route them into rules or skill edits"
+    },
+    {
+      "skill": "correct-rules",
+      "other": "correct",
+      "origin": "pstack",
+      "reason": "correct-rules is adapted from pstack correct: both find repeated mistakes and make them impossible at the highest level available"
+    }
+  ]
+}

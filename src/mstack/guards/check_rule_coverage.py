@@ -75,12 +75,12 @@ def display(path: Path, root: Path) -> str:
 
 
 def prose_rule_issues(
-    rules_dir: Path, known_checks: set[str], root: Path, pattern: str = "*.mdc"
+    rules_dir: Path, known_checks: set[str], root: Path
 ) -> tuple[list[dict], list[dict], dict[Path, set[str]]]:
     issues: list[dict] = []
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
-    for mdc_path in sorted(rules_dir.rglob(pattern)):
+    for mdc_path in sorted(rules_dir.rglob("*.mdc")):
         section = parse_checks_section(mdc_path)
         entry = {"mdc": display(mdc_path, root), "checks": [], "llm_review": False}
         rules.append(entry)
@@ -152,14 +152,11 @@ def compute_drift(
     config: Path,
     importlinter: Path,
     root: Path,
-    pattern: str = "*.mdc",
 ) -> dict:
     ast_grep_rules = load_ast_grep_rules(config)
     contracts = load_import_linter_contracts(importlinter)
     known_checks = set(ast_grep_rules) | contracts
-    rules, issues, listed_by_mdc = prose_rule_issues(
-        rules_dir, known_checks, root, pattern
-    )
+    rules, issues, listed_by_mdc = prose_rule_issues(rules_dir, known_checks, root)
     issues.extend(check_source_issues(ast_grep_rules, listed_by_mdc, root))
     return {"ok": not issues, "rules": rules, "issues": issues}
 
@@ -179,11 +176,6 @@ def main(argv: list[str] | None = None) -> int:
         help="Directory that relative metadata.source paths resolve against.",
     )
     parser.add_argument(
-        "--glob",
-        default="*.mdc",
-        help="Which .mdc files in --rules-dir to check (personal set: 'my-*.mdc').",
-    )
-    parser.add_argument(
         "--json", action="store_true", help="Print the drift report as JSON."
     )
     arguments = parser.parse_args(argv)
@@ -193,7 +185,6 @@ def main(argv: list[str] | None = None) -> int:
         arguments.config.expanduser(),
         arguments.importlinter.expanduser(),
         arguments.root.expanduser(),
-        arguments.glob,
     )
     if arguments.json:
         sys.stdout.write(json.dumps(report, indent=2) + "\n")

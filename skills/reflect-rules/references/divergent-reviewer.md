@@ -28,7 +28,7 @@ Two finding shapes are valid:
 
 Drop any skill that was neither invoked nor a missed-trigger candidate.
 
-Findings routed to a `rule:` are exempt from this scope: they route to `.cursor/rules/` (or the personal set), not to a skill.
+Findings routed to a `rule:` are exempt from this scope: they route to `.cursor/rules/`, not to a skill.
 
 List each durable learning. For each:
 - Principle: one sentence naming the contrarian or second-order observation. Don't restate the obvious learning. Name the one beneath it.
