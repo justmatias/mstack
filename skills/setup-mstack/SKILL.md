@@ -56,7 +56,7 @@ Build the converted text, then compare it with what is installed and give each r
 
 ## 4. Show the plan and wait
 
-Show one table, one row per skill or rule: name, kind (skill or rule), state, proposed action, and "similar to `<name>`" for confirmed overlaps. Wait for the user's approval. Do not ask about rows whose action is obvious (`new` → add, `identical` → nothing, `old-symlink` → replace with a copy).
+Show one table, one row per skill or rule: name, kind (skill or rule), purpose (one line, in your own words, from its `description` and body: what it does and when it is used), state, proposed action, and "similar to `<name>`" for confirmed overlaps. Wait for the user's approval. Do not ask about rows whose action is obvious (`new` → add, `identical` → nothing, `old-symlink` → replace with a copy).
 
 ## 5. Ask about every conflict
 
@@ -70,7 +70,12 @@ For each `differs` item, each confirmed similar item, and anything the user want
 | **Discard** | Do not install mstack's version, and leave what is installed untouched. For a `duplicate`, back it up and remove it. |
 | **Combine** | Draft one merged item (see below) and install it after approval. |
 
-Show the diff (`diff -ru` for a skill, `diff -u` for a rule) before asking.
+Ask about one item at a time, and give the user what they need to decide without opening any file:
+
+1. **Purpose.** In two or three lines, say what the mstack version does and when it is used. For a `differs` item, also say what the installed version does. For a similar item, say what the user's skill or rule does and where the two overlap or differ in purpose.
+2. **What changed.** Summarize the differences in plain words (for example "adds a `--check` mode", "drops the reviewer templates", "only the wording of step 3 changed"), and say whether they look like the user's own edits or a newer mstack version.
+3. **The diff** (`diff -ru` for a skill, `diff -u` for a rule). For a long diff, show the parts that matter and offer the rest.
+4. **Your recommendation** and one line of why, then the question.
 
 **Combine:**
 
