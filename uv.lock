@@ -210,9 +210,10 @@ wheels = [
 
 [[package]]
 name = "mstack"
-version = "3.0.0"
+version = "3.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pydantic" },
     { name = "pyyaml" },
 ]
 
@@ -221,20 +222,21 @@ dev = [
     { name = "ast-grep-cli" },
     { name = "import-linter" },
     { name = "pre-commit" },
-    { name = "pydantic" },
     { name = "pytest" },
     { name = "types-pyyaml" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyyaml", specifier = ">=6" }]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2" },
+    { name = "pyyaml", specifier = ">=6" },
+]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "ast-grep-cli" },
     { name = "import-linter" },
     { name = "pre-commit", specifier = ">=4" },
-    { name = "pydantic", specifier = ">=2" },
     { name = "pytest" },
     { name = "types-pyyaml" },
 ]

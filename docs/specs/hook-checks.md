@@ -34,7 +34,7 @@ New line in the `## Checks` section:
 ## Changes
 
 - `src/mstack/guards/check_rule_coverage.py`: parse `enforced-by-hook`, load hook ids, report `unknown-hook`. A section with only `enforced-by-hook` lines counts as having checks (no `missing-checks-section`).
-- `src/mstack/config.py` (if `project-config` has landed): the `pre_commit_config` key. Otherwise a `--pre-commit-config` flag.
+- `src/mstack/config.py`: the `pre_commit_config` key.
 - `skills/sync-rules/references/rule-format.md`: the new line in the Checks table, and when to use it.
 - `skills/sync-rules/references/authoring-a-check.md`, step 1: a new row, "an existing linter run as a pre-commit hook" (shellcheck, gitleaks, a commit-message check), tried after ast-grep and import-linter. Note that the hook must be pinned (`hookpin` already checks pins in this repo).
 - `sync-rules` step 4: `unknown-hook` in the drift list.

@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "3.0.0"
+version = "3.1.0"
 description = "Logbook of agent skills, rules, checks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }
@@ -8,7 +8,7 @@ authors = [
   { name = "Matias Gimenez", email = "matiasgimenez.dev@gmail.com" },
 ]
 requires-python = ">=3.12"
-dependencies = ["pyyaml>=6"]
+dependencies = ["pydantic>=2", "pyyaml>=6"]
 
 [project.scripts]
 mstack = "mstack.cli:main"
@@ -17,12 +17,10 @@ mstack = "mstack.cli:main"
 repository = "https://github.com/justmatias/mstack"
 
 [dependency-groups]
-# pydantic is only used by fixtures/valid/, the sample code the checks run on.
 dev = [
     "ast-grep-cli",
     "import-linter",
     "pre-commit>=4",
-    "pydantic>=2",
     "pytest",
     "types-pyyaml",
 ]

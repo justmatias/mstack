@@ -1,0 +1,267 @@
+import argparse
+import json
+import logging
+import sys
+import tomllib
+from pathlib import Path
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+logger = logging.getLogger(__name__)
+
+CONFIG_FILE_NAME = ".mstack.toml"
+PYPROJECT_FILE_NAME = "pyproject.toml"
+# Keys whose values are paths (or lists of paths) relative to the config file.
+PATH_KEYS = {
+    "rules_dir",
+    "sgconfig",
+    "importlinter",
+    "leak_check.paths",
+    "leak_check.exclude",
+}
+
+Source = Literal["default", "file", "flag"]
+
+
+class ConfigError(Exception):
+    pass
+
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class ScanSettings(StrictModel):
+    exclude: list[str] = []
+    extensions: list[str] = [".py"]
+
+
+class LeakCheckSettings(StrictModel):
+    paths: list[Path] = [Path("lint-rules"), Path(".cursor/rules")]
+    exclude: list[Path] = []
+
+
+class ChangedSettings(StrictModel):
+    base_ref: str = "origin/main"
+
+
+class ProjectConfig(StrictModel):
+    rules_dir: Path = Path(".cursor/rules")
+    sgconfig: Path = Path("lint-rules/sgconfig.yml")
+    importlinter: Path = Path(".importlinter")
+    scan: ScanSettings = ScanSettings()
+    leak_check: LeakCheckSettings = LeakCheckSettings()
+    changed: ChangedSettings = ChangedSettings()
+
+
+class ResolvedConfig(StrictModel):
+    """The merged config. Every path value is absolute."""
+
+    root: Path
+    git_root: Path | None
+    file: Path | None
+    values: ProjectConfig
+    sources: dict[str, Source]
+
+
+def find_git_root(start: Path) -> Path | None:
+    return next(
+        (
+            directory
+            for directory in (start, *start.parents)
+            if (directory / ".git").exists()
+        ),
+        None,
+    )
+
+
+def candidate_directories(start: Path, git_root: Path | None) -> list[Path]:
+    if git_root is None:
+        return [start]
+    directories = [start]
+    for parent in start.parents:
+        if not parent.is_relative_to(git_root):
+            break
+        directories.append(parent)
+    return directories
+
+
+def read_toml(path: Path) -> dict[str, Any]:
+    try:
+        return tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as error:
+        raise ConfigError(f"{path}: invalid TOML ({error})") from error
+
+
+def pyproject_table(directory: Path) -> dict[str, Any] | None:
+    pyproject = directory / PYPROJECT_FILE_NAME
+    if not pyproject.is_file():
+        return None
+    table = read_toml(pyproject).get("tool", {}).get("mstack")
+    if table is None or isinstance(table, dict):
+        return table
+    raise ConfigError(f"{pyproject}: [tool.mstack] must be a table")
+
+
+def find_config_file(
+    start: Path, git_root: Path | None
+) -> tuple[Path, dict[str, Any]] | None:
+    """Walk up from start to the git root; never read a config above the repo."""
+    for directory in candidate_directories(start, git_root):
+        config_file = directory / CONFIG_FILE_NAME
+        table = pyproject_table(directory)
+        if config_file.is_file():
+            if table is not None:
+                logger.warning(
+                    "%s: both %s and [tool.mstack] in %s exist; using %s",
+                    directory,
+                    CONFIG_FILE_NAME,
+                    PYPROJECT_FILE_NAME,
+                    CONFIG_FILE_NAME,
+                )
+            return config_file, read_toml(config_file)
+        if table is not None:
+            return directory / PYPROJECT_FILE_NAME, table
+    return None
+
+
+def flatten(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
+    flat: dict[str, Any] = {}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            flat.update(flatten(value, f"{prefix}{key}."))
+        else:
+            flat[f"{prefix}{key}"] = value
+    return flat
+
+
+def unflatten(flat: dict[str, Any]) -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    for dotted_key, value in flat.items():
+        *parents, leaf = dotted_key.split(".")
+        table = data
+        for parent in parents:
+            table = table.setdefault(parent, {})
+        table[leaf] = value
+    return data
+
+
+def absolute(value: Any, base: Path) -> Any:
+    if isinstance(value, list):
+        return [absolute(item, base) for item in value]
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else base / path
+
+
+def validate(data: dict[str, Any], origin: str) -> ProjectConfig:
+    try:
+        return ProjectConfig.model_validate(data)
+    except ValidationError as error:
+        raise ConfigError(f"{origin}: {error}") from error
+
+
+def resolve_config(
+    overrides: dict[str, Any] | None = None, start: Path | None = None
+) -> ResolvedConfig:
+    """Merge built-in defaults, the config file and flags, in that order.
+
+    `overrides` maps dotted keys (`rules_dir`, `leak_check.paths`) to flag values;
+    None means the flag was not given. Flag paths resolve against the current
+    directory, file and default paths against the config file's directory.
+    """
+    current_directory = Path.cwd()
+    start = (start or current_directory).resolve()
+    git_root = find_git_root(start)
+    found = find_config_file(start, git_root)
+    config_file, file_data = found or (None, {})
+    root = config_file.parent if config_file else (git_root or start)
+
+    file_values = flatten(
+        validate(file_data, str(config_file)).model_dump(exclude_unset=True)
+    )
+    merged = flatten(ProjectConfig().model_dump())
+    sources: dict[str, Source] = dict.fromkeys(merged, "default")
+    merged.update(file_values)
+    sources.update(dict.fromkeys(file_values, "file"))
+    for key in merged:
+        if key in PATH_KEYS:
+            merged[key] = absolute(merged[key], root)
+    for key, value in (overrides or {}).items():
+        if value is None:
+            continue
+        if key not in merged:
+            raise ConfigError(f"unknown config key '{key}'")
+        merged[key] = absolute(value, current_directory) if key in PATH_KEYS else value
+        sources[key] = "flag"
+
+    return ResolvedConfig(
+        root=root,
+        git_root=git_root,
+        file=config_file,
+        values=validate(unflatten(merged), "resolved config"),
+        sources=sources,
+    )
+
+
+def display_value(value: Any, root: Path) -> Any:
+    if isinstance(value, list):
+        return [display_value(item, root) for item in value]
+    if isinstance(value, Path):
+        return (
+            str(value.relative_to(root)) if value.is_relative_to(root) else str(value)
+        )
+    return value
+
+
+def describe(config: ResolvedConfig) -> dict[str, Any]:
+    values = flatten(config.values.model_dump())
+    return {
+        "file": str(config.file) if config.file else None,
+        "root": str(config.root),
+        "settings": {
+            key: {
+                "value": display_value(value, config.root),
+                "source": config.sources[key],
+            }
+            for key, value in values.items()
+        },
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="mstack config",
+        description=(
+            f"Print the resolved project config ({CONFIG_FILE_NAME} or [tool.mstack] "
+            "in pyproject.toml) and where each value comes from."
+        ),
+    )
+    parser.add_argument("--rules-dir", type=Path)
+    parser.add_argument("--sgconfig", type=Path)
+    parser.add_argument("--importlinter", type=Path)
+    parser.add_argument(
+        "--json", action="store_true", help="Print the resolved config as JSON."
+    )
+    arguments = parser.parse_args(argv)
+
+    description = describe(
+        resolve_config({
+            "rules_dir": arguments.rules_dir,
+            "sgconfig": arguments.sgconfig,
+            "importlinter": arguments.importlinter,
+        })
+    )
+    if arguments.json:
+        sys.stdout.write(json.dumps(description, indent=2) + "\n")
+        return 0
+    lines = [
+        f"# file: {description['file'] or 'none (built-in defaults)'}",
+        f"# root: {description['root']}",
+    ]
+    lines.extend(
+        f"{key} = {json.dumps(setting['value'])}  # {setting['source']}"
+        for key, setting in description["settings"].items()
+    )
+    sys.stdout.write("\n".join(lines) + "\n")
+    return 0

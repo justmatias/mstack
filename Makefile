@@ -3,12 +3,13 @@ SHELL := /usr/bin/env bash
 
 AST_GREP := uv run ast-grep
 MSTACK := uv run mstack
+# The mstack guards read their paths from .mstack.toml. The ast-grep calls below still
+# repeat the sgconfig and the scan exclude until `mstack lint` runs them
+# (docs/specs/runtime-lint-command.md).
 SGCONFIG := lint/sgconfig.yml
-# This repo keeps its prose rules in rules/ and its checks in lint/; the guards default
-# to a work repo's .cursor/rules/ and lint-rules/, so the paths are passed explicitly.
-RULE_PATHS := --rules-dir rules --config $(SGCONFIG)
 # The installable files in agents/, mcp/, settings/ and instructions/. Each folder's
 # README.md documents the format for this repo and is not installed, so it is left out.
+# Passing them to leak-check replaces [leak_check].paths, so lint and rules are repeated.
 AGENT_CONFIG_FILES := $(filter-out %/README.md,$(wildcard agents/*.md mcp/*.json settings/*.json instructions/*.md))
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
@@ -46,10 +47,10 @@ lint-rules-changed:
 
 guards:
 	uv run lint-imports
-	$(MSTACK) coverage $(RULE_PATHS)
+	$(MSTACK) coverage
 	$(MSTACK) exceptions
 	$(MSTACK) config-check
-	$(MSTACK) leak-check lint rules $(AGENT_CONFIG_FILES) --repo . --exclude src --exclude scripts --exclude tests --exclude fixtures/invalid
+	$(MSTACK) leak-check lint rules $(AGENT_CONFIG_FILES)
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:

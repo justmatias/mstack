@@ -2,6 +2,39 @@
 
 <!-- version list -->
 
+## v3.1.0 (2026-11-20)
+
+### Continuous Integration
+
+- Audit the locked dependencies, least-privilege permissions and drop redundant steps
+  ([#18](https://github.com/justmatias/mstack/pull/18),
+  [`e42e9d5`](https://github.com/justmatias/mstack/commit/e42e9d50c889bbb3ee44f0a27088f09d59754d03))
+
+### Documentation
+
+- Simplify the README and add a getting started section
+  ([#19](https://github.com/justmatias/mstack/pull/19),
+  [`dd55a73`](https://github.com/justmatias/mstack/commit/dd55a73d138f2d0355ebfeaf9e9a8a751398cdc2))
+
+- **setup-mstack**: Reword which items step 5 asks about
+  ([#22](https://github.com/justmatias/mstack/pull/22),
+  [`3c28eed`](https://github.com/justmatias/mstack/commit/3c28eed8d0423930fbcc7265b57050dfff343618))
+
+- **specs**: Add implementation plans for the cross-machine stack
+  ([#20](https://github.com/justmatias/mstack/pull/20),
+  [`05230f5`](https://github.com/justmatias/mstack/commit/05230f5f4c966d1493c890c020960409389febf3))
+
+### Features
+
+- **config**: Read repo paths from .mstack.toml
+  ([#21](https://github.com/justmatias/mstack/pull/21),
+  [`09dde71`](https://github.com/justmatias/mstack/commit/09dde7109a46dd761636d455e2c7d5a5915e7bc6))
+
+- **install**: Record installed items in a manifest
+  ([#22](https://github.com/justmatias/mstack/pull/22),
+  [`3c28eed`](https://github.com/justmatias/mstack/commit/3c28eed8d0423930fbcc7265b57050dfff343618))
+
+
 ## v3.0.0 (2026-11-20)
 
 ### Features

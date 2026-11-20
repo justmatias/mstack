@@ -3,6 +3,7 @@ import logging
 import sys
 from collections.abc import Callable
 
+from mstack import config
 from mstack.guards import (
     check_agent_config,
     check_exceptions,
@@ -11,7 +12,10 @@ from mstack.guards import (
 )
 from mstack.install import manifest, merge, render
 
+logger = logging.getLogger(__name__)
+
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
+    "config": config.main,
     "config-check": check_agent_config.main,
     "coverage": check_rule_coverage.main,
     "exceptions": check_exceptions.main,
@@ -36,4 +40,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    return COMMANDS[parsed.command](arguments[1:])
+    try:
+        return COMMANDS[parsed.command](arguments[1:])
+    except config.ConfigError as error:
+        logger.error("mstack: %s", error)
+        return 2
