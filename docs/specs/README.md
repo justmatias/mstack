@@ -15,7 +15,6 @@ Suggested order: the first two unblock most of the rest.
 | [project-config](project-config.md) | `.mstack.toml`: one place for a repo's rule, check and scan paths | none |
 | [remove-architecture-layers-rule](remove-architecture-layers-rule.md) | Drop the fixture-only rule and everything that exists only for it | none |
 | [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | project-config |
-| [install-manifest](install-manifest.md) | Record what mstack installed, so updates tell user edits from upstream changes | none |
 | [skill-validation](skill-validation.md) | `mstack skills-check`: validate every `SKILL.md` and its links in CI | none |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [agent-config-folders](agent-config-folders.md) | `agents/`, `mcp/`, `settings/`, `instructions/` alongside `skills/` and `rules/` | install-manifest (soft) |
