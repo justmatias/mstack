@@ -166,9 +166,9 @@ def test_generic_profile_skips_mstack_only_checks(
     )
     edit_skill("setup-mstack/SKILL.md", "Install the mstack", "Instalá the mstack")
     edit_skill(
-        "integrate-skills/SKILL.md",
-        "name: integrate-skills",
-        "name: integrate-skills\nallowed-tools: Read\nauthor: someone",
+        "integrate/SKILL.md",
+        "name: integrate",
+        "name: integrate\nallowed-tools: Read\nauthor: someone",
     )
 
     completed = run_mstack(

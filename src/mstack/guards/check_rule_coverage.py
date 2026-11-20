@@ -9,6 +9,8 @@ from pathlib import Path
 import yaml
 
 from mstack.config import resolve_config
+from mstack.guards.credit import credit_problems
+from mstack.install.render import RuleFormatError, split_frontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +108,17 @@ def unknown_hook_issues(
     ]
 
 
+def frontmatter_issues(mdc_path: Path, mdc: str) -> list[dict]:
+    try:
+        frontmatter, _ = split_frontmatter(mdc_path.read_text(encoding="utf-8"))
+    except RuleFormatError as error:
+        return [{"kind": "invalid-frontmatter", "file": mdc, "detail": str(error)}]
+    return [
+        {"kind": "credit", "file": mdc, "detail": problem}
+        for problem in credit_problems(frontmatter)
+    ]
+
+
 def resolve_source(source: str, root: Path) -> Path:
     path = Path(source).expanduser()
     return path if path.is_absolute() else root / path
@@ -133,6 +146,7 @@ def prose_rule_issues(
         mdc = display(mdc_path, root)
         entry = {"mdc": mdc, "checks": [], "hooks": [], "llm_review": False}
         rules.append(entry)
+        issues.extend(frontmatter_issues(mdc_path, mdc))
         if section is None or not (
             section["enforced_by"] or section["hooks"] or section["llm_review"]
         ):

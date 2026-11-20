@@ -62,6 +62,7 @@ Sources: every `<mstack>/rules/*.mdc`. Each one installs as `~/.claude/rules/<na
 2. If the rule had `globs`, start the body with one line: `Applies to files matching <globs>.`
 3. Drop the `## Checks` section: those checks only run inside the mstack repo.
 4. Keep the rest of the body as it is.
+5. If the frontmatter credits an upstream (`metadata.adapted-from` or `inspired-by`), end the body with one line per credit (`Adapted from <adapted-from> License: <upstream-license>.`), so the notice travels with the copy.
 
 The rule states come from the same `mstack manifest status` output as the skills (`kind: rule`). To see what changed, `diff -u <(mstack render-rule <mstack>/rules/<name>.mdc) ~/.claude/rules/<name>.md`. Also look for **similar rules** in `~/.claude/rules/` (same topic under another file name) by reading them, and keep only real overlaps.
 

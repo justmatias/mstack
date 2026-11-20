@@ -9,13 +9,14 @@ from urllib.parse import unquote
 
 import yaml
 
+from mstack.guards.credit import credit_problems
+
 logger = logging.getLogger(__name__)
 
 SKILL_FILE = "SKILL.md"
 PROFILES = ("mstack", "generic")
 MAX_DESCRIPTION_LENGTH = 1024
 KEBAB_CASE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-SHA = re.compile(r"^[0-9a-f]{40}$")
 FENCE = re.compile(r"^\s*(```|~~~)")
 CODE_SPAN = re.compile(r"(`+).+?\1")
 QUOTED = re.compile(r"\"[^\"]*\"|“[^”]*”")
@@ -154,27 +155,7 @@ def key_issues(skill: Path, frontmatter: dict, profile: str) -> list[dict]:
 
 
 def credit_issues(skill: Path, frontmatter: dict) -> list[dict]:
-    metadata = frontmatter.get("metadata") or {}
-    if not isinstance(metadata, dict):
-        return [issue(skill, "credit", "'metadata' is not a mapping")]
-    problems: list[dict] = []
-    if "license" in frontmatter and "adapted-from" not in metadata:
-        problems.append(issue(skill, "credit", "'license' without 'adapted-from'"))
-    if "adapted-from" in metadata and "license" not in frontmatter:
-        problems.append(issue(skill, "credit", "'adapted-from' without 'license'"))
-    for key in metadata:
-        if not str(key).startswith("adapted-from"):
-            continue
-        commit_key = str(key).replace("adapted-from", "upstream-commit", 1)
-        if not SHA.match(str(metadata.get(commit_key, ""))):
-            problems.append(
-                issue(
-                    skill,
-                    "credit",
-                    f"'{key}' needs a '{commit_key}' set to a 40-character sha",
-                )
-            )
-    return problems
+    return [issue(skill, "credit", problem) for problem in credit_problems(frontmatter)]
 
 
 def principles_issues(skill: Path, text: str) -> list[dict]:

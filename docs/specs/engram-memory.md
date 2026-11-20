@@ -15,7 +15,7 @@ Engram becomes the optional memory layer of the stack: installed and verified th
 
 - Replacing rules or skills with memories. A memory is a hint an agent may retrieve; a rule with a check is enforced. mstack's core idea stays the same.
 - Hosting Engram Cloud.
-- Vendoring Engram, or copying its skills or instructions into this repo without going through `integrate-skills`.
+- Vendoring Engram, or copying its skills or instructions into this repo without going through `integrate`.
 
 ## Design
 
