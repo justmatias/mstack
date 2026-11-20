@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.10.0 (2026-11-20)
+
+### Features
+
+- **ci**: Add a reusable GitHub Action that runs mstack lint
+  ([#28](https://github.com/justmatias/mstack/pull/28),
+  [`ef8c991`](https://github.com/justmatias/mstack/commit/ef8c99132afedf96f2ab08b7c55b89e3c627cc66))
+
+
 ## v3.9.0 (2026-11-20)
 
 ### Features
