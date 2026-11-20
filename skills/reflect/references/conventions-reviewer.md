@@ -16,14 +16,15 @@ Scan for:
 - Conventions that contradict an existing rule in `.cursor/rules/`
 
 For each, decide the kind:
-- **pattern**: a construct an AST pattern can find (ast-grep).
-- **architecture**: a dependency between modules (import-linter).
-- **judgment**: no tool can check it reliably (`enforcement: llm-review`).
+- **pattern**: a concrete construct one simple ast-grep rule can deny from the file alone, with no false positives.
+- **architecture**: a dependency between modules one import-linter contract can deny.
+- **judgment**: anything else, including rules a tool could check only with complex logic, cross-file knowledge or many exceptions (`enforcement: llm-review`).
+- **borderline**: it fails one of these tests but not clearly. The parent will ask the user.
 
 List each convention. For each:
 - Principle: one sentence stating the generic rule, in the imperative, with no domain names.
 - Evidence: the transcript message index (for example `#42`). Never copy the message content, its code or its names.
-- Kind: pattern | architecture | judgment.
+- Kind: pattern | architecture | judgment | borderline.
 - Construct: for pattern and architecture, the generic construct to match (for example "a call to `datetime.now()` with no `tz` argument"). Never a domain identifier.
 - Related rule: the existing `.mdc` that covers the topic, or "none". If it contradicts that rule, say `conflict` and quote the existing rule's line number, not its text.
 

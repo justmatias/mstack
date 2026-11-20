@@ -6,21 +6,42 @@ The recipe for turning one checkable prose rule into a check. `sync`, `reflect` 
 
 The checks run through the `mstack` command on `PATH`: `mstack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `leak-check` guards), and `mstack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
 
+## 0. Static check or LLM review?
+
+Decide this before you pick a tool. A static check costs a YAML file, its tests, its false positives and every exception people add to dodge it, so it has to be worth that. A rule with `enforcement: llm-review` costs only its prose: the reviewer reads it on every PR.
+
+Write a **static check** only when every one of these holds:
+
+- **The bad code is a concrete construct**: a call, a decorator, an import, a statement shape. You can show it in one line and say "never this".
+- **The file alone decides it.** No intent, naming, call sites in other files or runtime data is needed to tell a violation from fine code.
+- **One simple rule expresses it**: one ast-grep pattern with at most a `not`, `inside` or `has` or two, or one import-linter contract. No Fixit or custom logic.
+- **Near misses are easy to tell apart.** You can write the valid near-miss cases, and the scan finds no false positive you cannot remove without narrowing the rule until it misses the real mistake.
+- **The message names one fix** ("use `Foo` instead"), not "it depends".
+
+Use **rule + `enforcement: llm-review`** when any of these holds:
+
+- It is about meaning: names, responsibilities, "a function does one thing", when to use an abstraction.
+- Expressing it needs a chain of exclusions, several rules for one idea, a Fixit codemod, or cross-file knowledge.
+- You expect legitimate exceptions to be common (more than a few `ast-grep-ignore` lines).
+- The tests pass only because the cases were tuned to the pattern, not because the pattern matches the mistake.
+
+**Borderline: ask the user.** When the rule fails one static criterion but not clearly, or the check needs Fixit, do not decide alone. Show both options side by side: the check you would write (tool, pattern sketch, scan count, expected exceptions) and the llm-review rule, with your recommendation. Let the user pick. The user may also override either default; record their choice in your reply.
+
 ## 1. Pick the tool
 
-Try them in this order and stop at the first that expresses the rule without false positives:
+Only for rules that passed step 0. Try them in this order and stop at the first that expresses the rule without false positives:
 
 | Tool | Use it for | Example |
 | --- | --- | --- |
 | ast-grep (YAML in `lint-rules/rules/`) | Code patterns | no `print`, no `@dataclass`, no bare `except:` |
 | import-linter (`.importlinter`) | Dependencies between modules | `domain` does not import `infra` |
 | An existing linter run as a pre-commit hook (`enforced-by-hook: <id>`) | What a dedicated tool already checks | shellcheck for unquoted expansions, gitleaks for committed secrets, a commit-message check |
-| Fixit (LibCST, Python) | Logic a pattern cannot express | an `__init__` that only assigns `self.x = x` across a whole class |
+| Fixit (LibCST, Python) | Logic a pattern cannot express, only after the user chose it in step 0 | an `__init__` that only assigns `self.x = x` across a whole class |
 | none: `enforcement: llm-review` | Judgment | descriptive names, single-purpose functions |
 
 A hook goes in `.pre-commit-config.yaml` pinned to a full tag or sha (in the mstack repo, `hookpin` checks the pins); write `- enforced-by-hook: <hook id>` in the Checks section, and skip steps 2 to 6.
 
-If no tool fits, the rule is judgment: mark it `enforcement: llm-review` and stop. Do not force a pattern at the cost of false positives; a narrower check shipped as `warning` is better than a broad one that people learn to ignore.
+If no tool fits, or the check grows past what step 0 allows, the rule is judgment: mark it `enforcement: llm-review` and stop. Do not force a pattern at the cost of false positives; a narrower check shipped as `warning` is better than a broad one that people learn to ignore.
 
 ## 2. Write the YAML
 

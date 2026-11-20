@@ -75,11 +75,11 @@ Skip step 2. Instead:
 
 ## 4. Turn conventions into rules and checks
 
-Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog. For each Accepted `rule:` row, prepare the full change now, without writing it yet:
+Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog. Before preparing a check, apply step 0 of [authoring-a-check.md](../sync/references/authoring-a-check.md): only a concrete construct that one simple rule denies from the file alone gets a static check; anything else becomes a rule with `enforcement: llm-review`. For borderline rows, prepare both options and let the user pick in step 5. For each Accepted `rule:` row, prepare the full change now, without writing it yet:
 
 1. **Find the related rule.** Search `.cursor/rules/` for a rule on the same topic. Prefer editing it over adding a duplicate.
 2. **Write the prose rule**: the bullet, its `Why:` line, and the `## Checks` line, following [rule-format.md](../sync/references/rule-format.md).
-3. **Write the check** for pattern and architecture rows, following [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows get `enforcement: llm-review` and no check.
+3. **Write the check** for pattern and architecture rows that passed step 0, following [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
 5. **Verify** with `check_no_domain_leak.py` over the prepared files, and reread them for English.
 
@@ -87,7 +87,7 @@ Only what no available tool can check, or what needs a large architecture change
 
 ## 5. Approve, then apply
 
-Present the full Accepted / Rejected / Backlog output (yours from step 2, or the synthesizer's with `--deep`), with the prepared rule and check for each `rule:` row, and **wait for explicit approval** before applying anything. The user picks the subset and may redirect routings. Rules are written to `.cursor/rules/` and `lint-rules/` in the current repo.
+Present the full Accepted / Rejected / Backlog output (yours from step 2, or the synthesizer's with `--deep`), with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules are written to `.cursor/rules/` and `lint-rules/` in the current repo.
 
 Rules and skills change what every future agent does. Do not auto-apply.
 
