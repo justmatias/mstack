@@ -28,7 +28,7 @@ mstack targets Claude Code and Cursor. Other agents read similar files: Codex CL
 ## Changes
 
 - `src/mstack/doctor/targets.py` grows a definition per tool.
-- `.claude/skills/setup-mstack/SKILL.md`: a row per tool.
+- `.agents/skills/setup-mstack/SKILL.md`: a row per tool.
 - `doctor`: per-target checks.
 - `README.md` install table, and `discovery.md`.
 

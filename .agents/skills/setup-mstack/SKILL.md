@@ -1,6 +1,6 @@
 ---
 name: setup-mstack
-description: "Install or update mstack on this machine: the mstack CLI, the skills (skills/), rules (rules/), subagents (agents/), MCP servers (mcp/), global instructions (instructions/) and settings (settings/), into the user-level folders Claude Code and Cursor load. Compares each item with what is already installed, shows one plan, and asks only where the user's own setup differs. Use for /setup-mstack, set up mstack, install mstack, update mstack, or after pulling a new version of the mstack repo."
+description: "Install or update mstack on this machine: the mstack CLI, the skills (skills/), rules (rules/), subagents (agents/), MCP servers (mcp/), global instructions (instructions/) and settings (settings/), into the user-level folders Claude Code and Cursor load. Compares each item with what is already installed, shows one plan, and asks only where the user's own setup differs. Use for /setup-mstack ($setup-mstack in Codex), set up mstack, install mstack, update mstack, or after pulling a new version of the mstack repo."
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim code taken from the user's version. Details: `skills/sync/references/principles.md` in this checkout.
 
-This skill runs from the mstack checkout (`<mstack>`, the folder with `skills/` and `rules/`), and is never installed. Installing and updating are the same run: the user pulls the repo and runs it again.
+This skill runs from the mstack checkout (`<mstack>`, the folder with `skills/` and `rules/`), and is never installed. It lives in `.agents/skills/`, which Codex, Cursor and opencode load as project skills; Claude Code reaches it through `CLAUDE.md`, which imports `AGENTS.md`. Installing and updating are the same run: the user pulls the repo and runs it again.
 
 You decide how to do the work, with ordinary file tools and the shell the machine has (PowerShell on native Windows). This page says what a finished setup looks like, what to watch out for, and the rules you never break.
 

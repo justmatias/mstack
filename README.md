@@ -26,10 +26,10 @@ You need git, [`uv`](https://docs.astral.sh/uv/), and Claude Code or Cursor.
 ```bash
 git clone https://github.com/justmatias/mstack
 cd mstack
-claude /setup-mstack
+claude "set up mstack"
 ```
 
-In Cursor, open the folder and run `/setup-mstack` in the agent chat; any other agent can be asked to *"set up mstack"* (`AGENTS.md` points it to the skill). The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`.
+The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
 | You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
 | --- | --- | --- | --- | --- |
@@ -53,7 +53,7 @@ On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows prof
 
 **3. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and whether an installed copy drifted from the checkout. It prints the fix for each problem and exits 1 on any error; run `/repair` to apply them. `--online` also compares with the latest release.
 
-**4. Update.** `git pull` in the checkout, then run `/setup-mstack` again. Copies that only mstack changed update with a backup; it asks before touching your own edits.
+**4. Update.** `git pull` in the checkout, then run the setup again. Copies that only mstack changed update with a backup; it asks before touching your own edits.
 
 ## Use the checks in another repo
 

@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## 1. Run doctor
 
 1. Run `mstack doctor --json` (add `--tool <claude|cursor|both>` if the user names one, and `--online` if they asked about updates). If `mstack` is not on `PATH`, or it fails to start, the CLI is the first gap: go to the `cli` row in step 2, then run doctor again.
-2. Read `checkout`, `tool` and `platform` from the JSON, and keep every result whose `status` is not `ok`. `<mstack>` below is that `checkout`: the setup instructions this skill defers to are in `<mstack>/.claude/skills/setup-mstack/SKILL.md`, which is never installed, so read it from there.
+2. Read `checkout`, `tool` and `platform` from the JSON, and keep every result whose `status` is not `ok`. `<mstack>` below is that `checkout`: the setup instructions this skill defers to are in `<mstack>/.agents/skills/setup-mstack/SKILL.md`, which is never installed, so read it from there.
 3. If nothing is left, say so in one line and stop.
 
 ## 2. Map each result to its fix
