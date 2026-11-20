@@ -1,0 +1,8 @@
+- repo: https://github.com/justmatias/mstack
+  rev: v{{version}}
+  hooks:
+    - id: mstack-lint
+    - id: mstack-rules
+    - id: mstack-exceptions
+    - id: mstack-leak-check
+    - id: mstack-imports

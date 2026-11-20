@@ -7,6 +7,7 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `mstack config` | `config.py` | Prints the resolved project config and where each value comes from (`default`, `file` or `flag`). `--json` prints it as JSON. |
 | `mstack lint` | `lint.py`, `changed_files.py` | Runs every check in order (see below). |
 | `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
+| `mstack init` | `init.py`, `templates/` | Scaffolds the rules-as-checks layout in a repo (see below). |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
 | `mstack leak-check` | `guards/check_no_domain_leak.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, emails or secrets. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
@@ -58,6 +59,20 @@ mstack lint [--changed [--base-ref REF] [--staged]] [--files FILE ...]
 - **All steps run**, even after a failure, and the exit code is 1 if any failed (2 for a usage or git error). `--json` prints `{step: {ok, skipped, findings}}` to stdout: scan findings carry `file`, `line`, `rule`, `severity` and `message`; the other steps list their error messages.
 - **Tools.** ast-grep and lint-imports are taken from the environment mstack runs in (next to its Python) before `PATH`, so the bundled versions win. For `imports`, a repo whose `uv.lock` lists import-linter runs its own (`uv run --frozen lint-imports`), because the contracts need the project importable; otherwise the bundled one runs with the repo root and `src/` on `PYTHONPATH`. The log says which one ran.
 - The guards run in process, through their `main()` functions.
+
+### `mstack init`
+
+```text
+mstack init [--rules-dir DIR] [--checks-dir DIR]
+            [--pre-commit] [--ci github] [--makefile] [--dry-run] [--yes]
+```
+
+- Always: `.mstack.toml` with the chosen folders (defaults `.cursor/rules` and `lint-rules`), `<checks-dir>/sgconfig.yml`, empty `rules/` and `rule-tests/` (with a `.gitkeep`), and `<rules-dir>/` when missing.
+- `--pre-commit`: adds the mstack hooks to `.pre-commit-config.yaml`, pinned to the running version's tag, at the end of `repos:` (the rest of the file is untouched). Creates the file when missing.
+- `--ci github`: `.github/workflows/mstack.yml`, which runs the mstack action at the running version's tag.
+- `--makefile`: the `lint-rules` and `lint-rules-changed` targets, each only when the Makefile doesn't define it yet.
+
+It prints every file as `create`, `append` or `exists, skipped` and asks before writing, unless `--yes`; `--dry-run` only prints. It never overwrites a file and appends only missing entries, so a second run changes nothing. If the repo already has a `.mstack.toml` (or `[tool.mstack]`) or a `lint-rules/sgconfig.yml`, the layout is left as it is and only missing optional pieces are added. After writing it runs `mstack lint` once; an empty layout passes. The templates are in `templates/` and ship in the wheel.
 
 Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`, as `rules/logging.mdc` asks.
 
