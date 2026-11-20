@@ -8,7 +8,7 @@ from mstack.install.item_kinds import Tool
 from mstack.platform import Platform
 
 Status = Literal["ok", "warn", "error"]
-SETUP_FIX = "ask your agent to follow skills/setup-mstack/SKILL.md in the checkout"
+REPAIR_FIX = "ask your agent to run the repair skill (/repair in Claude Code)"
 
 
 class StrictModel(BaseModel):

@@ -1,4 +1,4 @@
-from mstack.doctor.model import SETUP_FIX, Context, Result
+from mstack.doctor.model import REPAIR_FIX, Context, Result
 from mstack.install.manifest import (
     ManifestError,
     compute_status,
@@ -34,7 +34,7 @@ def check_drift(context: Context) -> list[Result]:
             check=f"{row.kind} {row.name}",
             status="warn",
             detail=f"{row.state} at {row.target} ({row.action})",
-            fix=SETUP_FIX,
+            fix=REPAIR_FIX,
         )
         for row in drifted
     ]

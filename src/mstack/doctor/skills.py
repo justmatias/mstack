@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from mstack.doctor.model import SETUP_FIX, Context, Result
+from mstack.doctor.model import REPAIR_FIX, Context, Result
 from mstack.guards.check_skills import check_skills
 from mstack.install.item_kinds import source_names, uses_claude, uses_cursor
 
@@ -29,7 +29,7 @@ def missing_results(context: Context, folder: Path) -> list[Result]:
                 check="installed",
                 status="error",
                 detail=f"not installed in {folder}: {', '.join(missing)}",
-                fix=SETUP_FIX,
+                fix=REPAIR_FIX,
             )
         ]
     return [
