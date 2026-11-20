@@ -19,7 +19,6 @@ repository = "https://github.com/justmatias/mstack"
 [dependency-groups]
 dev = [
     "ast-grep-cli",
-    "import-linter",
     "pre-commit>=4",
     "pytest",
     "types-pyyaml",
