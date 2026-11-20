@@ -4,6 +4,8 @@ My stack for guiding AI coding agents: the skills, rules and checks I use to ste
 
 Agents follow what they are told and what is checked. So every rule that can be verified becomes an automated check (**rules as checks**), and conventions are enforced instead of re-flagged in code review.
 
+**New here?** [`docs/workflow.md`](docs/workflow.md) walks through the whole workflow: setting up a machine, adopting rules as checks in a repo, and the daily loop.
+
 ## What's inside
 
 | Folder | What it is |
@@ -126,7 +128,7 @@ Each rule ends with a `## Checks` section naming its checks, and each check poin
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
-Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into now, next and future.
+Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into next and future.
 
 ## CI and releases
 
