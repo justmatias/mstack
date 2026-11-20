@@ -1,0 +1,7 @@
+# Hooks other repos use from their .pre-commit-config.yaml, pinned to a release tag.
+- id: mstack-commit-msg
+  name: mstack commit-msg
+  description: Commit messages follow Conventional Commits ([commits].types in .mstack.toml).
+  entry: mstack commit-msg
+  language: python
+  stages: [commit-msg]
