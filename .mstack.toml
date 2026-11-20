@@ -2,13 +2,13 @@
 # flags still override it. Run `mstack config` to see the resolved values.
 rules_dir = "rules"
 sgconfig = "lint/sgconfig.yml"
-importlinter = ".importlinter"
 
 [scan]
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 exclude = ["fixtures/invalid/**"]
+extensions = [".py", ".sh"]
 
 [leak_check]
 paths = ["lint", "rules"]
 # Tooling folders, not the analyzed code.
-exclude = ["src", "scripts", "tests", "fixtures/invalid"]
+exclude = ["src", "tests", "fixtures/invalid"]

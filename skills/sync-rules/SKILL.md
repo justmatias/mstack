@@ -82,7 +82,7 @@ One commit per synced rule (YAML, tests and `.mdc` together), with a Conventiona
 ## 7. Verify
 
 ```bash
-make lint-rules
+mstack lint
 make demo          # when the repo has fixtures/invalid/
 ```
 

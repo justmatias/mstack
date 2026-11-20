@@ -10,7 +10,6 @@ from tests.conftest import REPOSITORY_ROOT
 def rules_sandbox(tmp_path: Path) -> Path:
     shutil.copytree(REPOSITORY_ROOT / "rules", tmp_path / "rules")
     shutil.copytree(REPOSITORY_ROOT / "lint", tmp_path / "lint")
-    shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
     shutil.copy(REPOSITORY_ROOT / ".mstack.toml", tmp_path / ".mstack.toml")
     shutil.copy(
         REPOSITORY_ROOT / ".pre-commit-config.yaml",
@@ -117,3 +116,17 @@ def _only_hook_in_checks_section(rules_sandbox: Path) -> None:
     mdc.write_text(
         prose + "## Checks\n- enforced-by-hook: gitleaks\n", encoding="utf-8"
     )
+
+
+@pytest.fixture
+def shell_exception_file(tmp_path: Path):
+    def write(header: str) -> Path:
+        path = tmp_path / "task.sh"
+        path.write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n"
+            f'{header}# ast-grep-ignore: no-eval\neval "$1"\n',
+            encoding="utf-8",
+        )
+        return path
+
+    return write

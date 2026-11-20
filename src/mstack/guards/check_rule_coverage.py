@@ -75,11 +75,13 @@ def load_pre_commit_hooks(config_path: Path) -> set[str] | None:
     """
     if not config_path.is_file():
         return None
-    config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    repos = config.get("repos") if isinstance(config, dict) else None
     return {
         hook["id"]
-        for repo in config.get("repos") or []
-        for hook in (repo or {}).get("hooks") or []
+        for repo in repos or []
+        if isinstance(repo, dict)
+        for hook in repo.get("hooks") or []
         if isinstance(hook, dict) and "id" in hook
     }
 
