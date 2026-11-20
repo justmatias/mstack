@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v3.5.0 (2026-11-20)
+
+### Bug Fixes
+
+- **coverage**: Ignore malformed entries in the pre-commit config
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+- **platform**: Portable config paths and test homes on Windows
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+### Features
+
+- **coverage**: Let a rule be enforced by a pre-commit hook
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+
 ## v3.4.0 (2026-11-20)
 
 ### Features
