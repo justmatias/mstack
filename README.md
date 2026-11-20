@@ -46,9 +46,9 @@ Skills, rules and agents are copies, not symlinks. MCP servers, instructions and
 
 | Skill | Use it to |
 | --- | --- |
-| `sync-rules` | Adopt rules as checks in a repo: turn its prose rules (`.cursor/rules`, `AGENTS.md`, `CLAUDE.md`) into checks, and keep both in sync. |
-| `reflect-rules` | Turn the corrections and preferences from the current session into rules and checks. |
-| `correct-rules` | Find the mistakes that keep repeating in a repo and make each one impossible. |
+| `sync` | Adopt rules as checks in a repo: turn its prose rules (`.cursor/rules`, `AGENTS.md`, `CLAUDE.md`) into checks, and keep both in sync. |
+| `reflect` | Turn the corrections and preferences from the current session into rules and checks. |
+| `correct` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate` | Bring skills or rules from a GitHub URL into `skills/` or `rules/`, merged into what already exists, with their license, credit and a check for each rule. |
 
 **4. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and no drift from the checkout. It prints the fix for each problem and exits 1 on any error. `--online` also compares with the latest release.

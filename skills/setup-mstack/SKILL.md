@@ -5,7 +5,7 @@ description: "Install or update the mstack skills (skills/), rules (rules/), sub
 
 # Set up mstack
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the user's version. Details: [principles.md](../sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim repo code taken from the user's version. Details: [principles.md](../sync/references/principles.md).
 
 Install the mstack skills, rules, agents, MCP servers, global instructions and settings from this checkout into the user-level setup that Claude Code and Cursor load. Run it with the mstack repo open: `<mstack>` below is that checkout's root (the folder with `skills/` and `rules/`). Updating is the same flow: pull the repo, then run this skill again.
 
@@ -45,12 +45,12 @@ Run `mstack manifest status --tool <claude|cursor|both> --json` from `<mstack>`.
 | `conflict` | Both changed | ask (step 6): update, keep or combine |
 | `unknown` | No record, and the installed copy differs from the source | ask (step 6) |
 | `removed` | Recorded, but nothing is installed any more | ask: reinstall or forget |
-| `orphan` | Recorded, but no longer in the checkout | ask: uninstall (back up first) or keep |
+| `orphan` | Recorded, but no longer in the checkout | ask: uninstall (back up first) or keep. A skill that was renamed (`integrate-skills` → `integrate`, `reflect-rules` → `reflect`, `correct-rules` → `correct`, `sync-rules` → `sync`) recommends uninstall, since its successor is `new` |
 | `old-symlink` | A symlink into an mstack checkout (left by the old setup) | replace with a copy |
 
 Check one more state yourself: `duplicate`, with both tools, a copy or symlink of the same mstack skill in `~/.cursor/skills/` → discard the duplicate. To see what changed for `upstream-changed`, `conflict` or `unknown`, `diff -ru <mstack>/skills/<name> <skills>/<name>` (ignore `.DS_Store` and `__pycache__`).
 
-Then look for **similar skills**: any other skill in the folders the selected tools load (`~/.claude/skills/`, and `~/.cursor/skills/` with Cursor) that does the same job under another name. Start from [known-overlaps.json](references/known-overlaps.json) (pstack `reflect` ↔ `reflect-rules`, pstack `correct` ↔ `correct-rules`), then compare names and descriptions. For each candidate, read both `SKILL.md` files and keep it only if they really overlap. Say in one line why.
+Then look for **similar skills**: any other skill in the folders the selected tools load (`~/.claude/skills/`, and `~/.cursor/skills/` with Cursor) that does the same job under another name. Start from [known-overlaps.json](references/known-overlaps.json) (pstack `reflect` ↔ `reflect`, pstack `correct` ↔ `correct`), then compare names and descriptions. A known overlap that shares mstack's name sits at the same path, so it shows up as `unknown` rather than as a similar skill: the entry tells you it is the upstream mstack's skill was adapted from, so recommend **Combine** for it. For each candidate, read both `SKILL.md` files and keep it only if they really overlap. Say in one line why.
 
 ## 3. Inventory the rules (Claude Code)
 
@@ -109,12 +109,12 @@ Ask about one item at a time, and give the user what they need to decide without
 
 1. Draft the merged item in a temp folder outside the repo and outside every tool folder. Start from mstack's version and bring over what only the user's version has.
 2. A merged skill keeps the frontmatter `name` equal to its folder name. If either side had the principles header (`> **Principles (always apply):** ...`), the merged skill keeps it at the top. If either side credits pstack (`license` and `metadata.adapted-from` in the frontmatter, or an `Adapted from pstack/<skill> (MIT)` line), the merged skill keeps that credit in its frontmatter.
-3. Relative links into `../sync-rules/references/` must still resolve: every mstack skill is installed side by side in `<skills>`.
+3. Relative links into `../sync/references/` must still resolve: every mstack skill is installed side by side in `<skills>`.
 4. Show the diff of the draft against both versions, and install it only after the user explicitly approves it.
 
 ## 7. Apply what was approved
 
-- **Back up first.** Move whatever you are about to overwrite or remove into `<folder>/.mstack-backups/<UTC timestamp>/<name>`, inside the folder it came from (for example `~/.claude/skills/.mstack-backups/20261120-101500/sync-rules/`). Never put backups next to the skills or rules as `<name>.bak` or similar: the tools would load them.
+- **Back up first.** Move whatever you are about to overwrite or remove into `<folder>/.mstack-backups/<UTC timestamp>/<name>`, inside the folder it came from (for example `~/.claude/skills/.mstack-backups/20261120-101500/sync/`). Never put backups next to the skills or rules as `<name>.bak` or similar: the tools would load them.
 - A symlink is removed with `rm` (its target is the checkout; nothing to back up).
 - Copy skills with `cp -R <mstack>/skills/<name> <skills>/<name>`, then delete any `.DS_Store` or `__pycache__` that came along.
 - Write each rule with `mstack render-rule <mstack>/rules/<name>.mdc > ~/.claude/rules/<name>.md`.
@@ -126,7 +126,7 @@ Ask about one item at a time, and give the user what they need to decide without
   - an MCP server for Cursor: `mstack merge-settings <mstack>/mcp/<name>.json ~/.cursor/mcp.json --under mcpServers --under <name> --write`.
   Never write a secret: `${VAR}` placeholders stay as they are, and the user sets the variables on each machine.
 - **Record every item you installed, updated or combined**, and every `identical` item whose `action` is `record it`: `mstack manifest record <kind> <name> <target>` from `<mstack>`. For a combined item, record it after installing the merged version. For `mcp` and `settings`, the record also stores the keys mstack wrote. The `<target>` is the file the item went into (`~/.claude.json`, `~/.cursor/mcp.json`, `~/.claude/settings.json`, `~/.claude/CLAUDE.md`), as `manifest status` shows it. For an uninstalled `orphan`, run `mstack manifest forget <kind> <name>` after backing it up and removing it.
-- Install the `mstack` CLI, which the installed skills call to run the guards (see `../sync-rules/references/authoring-a-check.md`). If `mstack --help` already works, leave it. Otherwise ask the user, then run `uv tool install --editable <mstack>`.
+- Install the `mstack` CLI, which the installed skills call to run the guards (see `../sync/references/authoring-a-check.md`). If `mstack --help` already works, leave it. Otherwise ask the user, then run `uv tool install --editable <mstack>`.
 
 ## 8. Cursor rules and instructions
 

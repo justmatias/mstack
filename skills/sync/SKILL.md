@@ -1,6 +1,6 @@
 ---
-name: sync-rules
-description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) with their automated checks in lint-rules/ (ast-grep, import-linter), in both directions. Use when the user says sync the rules, sync-rules, after editing .cursor/rules, when a rule has no check, when adopting rules-as-checks in an existing repo, or with --check in CI."
+name: sync
+description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) with their automated checks in lint-rules/ (ast-grep, import-linter), in both directions. Use when the user says sync the rules, sync, after editing .cursor/rules, when a rule has no check, when adopting rules-as-checks in an existing repo, or with --check in CI."
 ---
 
 # Sync rules
@@ -17,8 +17,8 @@ References: [rule format](references/rule-format.md), [authoring a check](refere
 
 | Invocation | Scope | Writes |
 | --- | --- | --- |
-| `sync-rules` | The current repo's rules ↔ `lint-rules/` | After approval |
-| `sync-rules --check` | Same | Nothing. Exits non-zero (or reports failure) if there is drift. |
+| `sync` | The current repo's rules ↔ `lint-rules/` | After approval |
+| `sync --check` | Same | Nothing. Exits non-zero (or reports failure) if there is drift. |
 
 ## 1. Discover
 

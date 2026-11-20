@@ -1,12 +1,12 @@
 ---
 name: integrate
-description: "Integrate existing agent skills or coding rules from a GitHub URL into this toolkit: skills (a repo, a folder or a SKILL.md) into a skills/ folder, and rules (.mdc files, .cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) into the rules folder. Compares each upstream item with everything that already exists first, and merges it into the skill or rule that already does its job (or rebases it on a newer upstream commit), adding a new one only when none does. Pins the upstream commit, checks the license, credits the source in the frontmatter, applies the mstack principles, gives every imported rule a check through sync-rules, and waits for approval before writing anything. Use for /integrate, integrate this skill, integrate these rules, import skills or rules from GitHub, adopt another repo's cursor rules or AGENTS.md, or rebase a skill or rule on its upstream."
+description: "Integrate existing agent skills or coding rules from a GitHub URL into this toolkit: skills (a repo, a folder or a SKILL.md) into a skills/ folder, and rules (.mdc files, .cursor/rules, AGENTS.md, CLAUDE.md, copilot instructions) into the rules folder. Compares each upstream item with everything that already exists first, and merges it into the skill or rule that already does its job (or rebases it on a newer upstream commit), adding a new one only when none does. Pins the upstream commit, checks the license, credits the source in the frontmatter, applies the mstack principles, gives every imported rule a check through sync, and waits for approval before writing anything. Use for /integrate, integrate this skill, integrate these rules, import skills or rules from GitHub, adopt another repo's cursor rules or AGENTS.md, or rebase a skill or rule on its upstream."
 disable-model-invocation: true
 ---
 
 # Integrate
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the upstream skill or rule is not. (2) **Practices, not domain**: an integrated skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim code from the upstream repo's own project; the only upstream URLs kept are the credit in the frontmatter. Details: [../sync-rules/references/principles.md](../sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the upstream skill or rule is not. (2) **Practices, not domain**: an integrated skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim code from the upstream repo's own project; the only upstream URLs kept are the credit in the frontmatter. Details: [../sync/references/principles.md](../sync/references/principles.md).
 
 Bring skills and rules that already exist on GitHub into this toolkit without losing their credit or their license, and without breaking the conventions the rest of the toolkit follows.
 
@@ -67,7 +67,7 @@ Review every script line by line before proposing to keep it. Drop scripts the s
 
 ### Rules
 
-A rules file mixes many rules, so the unit is one **atomic rule**: one verifiable statement, the way a bullet in [rule-format.md](../sync-rules/references/rule-format.md) is. Split every upstream file into atomic rules and record, for each:
+A rules file mixes many rules, so the unit is one **atomic rule**: one verifiable statement, the way a bullet in [rule-format.md](../sync/references/rule-format.md) is. Split every upstream file into atomic rules and record, for each:
 
 - the statement, in your own words, and its why (the upstream's, or "none given");
 - its scope: the languages or files it applies to, as a structural glob;
@@ -105,9 +105,9 @@ Never add a skill or a rule before checking that nothing existing should absorb 
 
    A **conflicts** pair is decided by the user in step 5 before its route is final.
 4. **`--into <name>` is a hint, not a bypass.** Still run the comparison: if something else fits better, or the upstream item is unrelated to `<name>`, say so in the plan and recommend the better route.
-5. **Write the evidence.** For every route, record the one or two existing items it was compared against most closely and one line of why (for example "`extends` `reflect-rules`: same transcript mining, adds a per-file lens", or "`extends` `testing.mdc`: adds a rule on fixture scope"). A route of **add** also says why nothing existing fits.
+5. **Write the evidence.** For every route, record the one or two existing items it was compared against most closely and one line of why (for example "`extends` `reflect`: same transcript mining, adds a per-file lens", or "`extends` `testing.mdc`: adds a rule on fixture scope"). A route of **add** also says why nothing existing fits.
 
-When a merged or added skill still overlaps an mstack skill that users may already have from the upstream (the way pstack `reflect` overlaps `reflect-rules`), add the pair to `known-overlaps.json`, so `setup-mstack` can offer to combine them on install.
+When a merged or added skill still overlaps an mstack skill that users may already have from the upstream (the way mstack `reflect` overlaps pstack `reflect`, which users may have installed under the same name), add the pair to `known-overlaps.json`, so `setup-mstack` can offer to combine them on install.
 
 ## 5. Show the plan and wait
 
@@ -129,7 +129,7 @@ metadata:
   upstream-license: "<SPDX id>, <copyright line>, https://github.com/<owner>/<repo>/blob/<sha>/LICENSE"
 ```
 
-For something written from the idea only (step 2, no license), use `metadata.inspired-by` with the URL instead, and no `license` or `upstream-license`. When the target already credits another upstream, add this one under a suffixed key (`adapted-from-<label>`, `upstream-commit-<label>`, `upstream-license-<label>`), as `reflect-rules` does with `upstream-commit-deep`.
+For something written from the idea only (step 2, no license), use `metadata.inspired-by` with the URL instead, and no `license` or `upstream-license`. When the target already credits another upstream, add this one under a suffixed key (`adapted-from-<label>`, `upstream-commit-<label>`, `upstream-license-<label>`), as `reflect` does with `upstream-commit-deep`.
 
 ### Skills
 
@@ -138,21 +138,21 @@ Draft each skill in `<tmp>/draft/<name>/`.
 1. **Name.** The folder name is kebab-case and equals the frontmatter `name`. Keep the upstream name unless it collides with a target skill or the user picks another.
 2. **Description.** Rewrite it in English as what the skill does plus the phrases that should trigger it (`Use when ...`). Keep it under 1024 characters.
 3. **Invocation.** Set `disable-model-invocation: true` when the skill should only run when the user asks for it by name (it writes files, spawns subagents, or reaches the network); otherwise leave the key out.
-4. **Principles header.** The body starts, right after the title, with the `> **Principles (always apply):** ...` line that every mstack skill carries, adapted to what this skill writes, and linking to `../sync-rules/references/principles.md` (or the relative path that reaches it from the skill's folder). Every other `.md` file in the skill (references, templates) also states both principles in its first lines.
+4. **Principles header.** The body starts, right after the title, with the `> **Principles (always apply):** ...` line that every mstack skill carries, adapted to what this skill writes, and linking to `../sync/references/principles.md` (or the relative path that reaches it from the skill's folder). Every other `.md` file in the skill (references, templates) also states both principles in its first lines.
 5. **Principles in the body.** Translate to English. Replace domain names, URLs and values from the upstream author's projects with generic ones (`Foo`, `Item`, `do_work`), or drop the passage. Do not copy the upstream README, changelog or marketing text.
-6. **Links and tools.** Every relative link resolves inside the drafted skill or to a sibling skill that is installed with it. Where the upstream names tools for one agent only, say what to use in Claude Code and in Cursor (see `../sync-rules/references/discovery.md`).
+6. **Links and tools.** Every relative link resolves inside the drafted skill or to a sibling skill that is installed with it. Where the upstream names tools for one agent only, say what to use in Claude Code and in Cursor (see `../sync/references/discovery.md`).
 7. **Files.** Keep only the files the `SKILL.md` uses. No `.DS_Store`, `__pycache__`, lockfiles, or upstream CI.
 
 **Merge** (into `<skill>`): start from the target skill, not the upstream one: its name, structure, voice and principles stay. Bring over only what the target lacks (a step, a mode, a check, a reference), rewritten in the target's style, and say for each piece where it came from.
 
 ### Rules
 
-Draft each rule in `<tmp>/draft/rules/<name>.mdc`, in the format of [rule-format.md](../sync-rules/references/rule-format.md).
+Draft each rule in `<tmp>/draft/rules/<name>.mdc`, in the format of [rule-format.md](../sync/references/rule-format.md).
 
 1. **One `.mdc` per topic.** A new file is named for its topic in kebab-case (`fixtures.mdc`, not `upstream-rules.mdc`), with a `description`, structural `globs` and `alwaysApply: false` unless the rule really applies to every request.
 2. **Atomic bullets in your own words.** One verifiable statement per bullet, and a `Why:` line. Never paste the upstream wording, its examples or its code: restate the practice, with generic names (`Foo`, `do_work`) where an example helps.
 3. **Merge** (into `<rule>.mdc`): start from the target file. Add the new bullets where they belong, extend its `Why:` only if the upstream gave a reason the target lacks, and keep its voice. For a **conflicts** row, write only the side the user picked.
-4. **Checks.** Every new or merged bullet gets enforced, through [sync-rules](../sync-rules/SKILL.md) (rule → check), not by hand: it picks ast-grep, import-linter, an existing hook or `llm-review`, writes the check, its fixtures and its rule test, and proves the check fails on a synthetic copy of the mistake. An upstream check from step 3 may seed it, rewritten under the target's ids and `metadata.source`. Draft the checks next to the rule (`<tmp>/draft/lint/...`), and run `sync-rules` on the target only after step 7.
+4. **Checks.** Every new or merged bullet gets enforced, through [sync](../sync/SKILL.md) (rule → check), not by hand: it picks ast-grep, import-linter, an existing hook or `llm-review`, writes the check, its fixtures and its rule test, and proves the check fails on a synthetic copy of the mistake. An upstream check from step 3 may seed it, rewritten under the target's ids and `metadata.source`. Draft the checks next to the rule (`<tmp>/draft/lint/...`), and run `sync` on the target only after step 7.
 5. **No principles header.** Rules do not carry the skills' principles header; the principles still apply to every word in them.
 
 **Rebase** (on a newer upstream commit, skills and rules):
@@ -169,7 +169,7 @@ Draft each rule in `<tmp>/draft/rules/<name>.mdc`, in the format of [rule-format
 2. Run the leak check over the draft against the upstream clone: `mstack leak-check <tmp>/draft --repo <tmp>/upstream`. The only findings allowed are the upstream names in the frontmatter credit keys; rewrite or drop anything else it flags, and never ignore a finding.
 3. Show the user `diff -ru` against the upstream item and, for a merge or rebase, against the current target. For a long diff, show the parts that matter and offer the rest.
 4. After explicit approval, write into the target. Before overwriting or removing anything there, move it to `<target>/.mstack-backups/<UTC timestamp>/<name>` (never `<name>.bak` next to the skills or rules, or the tools would load it). Copy with `cp -R <tmp>/draft/<name> <target>/<name>`.
-5. **Rules:** run `sync-rules` on the target for the rules you wrote, so each one gets its proven check (step 6, point 4).
+5. **Rules:** run `sync` on the target for the rules you wrote, so each one gets its proven check (step 6, point 4).
 
 ## 8. Verify
 

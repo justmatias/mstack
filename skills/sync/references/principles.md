@@ -2,7 +2,7 @@
 
 Two principles: **English only**, and **Practices, not domain**.
 
-Every skill in this toolkit (`sync-rules`, `reflect-rules`, `correct-rules`), every reference and every reviewer or synthesizer template follows these two principles. They take priority over any other step.
+Every skill in this toolkit (`sync`, `reflect`, `correct`), every reference and every reviewer or synthesizer template follows these two principles. They take priority over any other step.
 
 ## 1. English only
 

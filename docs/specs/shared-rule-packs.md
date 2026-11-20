@@ -5,7 +5,7 @@
 
 ## Problem
 
-mstack's checks (`no-bare-except`, `no-print-in-app`, ...) only run inside this repo. To use them in a work repo, `sync-rules` writes a copy into its `lint-rules/`. Copies don't get fixes, and the same check drifts across repos.
+mstack's checks (`no-bare-except`, `no-print-in-app`, ...) only run inside this repo. To use them in a work repo, `sync` writes a copy into its `lint-rules/`. Copies don't get fixes, and the same check drifts across repos.
 
 ## Goal
 
@@ -52,7 +52,7 @@ severity = { no-print-in-app = "warning" }
 - `packs.toml`, and package-data configuration.
 - `src/mstack/packs.py`: loading, merging, overrides, export. Changes in `lint.py` and `check_rule_coverage.py`.
 - A test that every rule in `rules/` belongs to exactly one pack.
-- `sync-rules`: when a repo rule matches a pack check, propose using the pack instead of copying it.
+- `sync`: when a repo rule matches a pack check, propose using the pack instead of copying it.
 
 ## Tests
 
@@ -63,7 +63,7 @@ severity = { no-print-in-app = "warning" }
 ## Docs
 
 - `README.md`: "Use the checks in another repo" explains packs.
-- `sync-rules` and `authoring-a-check.md`: prefer a pack over a copy.
+- `sync` and `authoring-a-check.md`: prefer a pack over a copy.
 
 ## Acceptance criteria
 

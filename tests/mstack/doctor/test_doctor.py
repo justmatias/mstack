@@ -48,8 +48,8 @@ def test_installed_skills_and_rules_pass(context):
 
 def test_duplicate_skill_in_both_tools_warns(context, installed_home: Path):
     shutil.copytree(
-        installed_home / ".claude" / "skills" / "sync-rules",
-        installed_home / ".cursor" / "skills" / "sync-rules",
+        installed_home / ".claude" / "skills" / "sync",
+        installed_home / ".cursor" / "skills" / "sync",
     )
 
     results = check_skills_installed(context(tool="both"))
@@ -58,9 +58,9 @@ def test_duplicate_skill_in_both_tools_warns(context, installed_home: Path):
 
 
 def test_broken_skill_is_an_error(context, installed_home: Path):
-    skill = installed_home / ".claude" / "skills" / "sync-rules" / "SKILL.md"
+    skill = installed_home / ".claude" / "skills" / "sync" / "SKILL.md"
     text = skill.read_text(encoding="utf-8")
-    skill.write_text(text.replace("name: sync-rules", "name: other"), encoding="utf-8")
+    skill.write_text(text.replace("name: sync", "name: other"), encoding="utf-8")
 
     results = check_skills_installed(context())
 
@@ -97,13 +97,13 @@ def edit(path: Path) -> None:
 
 
 def apply_drift(state: str, checkout: Path, home: Path) -> None:
-    skill = home / ".claude" / "skills" / "sync-rules"
+    skill = home / ".claude" / "skills" / "sync"
     if state != "unknown":
-        record(checkout, "skill", "sync-rules", skill)
+        record(checkout, "skill", "sync", skill)
     if state in {"locally-edited", "conflict"}:
         edit(skill / "SKILL.md")
     if state in {"upstream-changed", "conflict"}:
-        edit(checkout / "skills" / "sync-rules" / "SKILL.md")
+        edit(checkout / "skills" / "sync" / "SKILL.md")
     if state == "unknown":
         # Installed and different from upstream, but never recorded.
         record(checkout, "rule", "logging", home / ".claude/rules/logging.md")
@@ -123,12 +123,12 @@ def test_every_drift_state_warns(context, checkout: Path, home: Path, state: str
 
     assert [
         (result.check, result.status, result.detail.split()[0]) for result in results
-    ] == [("skill sync-rules", "warn", state)]
+    ] == [("skill sync", "warn", state)]
 
 
 @pytest.mark.usefixtures("installed_home")
 def test_identical_items_pass_drift(context, checkout: Path, home: Path):
-    record(checkout, "skill", "sync-rules", home / ".claude/skills/sync-rules")
+    record(checkout, "skill", "sync", home / ".claude/skills/sync")
 
     results = check_drift(context())
 

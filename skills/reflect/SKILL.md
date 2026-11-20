@@ -1,6 +1,6 @@
 ---
-name: reflect-rules
-description: "Mine the active transcript for coding conventions and durable learnings, and turn each into a prose rule in .cursor/rules plus its automated check (ast-grep, import-linter), or into a skill edit. Reads the transcript in one pass by default; --deep spawns parallel review subagents and a synthesizer. Waits for approval before writing anything. Use when the user says reflect-rules, reflect on the rules, turn my corrections into rules, or make this preference a rule."
+name: reflect
+description: "Mine the active transcript for coding conventions and durable learnings, and turn each into a prose rule in .cursor/rules plus its automated check (ast-grep, import-linter), or into a skill edit. Reads the transcript in one pass by default; --deep spawns parallel review subagents and a synthesizer. Waits for approval before writing anything. Use when the user says reflect, reflect on the rules, turn my corrections into rules, or make this preference a rule."
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -12,24 +12,24 @@ metadata:
 
 # Reflect rules
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the transcript is not. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code; cite evidence by message index. Details: [../sync-rules/references/principles.md](../sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the transcript is not. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code; cite evidence by message index. Details: [../sync/references/principles.md](../sync/references/principles.md).
 
 Mine this conversation for durable learnings, then route them into rules with checks, or into skill edits.
 
-Invoke when the user says "reflect-rules" or "/reflect-rules". Skip when the conversation is trivial, off-topic, or already covered by an existing rule or skill the parent followed correctly. One-offs are not learnings.
+Invoke when the user says "reflect" or "/reflect". Skip when the conversation is trivial, off-topic, or already covered by an existing rule or skill the parent followed correctly. One-offs are not learnings.
 
 | Invocation | Who reads the transcript | Cost |
 | --- | --- | --- |
-| `reflect-rules` | The parent, in one pass (step 2) | One agent |
-| `reflect-rules --deep` | Four parallel reviewers and a synthesizer (step 3) | Five subagents |
+| `reflect` | The parent, in one pass (step 2) | One agent |
+| `reflect --deep` | Four parallel reviewers and a synthesizer (step 3) | Five subagents |
 
 Use `--deep` for long or contentious sessions, or when a single pass may miss a lens. Steps 1, 4, 5 and 6 are the same in both modes.
 
-Shared references (always installed together with `sync-rules`): [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md) (including the Claude Code / Cursor tool names).
+Shared references (always installed together with `sync`): [rule format](../sync/references/rule-format.md), [authoring a check](../sync/references/authoring-a-check.md), [discovery](../sync/references/discovery.md) (including the Claude Code / Cursor tool names).
 
 ## 1. Locate the active transcript
 
-Find this conversation's transcript, following "Transcripts" in [discovery.md](../sync-rules/references/discovery.md):
+Find this conversation's transcript, following "Transcripts" in [discovery.md](../sync/references/discovery.md):
 
 - **Claude Code:** `~/.claude/projects/<slug>/`, where the slug is the workspace path with each `/` and `.` changed to `-`. The newest `.jsonl` directly in that folder is the current session.
 - **Cursor:** the `agent-transcripts/` directory the system prompt names.
@@ -78,8 +78,8 @@ Skip step 2. Instead:
 Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog. For each Accepted `rule:` row, prepare the full change now, without writing it yet:
 
 1. **Find the related rule.** Search `.cursor/rules/` for a rule on the same topic. Prefer editing it over adding a duplicate.
-2. **Write the prose rule**: the bullet, its `Why:` line, and the `## Checks` line, following [rule-format.md](../sync-rules/references/rule-format.md).
-3. **Write the check** for pattern and architecture rows, following [authoring-a-check.md](../sync-rules/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows get `enforcement: llm-review` and no check.
+2. **Write the prose rule**: the bullet, its `Why:` line, and the `## Checks` line, following [rule-format.md](../sync/references/rule-format.md).
+3. **Write the check** for pattern and architecture rows, following [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
 5. **Verify** with `check_no_domain_leak.py` over the prepared files, and reread them for English.
 

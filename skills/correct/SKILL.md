@@ -1,6 +1,6 @@
 ---
-name: correct-rules
-description: "Find the coding mistakes that keep repeating in this repo (commits, reverts, PR review comments, ast-grep-ignore exceptions, warnings) and make each one impossible. Try architecture first (import-linter), then types and lints (ast-grep, Fixit) whose error names the fix, then a test, and write the .cursor/rules prose last. Prove each check fails on a synthetic copy of a real past mistake. Use for /correct-rules, correct the rules, stop this mistake from happening again, or when the operator keeps correcting the same thing."
+name: correct
+description: "Find the coding mistakes that keep repeating in this repo (commits, reverts, PR review comments, ast-grep-ignore exceptions, warnings) and make each one impossible. Try architecture first (import-linter), then types and lints (ast-grep, Fixit) whose error names the fix, then a test, and write the .cursor/rules prose last. Prove each check fails on a synthetic copy of a real past mistake. Use for /correct, correct the rules, stop this mistake from happening again, or when the operator keeps correcting the same thing."
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -11,13 +11,13 @@ metadata:
 
 # Correct rules
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when commits, comments or reviews are not. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code; cite evidence by sha or PR number. Details: [../sync-rules/references/principles.md](../sync-rules/references/principles.md).
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when commits, comments or reviews are not. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code; cite evidence by sha or PR number. Details: [../sync/references/principles.md](../sync/references/principles.md).
 
 The operator keeps correcting agents in this repo for the same mistakes. Change the repo so the next agent can't make them.
 
 Assume every contributor is an agent that sees only the files it opened, copies the nearest example, and takes the shortest path that compiles. Design the repo so a change that looks right from one file is right for the whole repo.
 
-Shared references: [rule format](../sync-rules/references/rule-format.md), [authoring a check](../sync-rules/references/authoring-a-check.md), [discovery](../sync-rules/references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
+Shared references: [rule format](../sync/references/rule-format.md), [authoring a check](../sync/references/authoring-a-check.md), [discovery](../sync/references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
 
 ## Find the mistake classes
 
@@ -36,7 +36,7 @@ Group the mistakes into classes. A class counts once it has happened twice.
 ## Fix each class at the highest level that works
 
 1. **Eliminate it with architecture.** Give each piece of state one owner and each task one supported way. Hide internals so the wrong import fails (an import-linter contract in `.importlinter`). Replace hand-synced lists with one source of truth. Delete old ways and dead code an agent would copy.
-2. **Enforce it with types and lints so the bad state can't be written.** If bad code still compiles, add a check whose error names the file, type, or function to use instead: ast-grep for patterns, import-linter for module dependencies, Fixit when logic is needed. Always follow [authoring-a-check.md](../sync-rules/references/authoring-a-check.md). If the pattern is already common, fail only when a change adds more: ship it as `warning` (the full `mstack lint` scan tolerates it, `mstack lint --changed` fails on new or touched code) and open a migration issue.
+2. **Enforce it with types and lints so the bad state can't be written.** If bad code still compiles, add a check whose error names the file, type, or function to use instead: ast-grep for patterns, import-linter for module dependencies, Fixit when logic is needed. Always follow [authoring-a-check.md](../sync/references/authoring-a-check.md). If the pattern is already common, fail only when a change adds more: ship it as `warning` (the full `mstack lint` scan tolerates it, `mstack lint --changed` fails on new or touched code) and open a migration issue.
 3. **Test the behavior.** Fix or delete any test that still passes when the behavior it checks breaks, or that fails when only the internals change.
 4. **Write docs or agent rules last, only for judgment calls.** Nothing fails when an agent skips them: mark them `enforcement: llm-review`.
 

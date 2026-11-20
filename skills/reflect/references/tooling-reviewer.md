@@ -52,4 +52,4 @@ Return as a numbered list. No exposition.
 <DIGEST IF FILE PATH UNAVAILABLE>
 
 
-<!-- Adapted from pstack/reflect (MIT). Attribution in the reflect-rules SKILL.md frontmatter. -->
+<!-- Adapted from pstack/reflect (MIT). Attribution in the reflect SKILL.md frontmatter. -->

@@ -20,7 +20,7 @@ The repo is also a Claude Code marketplace with one `mstack` plugin. On any mach
 
 - Add `.claude-plugin/marketplace.json` (the marketplace, listing one plugin with `source: "./"`) and `.claude-plugin/plugin.json` (name, description, version, author, license). Check the current plugin docs for the exact schema and folder layout when implementing; `claude plugin validate` must pass.
 - Plugin components come from the existing folders: `skills/` (except `setup-mstack`), `agents/`, and `hooks/hooks.json` generated from the hooks in `settings/claude.json`.
-- Plugin skills are namespaced (`mstack:sync-rules`). Relative links between skills (`../sync-rules/references/`) keep working because the plugin keeps the same layout. Update skill text that refers to other skills by bare name only where it matters.
+- Plugin skills are namespaced (`mstack:sync`). Relative links between skills (`../sync/references/`) keep working because the plugin keeps the same layout. Update skill text that refers to other skills by bare name only where it matters.
 - **Version:** semantic-release writes the version into `plugin.json` too (`version_variables` or a JSON updater in `[tool.semantic_release]`).
 - **No double install:** a machine uses either the plugin or copied skills. `setup-mstack` and `doctor` detect the installed plugin and skip or flag copied mstack skills.
 

@@ -32,7 +32,7 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 | [host-profiles](host-profiles.md) | Per-machine profiles (personal, work) choosing what gets installed | install-command |
 | [per-host-secrets](per-host-secrets.md) | `${VAR}` placeholders resolved per machine, never stored in the repo | agent-config-folders |
 | [more-agent-tools](more-agent-tools.md) | Codex, Gemini CLI and Copilot targets | install-command |
-| [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect-rules` | agent-config-folders, doctor |
+| [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect` | agent-config-folders, doctor |
 
 ## Writing a spec
 

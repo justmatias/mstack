@@ -84,4 +84,4 @@ print(banner)
 - The trailing form (`code  # ast-grep-ignore: <id>`) is allowed; the `rule-exception` then goes on the line above the code.
 - `check_exceptions.py` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
-- Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct-rules` looks for this).
+- Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct` looks for this).

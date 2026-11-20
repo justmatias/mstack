@@ -47,7 +47,7 @@ On WSL, Cursor runs on Windows, so its user folder is the Windows profile's `.cu
 
 User rules are personal. Read them only when asked, and never copy them into a repo without confirmation.
 
-## Transcripts (`reflect-rules`, optionally `correct-rules`)
+## Transcripts (`reflect`, optionally `correct`)
 
 | Environment | Location |
 | --- | --- |

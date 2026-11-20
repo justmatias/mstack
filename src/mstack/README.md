@@ -82,7 +82,7 @@ Reports only, and prints the fix for each problem. `--tool` defaults to the tool
 
 | Group | Checks | Status when it fails |
 | --- | --- | --- |
-| `tools` | `uv` and `git` on `PATH`; `gh` (used by `correct-rules` and `integrate`) | error; warn for `gh` |
+| `tools` | `uv` and `git` on `PATH`; `gh` (used by `correct` and `integrate`) | error; warn for `gh` |
 | `cli` | `mstack` on `PATH` reports this version (`mstack --version`); the bundled ast-grep runs | error |
 | `source` | the checkout exists and is a git repo; uncommitted changes | error; warn |
 | `skills` | every mstack skill is in the tool's skills folder; every skill there passes `skills-check --profile generic`; none is in both `~/.claude/skills/` and `~/.cursor/skills/` | error; warn for duplicates |

@@ -65,4 +65,4 @@ For each rejected finding:
 Only what no available tool can check, or what needs a large architecture change. For each item, describe the generic pattern, what was hit (by message index), and the suggested mechanism. The parent files each to whatever devex / backlog tracker the team uses.
 
 
-<!-- Adapted from pstack/reflect (MIT). Attribution in the reflect-rules SKILL.md frontmatter. -->
+<!-- Adapted from pstack/reflect (MIT). Attribution in the reflect SKILL.md frontmatter. -->
