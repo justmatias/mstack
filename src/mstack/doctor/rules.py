@@ -1,4 +1,4 @@
-from mstack.doctor.model import SETUP_FIX, Context, Result
+from mstack.doctor.model import REPAIR_FIX, Context, Result
 from mstack.install.item_kinds import source_names, uses_claude
 
 
@@ -23,7 +23,7 @@ def check_rules(context: Context) -> list[Result]:
                 check="installed",
                 status="error",
                 detail=f"not installed in {folder}: {', '.join(missing)}",
-                fix=SETUP_FIX,
+                fix=REPAIR_FIX,
             )
         )
     if with_frontmatter:
@@ -36,7 +36,7 @@ def check_rules(context: Context) -> list[Result]:
                     "installed with frontmatter (Claude Code may not load them): "
                     + ", ".join(with_frontmatter)
                 ),
-                fix=SETUP_FIX,
+                fix=REPAIR_FIX,
             )
         )
     if not results:

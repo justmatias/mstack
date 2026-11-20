@@ -2,7 +2,7 @@ import importlib.metadata
 import re
 import subprocess
 
-from mstack.doctor.model import SETUP_FIX, Context, Result
+from mstack.doctor.model import REPAIR_FIX, Context, Result
 
 RELEASE_TAG = re.compile(r"refs/tags/v(?P<version>\d+\.\d+\.\d+)$")
 
@@ -55,7 +55,7 @@ def check_version(context: Context) -> list[Result]:
                 check="latest",
                 status="warn",
                 detail=f"{display(latest)} is out; this is {display(installed)}",
-                fix=f"git pull in the checkout, then {SETUP_FIX}",
+                fix=REPAIR_FIX,
             )
         ]
     return [
