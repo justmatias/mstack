@@ -2,6 +2,40 @@
 
 <!-- version list -->
 
+## v5.0.0 (2026-11-20)
+
+### Documentation
+
+- **specs**: Plan a shared ~/.agents/skills copy in more-agent-tools
+  ([#40](https://github.com/justmatias/mstack/pull/40),
+  [`a25eeb7`](https://github.com/justmatias/mstack/commit/a25eeb77a606f0f728c1707f000c5afd1f3179fa))
+
+### Features
+
+- **doctor**: Add the repair skill and point doctor's fixes at it
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **setup**: Let the agent drive setup, and drop the manifest
+  ([#40](https://github.com/justmatias/mstack/pull/40),
+  [`a25eeb7`](https://github.com/justmatias/mstack/commit/a25eeb77a606f0f728c1707f000c5afd1f3179fa))
+
+- **setup**: Load the setup skill from .agents/skills for every agent
+  ([#40](https://github.com/justmatias/mstack/pull/40),
+  [`a25eeb7`](https://github.com/justmatias/mstack/commit/a25eeb77a606f0f728c1707f000c5afd1f3179fa))
+
+- **skills**: Add code-simplification from addyosmani/agent-skills
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **skills**: Add review, code-simplification and repair
+  ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+- **skills**: Add the review skill ([#39](https://github.com/justmatias/mstack/pull/39),
+  [`783e67e`](https://github.com/justmatias/mstack/commit/783e67e057d9dc51f1fbad44d6c6dc0d45b3ec54))
+
+
 ## v4.2.0 (2026-11-20)
 
 ### Features
