@@ -2,15 +2,22 @@
 description: Exception handling rules
 globs: "**/*.py"
 alwaysApply: false
+license: MIT
+metadata:
+  adapted-from: ".cursor/rules/ponytail.mdc in DietrichGebert/ponytail (https://github.com/DietrichGebert/ponytail/tree/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/.cursor/rules/ponytail.mdc). Thanks to DietrichGebert for the original."
+  upstream-commit: "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846"
+  upstream-license: "MIT, Copyright (c) 2026 DietrichGebert, https://github.com/DietrichGebert/ponytail/blob/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/LICENSE"
 ---
 
 # Error handling
 
 - Never use a bare `except:`. Always name the exception type you expect.
 - Never swallow an exception with `except Exception: pass`. Handle it, log it, or let it propagate.
+- Code you move or merge keeps its error handling and validation.
 
-Why: a bare `except:` also catches `KeyboardInterrupt` and `SystemExit`, and a swallowed exception hides bugs until they surface far from their cause.
+Why: a bare `except:` also catches `KeyboardInterrupt` and `SystemExit`, and a swallowed exception hides bugs until they surface far from their cause; error handling dropped during a move or merge is a swallowed exception nobody wrote down.
 
 ## Checks
 - enforced-by: no-bare-except
 - enforced-by: no-swallowed-exception
+- enforcement: llm-review

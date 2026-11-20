@@ -1,0 +1,28 @@
+id: shortcut-comment-format
+valid:
+  - |
+    # shortcut: lists up to a few thousand items, switch to an index when it grows
+    def find(items, key):
+        return next(item for item in items if item.key == key)
+  # Near misses: comments that only mention the word, and an ordinary comment.
+  - |
+    # The shortcuts module holds the keyboard bindings.
+    def bindings():
+        return {}
+  - |
+    # Retry once because the upstream API drops the first request.
+    def fetch():
+        return get()
+invalid:
+  - |
+    # shortcut
+    def find(items, key):
+        return next(item for item in items if item.key == key)
+  - |
+    # shortcut: only works for small lists
+    def find(items, key):
+        return next(item for item in items if item.key == key)
+  - |
+    # shortcut - linear scan, upgrade later
+    def find(items, key):
+        return next(item for item in items if item.key == key)

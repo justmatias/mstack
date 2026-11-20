@@ -28,7 +28,13 @@ def test_every_repository_rule_renders_as_the_skill_describes(mdc: Path):
 
     rendered = render_rule(text)
 
-    assert rendered == expected_rendering(text)
+    expected = expected_rendering(text)
+    if "adapted-from:" in text:
+        # An adapted rule keeps its credit after the body (frontmatter is dropped).
+        assert rendered.startswith(expected)
+        assert rendered[len(expected) :].lstrip().startswith("Adapted from ")
+    else:
+        assert rendered == expected
     assert not rendered.startswith("---")
     assert "## Checks" not in rendered
 

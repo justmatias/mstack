@@ -1,0 +1,26 @@
+---
+description: Keep a change as small as the task allows, without leaving parts of it undone
+globs: "**/*.py"
+alwaysApply: false
+license: MIT
+metadata:
+  adapted-from: ".cursor/rules/ponytail.mdc in DietrichGebert/ponytail (https://github.com/DietrichGebert/ponytail/tree/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/.cursor/rules/ponytail.mdc). Thanks to DietrichGebert for the original."
+  upstream-commit: "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846"
+  upstream-license: "MIT, Copyright (c) 2026 DietrichGebert, https://github.com/DietrichGebert/ponytail/blob/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/LICENSE"
+---
+
+# Minimal change
+
+- Before changing code, list everything the change must reach: callers, tests, fixtures, config and exports. Finish all of it.
+- Do not add features, options, abstractions, wrappers or "for later" code that nobody asked for.
+- Reuse the helper, component or pattern the codebase already has before writing new code, and use it the way the surrounding code does.
+- Prefer the standard library or a dependency the project already has. Do not add a dependency for a few lines.
+- Comment only the why that the code cannot show, in one line.
+- When fixing a bug, find every caller of the function you touch, then fix the root cause once in the shared code.
+- A shortcut with a known limit gets a comment in this form: `# shortcut: <the limit>, <when to upgrade>`.
+
+Why: every line added is a line someone must read, test and maintain, so the smallest change that fully solves the task is the cheapest one over time. Small does not mean unfinished: skipping a caller or a test the change breaks only moves the cost to someone else, and a shortcut with a stated limit tells the next reader when it stops being enough.
+
+## Checks
+- enforced-by: shortcut-comment-format
+- enforcement: llm-review

@@ -1,0 +1,14 @@
+id: shortcut-comment-format
+language: Python
+severity: error
+message: 'Write a shortcut comment as "# shortcut: <the limit>, <when to upgrade>"'
+note: |
+  A shortcut comment without its limit and upgrade point does not tell the next
+  reader when the shortcut stops being enough.
+metadata:
+  source: rules/minimal-change.mdc
+rule:
+  kind: comment
+  regex: "^#\\s*shortcut\\b"
+  not:
+    regex: "^#\\s*shortcut: [^,]+,\\s*\\S"

@@ -2,6 +2,11 @@
 description: Tests that are reliable, specific and test behavior
 globs: "**/tests/**/*.py, **/test_*.py"
 alwaysApply: false
+license: MIT
+metadata:
+  adapted-from: ".cursor/rules/ponytail.mdc in DietrichGebert/ponytail (https://github.com/DietrichGebert/ponytail/tree/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/.cursor/rules/ponytail.mdc). Thanks to DietrichGebert for the original."
+  upstream-commit: "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846"
+  upstream-license: "MIT, Copyright (c) 2026 DietrichGebert, https://github.com/DietrichGebert/ponytail/blob/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846/LICENSE"
 ---
 
 # Tests
@@ -13,8 +18,9 @@ alwaysApply: false
 - Test public behavior, not private helpers or internals.
 - Unit tests don't reach the network or the real clock.
 - Delete a test that cannot fail: one with no assertion, or one that only asserts a mock it just configured.
+- New non-trivial logic (a branch, a loop, a parser, money or security handling) ships with at least one small test. Trivial changes need none.
 
-Why: sleeps make tests slow and flaky; a broad `pytest.raises` passes on the wrong error; an unexplained skip is never revisited; tests tied to internals break on every refactor while missing real regressions.
+Why: sleeps make tests slow and flaky; a broad `pytest.raises` passes on the wrong error; an unexplained skip is never revisited; tests tied to internals break on every refactor while missing real regressions; logic with no test at all is the first to break unnoticed.
 
 ## Checks
 - enforced-by: no-sleep-in-tests
