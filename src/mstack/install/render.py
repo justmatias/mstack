@@ -48,6 +48,24 @@ def globs_text(globs: object) -> str:
     return f"`{globs}`"
 
 
+def credit_lines(frontmatter: dict) -> list[str]:
+    """The upstream credit, kept in the body because the frontmatter is dropped."""
+    metadata = frontmatter.get("metadata")
+    if not isinstance(metadata, dict):
+        return []
+    lines = []
+    for key, value in metadata.items():
+        name = str(key)
+        if name.startswith("adapted-from"):
+            license_key = name.replace("adapted-from", "upstream-license", 1)
+            license_text = metadata.get(license_key) or frontmatter.get("license")
+            suffix = f" License: {license_text}." if license_text else ""
+            lines.append(f"Adapted from {value}{suffix}")
+        elif name.startswith("inspired-by"):
+            lines.append(f"Inspired by {value}")
+    return lines
+
+
 def render_rule(mdc_text: str) -> str:
     """Convert an .mdc rule into the text installed at ~/.claude/rules/<name>.md."""
     metadata, body = split_frontmatter(mdc_text)
@@ -55,6 +73,9 @@ def render_rule(mdc_text: str) -> str:
     globs = metadata.get("globs")
     if globs:
         body = f"Applies to files matching {globs_text(globs)}.\n\n{body}"
+    credit = credit_lines(metadata)
+    if credit:
+        body = body + "\n\n" + "\n".join(credit)
     return body + "\n"
 
 

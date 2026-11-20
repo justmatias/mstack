@@ -9,13 +9,13 @@ mstack keeps what should be **enforced** (rules and checks) and **how to work** 
 
 ## Goal
 
-Engram becomes the optional memory layer of the stack: installed and verified the same way on every machine, wired into the agents mstack configures, and feeding `reflect-rules`, so a learning that keeps coming back is promoted from memory to a rule with a check.
+Engram becomes the optional memory layer of the stack: installed and verified the same way on every machine, wired into the agents mstack configures, and feeding `reflect`, so a learning that keeps coming back is promoted from memory to a rule with a check.
 
 ## Out of scope
 
 - Replacing rules or skills with memories. A memory is a hint an agent may retrieve; a rule with a check is enforced. mstack's core idea stays the same.
 - Hosting Engram Cloud.
-- Vendoring Engram, or copying its skills or instructions into this repo without going through `integrate-skills`.
+- Vendoring Engram, or copying its skills or instructions into this repo without going through `integrate`.
 
 ## Design
 
@@ -40,7 +40,7 @@ Engram becomes the optional memory layer of the stack: installed and verified th
 - `engram sync` exports into the **project repo's** `.engram/` folder, so work memories travel with work repos and personal ones with personal repos. mstack never syncs memories through its own repo, because they hold project details and this repo holds practices only.
 - Prompts are not exported (Engram's default); the spec keeps it that way.
 
-**Promotion into rules (`reflect-rules`, `correct-rules`):**
+**Promotion into rules (`reflect`, `correct`):**
 
 - New optional source in `discovery.md`: when the Engram MCP tools are available, search the current project's memories for corrections and conventions.
 - A convention found in memories repeatedly counts as evidence, like a repeated correction in a transcript. It goes through the same principles (abstracted, no domain), and becomes a rule with a check. The reply suggests removing the memory once a rule covers it, so the two don't diverge.
@@ -48,7 +48,7 @@ Engram becomes the optional memory layer of the stack: installed and verified th
 ## Changes
 
 - `mcp/engram.json`, a section in `instructions/global.md`, a `doctor` check, an `ENGRAM_DATA_DIR` setting in the profiles.
-- `skills/sync-rules/references/discovery.md`: the memory source. `reflect-rules` and `correct-rules`: the promotion step.
+- `skills/sync/references/discovery.md`: the memory source. `reflect` and `correct`: the promotion step.
 - `README.md`: one row in "What's inside" and a note that Engram is optional.
 
 ## Tests
@@ -60,7 +60,7 @@ Engram becomes the optional memory layer of the stack: installed and verified th
 
 - [ ] On a machine with Engram installed, setup wires it into the selected agents, and a second run changes nothing.
 - [ ] Personal and work memories end up in different databases.
-- [ ] `reflect-rules` can cite a memory as evidence, without copying its content into a rule.
+- [ ] `reflect` can cite a memory as evidence, without copying its content into a rule.
 
 ## Open questions
 

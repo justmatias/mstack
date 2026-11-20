@@ -22,7 +22,7 @@ TOOLS = {
     ),
     "gh": Tool(
         required=False,
-        used_by="correct-rules and integrate-skills",
+        used_by="correct and integrate",
         link="https://cli.github.com/",
     ),
 }

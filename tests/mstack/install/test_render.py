@@ -48,3 +48,22 @@ def test_section_after_checks_is_kept():
 def test_unclosed_frontmatter_is_rejected():
     with pytest.raises(RuleFormatError):
         split_frontmatter("---\ndescription: x\n# Rule\n")
+
+
+def test_upstream_credit_is_kept_in_the_body_when_frontmatter_is_dropped():
+    rendered = render_rule(
+        "---\n"
+        "license: MIT\n"
+        "metadata:\n"
+        '  adapted-from: "rules/x.mdc in owner/repo."\n'
+        '  upstream-license: "MIT, Copyright (c) Someone"\n'
+        '  inspired-by-idea: "https://example.com/idea"\n'
+        "---\n# Rule\n"
+    )
+
+    assert rendered == (
+        "# Rule\n\n"
+        "Adapted from rules/x.mdc in owner/repo. "
+        "License: MIT, Copyright (c) Someone.\n"
+        "Inspired by https://example.com/idea\n"
+    )

@@ -31,4 +31,4 @@ Skip one-offs the user did not ask to generalize, and anything an existing rule 
 
 <DIGEST IF FILE PATH UNAVAILABLE>
 
-<!-- Part of reflect-rules, written for this toolkit. Not in the pstack original. -->
+<!-- Part of reflect, written for this toolkit. Not in the pstack original. -->

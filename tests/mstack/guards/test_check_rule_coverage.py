@@ -162,3 +162,34 @@ def test_removed_import_linter_contract_is_unknown_check(
         (issue["kind"], issue["check"])
         for issue in json.loads(completed.stdout)["issues"]
     ] == [("unknown-check", "core-is-pure")]
+
+
+def credit_rule(rules_sandbox: Path, credit: str) -> None:
+    mdc = rules_sandbox / "rules" / "naming.mdc"
+    mdc.write_text(mdc.read_text().replace("---\n", f"---\n{credit}", 1))
+
+
+def test_complete_rule_credit_passes(run_mstack, rules_sandbox: Path):
+    credit_rule(
+        rules_sandbox,
+        "license: MIT\nmetadata:\n"
+        '  adapted-from: "rules/naming.mdc in owner/repo"\n'
+        f'  upstream-commit: "{"a" * 40}"\n',
+    )
+
+    assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
+
+
+def test_rule_credit_without_upstream_commit_fails(run_mstack, rules_sandbox: Path):
+    credit_rule(
+        rules_sandbox,
+        'license: MIT\nmetadata:\n  adapted-from: "rules/naming.mdc in owner/repo"\n',
+    )
+
+    assert coverage_issues(run_mstack, rules_sandbox) == (1, [("credit", None)])
+
+
+def test_rule_license_without_adapted_from_fails(run_mstack, rules_sandbox: Path):
+    credit_rule(rules_sandbox, "license: MIT\n")
+
+    assert coverage_issues(run_mstack, rules_sandbox) == (1, [("credit", None)])

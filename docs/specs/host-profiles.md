@@ -34,7 +34,7 @@ mcp = []
 # profiles/minimal.toml
 tools = ["claude"]
 [include]
-skills = ["sync-rules", "reflect-rules"]
+skills = ["sync", "reflect"]
 rules = ["error-handling", "logging", "git-commits"]
 ```
 

@@ -12,25 +12,25 @@ def test_repository_skills_pass_without_warnings(run_mstack, skills_sandbox: Pat
 
     assert completed.returncode == 0, completed.stderr
     assert report["issues"] == []
-    assert "sync-rules" in report["skills"]
+    assert "sync" in report["skills"]
 
 
 def test_renamed_folder_fails_the_name_check(run_mstack, skills_sandbox: Path):
-    (skills_sandbox / "correct-rules").rename(skills_sandbox / "fix-rules")
+    (skills_sandbox / "correct").rename(skills_sandbox / "fix-rules")
 
     completed = run_mstack("skills-check", str(skills_sandbox))
 
     assert completed.returncode == 1
-    assert "[name] 'correct-rules' does not match the folder name" in completed.stderr
+    assert "[name] 'correct' does not match the folder name" in completed.stderr
 
 
 @pytest.mark.parametrize(
     "case",
     [
-        ("---\nname: sync-rules", "name: sync-rules", "[frontmatter] no '---'"),
-        ("name: sync-rules", "name: [sync-rules", "[frontmatter] not valid YAML"),
+        ("---\nname: sync", "name: sync", "[frontmatter] no '---'"),
+        ("name: sync", "name: [sync", "[frontmatter] not valid YAML"),
         (
-            "name: sync-rules",
+            "name: sync",
             "name: Sync_Rules",
             "[name] 'Sync_Rules' is not kebab-case",
         ),
@@ -48,8 +48,8 @@ def test_renamed_folder_fails_the_name_check(run_mstack, skills_sandbox: Path):
         ),
         ("> **Principles (always apply):**", "Principles:", "[principles]"),
         (
-            "name: sync-rules",
-            "name: sync-rules\nauthor: someone",
+            "name: sync",
+            "name: sync\nauthor: someone",
             "[keys] unknown frontmatter key 'author'",
         ),
     ],
@@ -69,7 +69,7 @@ def test_broken_skill_fails(
     run_mstack, skills_sandbox: Path, edit_skill, case: tuple[str, str, str]
 ):
     old, new, expected_problem = case
-    edit_skill("sync-rules/SKILL.md", old, new)
+    edit_skill("sync/SKILL.md", old, new)
 
     completed = run_mstack("skills-check", str(skills_sandbox))
 
@@ -98,7 +98,7 @@ def test_incomplete_credit_fails(
     run_mstack, skills_sandbox: Path, edit_skill, case: tuple[str, str, str]
 ):
     old, new, expected_problem = case
-    edit_skill("correct-rules/SKILL.md", old, new)
+    edit_skill("correct/SKILL.md", old, new)
 
     completed = run_mstack("skills-check", str(skills_sandbox))
 
@@ -107,9 +107,7 @@ def test_incomplete_credit_fails(
 
 
 def test_license_without_credit_fails(run_mstack, skills_sandbox: Path, edit_skill):
-    edit_skill(
-        "sync-rules/SKILL.md", "name: sync-rules", "name: sync-rules\nlicense: MIT"
-    )
+    edit_skill("sync/SKILL.md", "name: sync", "name: sync\nlicense: MIT")
 
     completed = run_mstack("skills-check", str(skills_sandbox))
 
@@ -118,9 +116,7 @@ def test_license_without_credit_fails(run_mstack, skills_sandbox: Path, edit_ski
 
 
 def test_unlinked_reference_only_warns(run_mstack, skills_sandbox: Path):
-    (skills_sandbox / "sync-rules" / "references" / "orphan.md").write_text(
-        "# Orphan\n"
-    )
+    (skills_sandbox / "sync" / "references" / "orphan.md").write_text("# Orphan\n")
 
     completed = run_mstack("skills-check", str(skills_sandbox))
 
@@ -130,7 +126,7 @@ def test_unlinked_reference_only_warns(run_mstack, skills_sandbox: Path):
 
 def test_non_ascii_prose_only_warns(run_mstack, skills_sandbox: Path, edit_skill):
     edit_skill(
-        "sync-rules/SKILL.md",
+        "sync/SKILL.md",
         "Keep `.cursor/rules/`",
         'Mantené `código` and "señal" out. Keep `.cursor/rules/`',
     )
@@ -145,7 +141,7 @@ def test_non_ascii_prose_only_warns(run_mstack, skills_sandbox: Path, edit_skill
 
 def test_links_in_code_are_ignored(run_mstack, skills_sandbox: Path, edit_skill):
     edit_skill(
-        "sync-rules/SKILL.md",
+        "sync/SKILL.md",
         "## Modes",
         "`[x](missing.md)`\n\n```markdown\n[y](missing.md)\n```\n\n## Modes",
     )
@@ -158,17 +154,17 @@ def test_links_in_code_are_ignored(run_mstack, skills_sandbox: Path, edit_skill)
 def test_generic_profile_skips_mstack_only_checks(
     run_mstack, skills_sandbox: Path, edit_skill
 ):
-    edit_skill("sync-rules/SKILL.md", PRINCIPLES_LINE, "Principles:")
+    edit_skill("sync/SKILL.md", PRINCIPLES_LINE, "Principles:")
     edit_skill(
-        "correct-rules/SKILL.md",
+        "correct/SKILL.md",
         '  upstream-commit: "e58dd043600587dbaf58ba315e7f2b38373eeb43"\n',
         "",
     )
     edit_skill("setup-mstack/SKILL.md", "Install the mstack", "Instalá the mstack")
     edit_skill(
-        "integrate-skills/SKILL.md",
-        "name: integrate-skills",
-        "name: integrate-skills\nallowed-tools: Read\nauthor: someone",
+        "integrate/SKILL.md",
+        "name: integrate",
+        "name: integrate\nallowed-tools: Read\nauthor: someone",
     )
 
     completed = run_mstack(
@@ -190,7 +186,7 @@ def test_missing_folder_fails(run_mstack, tmp_path: Path):
 
 
 def test_single_skill_folder_is_checked(run_mstack, skills_sandbox: Path):
-    completed = run_mstack("skills-check", str(skills_sandbox / "sync-rules"), "--json")
+    completed = run_mstack("skills-check", str(skills_sandbox / "sync"), "--json")
 
     assert completed.returncode == 0, completed.stderr
-    assert json.loads(completed.stdout)["skills"] == ["sync-rules"]
+    assert json.loads(completed.stdout)["skills"] == ["sync"]

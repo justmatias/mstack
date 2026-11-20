@@ -31,6 +31,7 @@ Why: one sentence on why the team follows the rule.
 - `alwaysApply`: `true` only for rules that apply to every request.
 - One bullet per atomic rule: one verifiable statement each.
 - A `Why:` line. Checks enforce the *what*; the prose keeps the *why*.
+- A rule adapted from another repo (through `integrate`) also carries its credit in the frontmatter: `license`, and `metadata.adapted-from`, `upstream-commit` (a 40-character sha) and `upstream-license`, the same keys as a skill. `mstack coverage` reports `credit` when they are incomplete, and `mstack render-rule` keeps the credit as the last lines of the installed rule.
 
 ## The `## Checks` section
 
@@ -83,4 +84,4 @@ print(banner)
 - The trailing form (`code  # ast-grep-ignore: <id>`) is allowed; the `rule-exception` then goes on the line above the code.
 - `check_exceptions.py` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
-- Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct-rules` looks for this).
+- Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct` looks for this).
