@@ -2,6 +2,65 @@
 
 <!-- version list -->
 
+## v5.1.0 (2026-11-20)
+
+### Documentation
+
+- List the pstack skills and their overlaps ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+### Features
+
+- **agents**: Add comment-sicko and the no-comments skill
+  ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **rules**: Forbid AI attribution in commits and PRs
+  ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add bro ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add how and why ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add leave-pr-comments ([#42](https://github.com/justmatias/mstack/pull/42),
+  [`b6ff6ed`](https://github.com/justmatias/mstack/commit/b6ff6ed3c66f06caec55f5cc7a3a5c05ffcb7777))
+
+- **skills**: Add modernize ([#42](https://github.com/justmatias/mstack/pull/42),
+  [`b6ff6ed`](https://github.com/justmatias/mstack/commit/b6ff6ed3c66f06caec55f5cc7a3a5c05ffcb7777))
+
+- **skills**: Add open-pull-request ([#42](https://github.com/justmatias/mstack/pull/42),
+  [`b6ff6ed`](https://github.com/justmatias/mstack/commit/b6ff6ed3c66f06caec55f5cc7a3a5c05ffcb7777))
+
+- **skills**: Add open-pull-request, leave-pr-comments and modernize
+  ([#42](https://github.com/justmatias/mstack/pull/42),
+  [`b6ff6ed`](https://github.com/justmatias/mstack/commit/b6ff6ed3c66f06caec55f5cc7a3a5c05ffcb7777))
+
+- **skills**: Add pstack skills and the comment-sicko agent
+  ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add recall ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add sharpen ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add teach ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+- **skills**: Add unslop ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+### Refactoring
+
+- **skills**: Rename code-simplification to declutter
+  ([#43](https://github.com/justmatias/mstack/pull/43),
+  [`cff5a87`](https://github.com/justmatias/mstack/commit/cff5a8755a0c693000411ecc3f895688d0c0786c))
+
+
 ## v5.0.0 (2026-11-20)
 
 ### Documentation
