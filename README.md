@@ -11,6 +11,10 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `rules/` | Conventions in prose (`.mdc`), the source of truth agents read before writing code. |
 | `lint/` | The checks that enforce those rules (ast-grep), plus architecture contracts in `.importlinter`. |
 | `skills/` | Agent skills that keep rules and checks in sync and turn corrections into new rules. |
+| `agents/` | Subagent definitions. |
+| `mcp/` | MCP servers, one per file, with `${VAR}` placeholders for secrets. |
+| `instructions/` | Global instructions for every project (`global.md`). |
+| `settings/` | A partial Claude Code `settings.json`: permissions, status line, env. |
 | `src/mstack/` | The `mstack` CLI: the guards the skills and `make` targets run. |
 
 ## Getting started
@@ -26,15 +30,15 @@ make setup                      # dev dependencies
 uv tool install --editable .    # the mstack CLI; `mstack --help` lists the commands
 ```
 
-**2. Install the skills and rules.** Open this repo in Claude Code or Cursor and ask the agent to *"set up mstack following skills/setup-mstack/SKILL.md"*. It asks which tool you use, compares each skill and rule with what you already have, and waits for your answer before every change.
+**2. Install the skills, rules and agent config.** Open this repo in Claude Code or Cursor and ask the agent to *"set up mstack following skills/setup-mstack/SKILL.md"*. It asks which tool you use, compares each skill and rule with what you already have, and waits for your answer before every change.
 
-| You use | Skills go to | Rules go to |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `~/.claude/rules/` |
-| Cursor | `~/.cursor/skills/` | Cursor Settings → Rules (the skill prints them for you to paste) |
-| Both | `~/.claude/skills/` (Cursor loads it too) | both of the above |
+| You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
+| --- | --- | --- | --- | --- |
+| Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/`, a managed block in `~/.claude/CLAUDE.md` | `claude mcp add-json --scope user` | merged into `~/.claude/settings.json` |
+| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | none |
+| Both | `~/.claude/` only (Cursor loads it too) | both of the above | both of the above | merged into `~/.claude/settings.json` |
 
-They are copies, not symlinks, and anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
+Skills, rules and agents are copies, not symlinks. MCP servers, instructions and settings are merged: your own keys and text stay. Anything replaced is backed up to `<folder>/.mstack-backups/<timestamp>/`.
 
 **3. Use the skills in your projects.**
 

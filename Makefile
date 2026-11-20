@@ -7,6 +7,10 @@ MSTACK := uv run mstack
 # repeat the sgconfig and the scan exclude until `mstack lint` runs them
 # (docs/specs/runtime-lint-command.md).
 SGCONFIG := lint/sgconfig.yml
+# The installable files in agents/, mcp/, settings/ and instructions/. Each folder's
+# README.md documents the format for this repo and is not installed, so it is left out.
+# Passing them to leak-check replaces [leak_check].paths, so lint and rules are repeated.
+AGENT_CONFIG_FILES := $(filter-out %/README.md,$(wildcard agents/*.md mcp/*.json settings/*.json instructions/*.md))
 # fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
 SCAN_EXCLUDES := --globs '!fixtures/invalid/**'
 
@@ -45,7 +49,8 @@ guards:
 	uv run lint-imports
 	$(MSTACK) coverage
 	$(MSTACK) exceptions
-	$(MSTACK) leak-check
+	$(MSTACK) config-check
+	$(MSTACK) leak-check lint rules $(AGENT_CONFIG_FILES)
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:

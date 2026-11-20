@@ -4,17 +4,25 @@ import sys
 from collections.abc import Callable
 
 from mstack import config
-from mstack.guards import check_exceptions, check_no_domain_leak, check_rule_coverage
-from mstack.install import manifest, render
+from mstack.guards import (
+    check_agent_config,
+    check_exceptions,
+    check_no_domain_leak,
+    check_rule_coverage,
+)
+from mstack.install import manifest, merge, render
 
 logger = logging.getLogger(__name__)
 
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "config": config.main,
+    "config-check": check_agent_config.main,
     "coverage": check_rule_coverage.main,
     "exceptions": check_exceptions.main,
     "leak-check": check_no_domain_leak.main,
     "manifest": manifest.main,
+    "merge-block": merge.merge_block_main,
+    "merge-settings": merge.merge_settings_main,
     "render-rule": render.main,
 }
 

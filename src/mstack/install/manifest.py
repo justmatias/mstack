@@ -6,24 +6,29 @@ import logging
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from mstack.install.hashing import hash_installed, hash_text, hash_tree
-from mstack.install.render import RuleFormatError, render_rule
+from mstack.install.files import atomic_write_text
+from mstack.install.item_kinds import (
+    KINDS,
+    Kind,
+    SourceError,
+    SourceItem,
+    Tool,
+    expand,
+    installed_hash,
+    owns_target,
+    source_hash,
+    source_items,
+    written_keys,
+)
 
 logger = logging.getLogger(__name__)
 
 SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
-# This skill runs from the checkout and is never installed.
-NOT_INSTALLED_SKILLS = frozenset({"setup-mstack"})
-
-Kind = Literal["skill", "rule"]
-Tool = Literal["claude", "cursor", "both"]
 
 ACTIONS = {
     "new": "add",
@@ -61,6 +66,8 @@ class ManifestItem(BaseModel):
     source_version: str | None
     source_commit: str | None
     installed_at: str
+    # For merged items (mcp, settings): the JSON keys mstack wrote.
+    keys: list[str] | None = None
 
 
 class Manifest(BaseModel):
@@ -78,13 +85,6 @@ class Manifest(BaseModel):
             ):
                 return item
         return None
-
-
-class SourceItem(BaseModel):
-    kind: Kind
-    name: str
-    source_hash: str
-    target: Path
 
 
 class ItemStatus(BaseModel):
@@ -106,10 +106,6 @@ def state_directory() -> Path:
 
 def manifest_path() -> Path:
     return state_directory() / MANIFEST_NAME
-
-
-def expand(target: str | Path) -> Path:
-    return Path(os.path.abspath(Path(target).expanduser()))
 
 
 def abbreviate(target: Path) -> str:
@@ -139,63 +135,7 @@ def load_manifest(path: Path) -> Manifest:
 
 
 def save_manifest(manifest: Manifest, path: Path) -> None:
-    """Write to a temporary file in the same folder, then rename it over the manifest."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    text = manifest.model_dump_json(by_alias=True, indent=2) + "\n"
-    with tempfile.NamedTemporaryFile(
-        "w", encoding="utf-8", dir=path.parent, prefix=".manifest-", delete=False
-    ) as temporary:
-        temporary.write(text)
-    try:
-        os.replace(temporary.name, path)
-    except OSError:
-        Path(temporary.name).unlink(missing_ok=True)
-        raise
-
-
-def target_folders(tool: Tool) -> dict[str, Path | None]:
-    home = Path.home()
-    if tool == "cursor":
-        return {"skill": home / ".cursor" / "skills", "rule": None}
-    return {"skill": home / ".claude" / "skills", "rule": home / ".claude" / "rules"}
-
-
-def source_skill_hash(checkout: Path, name: str) -> str:
-    return hash_tree(checkout / "skills" / name)
-
-
-def source_rule_hash(checkout: Path, name: str) -> str:
-    mdc = checkout / "rules" / f"{name}.mdc"
-    return hash_text(render_rule(mdc.read_text(encoding="utf-8")))
-
-
-def source_items(checkout: Path, tool: Tool) -> list[SourceItem]:
-    folders = target_folders(tool)
-    items: list[SourceItem] = []
-    skills_folder = folders["skill"]
-    if skills_folder is not None:
-        items.extend(
-            SourceItem(
-                kind="skill",
-                name=skill.parent.name,
-                source_hash=source_skill_hash(checkout, skill.parent.name),
-                target=expand(skills_folder / skill.parent.name),
-            )
-            for skill in sorted((checkout / "skills").glob("*/SKILL.md"))
-            if skill.parent.name not in NOT_INSTALLED_SKILLS
-        )
-    rules_folder = folders["rule"]
-    if rules_folder is not None:
-        items.extend(
-            SourceItem(
-                kind="rule",
-                name=mdc.stem,
-                source_hash=source_rule_hash(checkout, mdc.stem),
-                target=expand(rules_folder / f"{mdc.stem}.md"),
-            )
-            for mdc in sorted((checkout / "rules").glob("*.mdc"))
-        )
-    return items
+    atomic_write_text(path, manifest.model_dump_json(by_alias=True, indent=2) + "\n")
 
 
 def item_state(
@@ -228,34 +168,35 @@ def status_row(
 def orphan_rows(
     manifest: Manifest, sources: list[SourceItem], tool: Tool
 ) -> list[ItemStatus]:
-    known = {(source.kind, source.target) for source in sources}
-    folders = {
-        kind: expand(folder)
-        for kind, folder in target_folders(tool).items()
-        if folder is not None
-    }
+    known = {(source.kind, source.name, source.target) for source in sources}
     return [
         status_row(
             record.kind, record.name, expand(record.target), "orphan", recorded=True
         )
         for record in manifest.items
-        if record.kind in folders
-        and expand(record.target).parent == folders[record.kind]
-        and (record.kind, expand(record.target)) not in known
+        if owns_target(record.kind, expand(record.target), tool)
+        and (record.kind, record.name, expand(record.target)) not in known
     ]
 
 
 def compute_status(checkout: Path, tool: Tool, manifest: Manifest) -> list[ItemStatus]:
-    sources = source_items(checkout, tool)
+    try:
+        sources = source_items(checkout, tool)
+    except SourceError as error:
+        raise ManifestError(str(error)) from error
     rows: list[ItemStatus] = []
     for source in sources:
         record = manifest.find(source.kind, source.name, source.target)
         if source.target.is_symlink():
             state = "old-symlink"
         else:
-            state = item_state(
-                source.source_hash, record, hash_installed(source.target)
-            )
+            try:
+                installed = installed_hash(
+                    checkout, source.kind, source.name, source.target
+                )
+            except SourceError as error:
+                raise ManifestError(str(error)) from error
+            state = item_state(source.source_hash, record, installed)
         rows.append(
             status_row(
                 source.kind,
@@ -289,22 +230,21 @@ def source_version() -> str | None:
 def record_item(
     manifest: Manifest, kind: Kind, name: str, target: Path, checkout: Path
 ) -> ManifestItem:
-    installed_hash = hash_installed(target)
-    if installed_hash is None:
-        raise ManifestError(f"nothing is installed at {target}")
     try:
-        if kind == "skill":
-            source_hash = source_skill_hash(checkout, name)
-        else:
-            source_hash = source_rule_hash(checkout, name)
-    except (OSError, RuleFormatError) as error:
-        raise ManifestError(f"cannot read the source {kind} {name}: {error}") from error
+        installed = installed_hash(checkout, kind, name, target)
+        source = source_hash(checkout, kind, name)
+        keys = written_keys(checkout, kind, name)
+    except SourceError as error:
+        raise ManifestError(str(error)) from error
+    if installed is None:
+        raise ManifestError(f"nothing is installed at {target} for {kind} {name}")
     item = ManifestItem(
         kind=kind,
         name=name,
         target=abbreviate(target),
-        hash=installed_hash,
-        source_hash=source_hash,
+        hash=installed,
+        source_hash=source,
+        keys=keys,
         source_version=source_version(),
         source_commit=source_commit(checkout),
         installed_at=datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -388,13 +328,13 @@ def build_parser() -> argparse.ArgumentParser:
     record = commands.add_parser(
         "record", help="Record the installed hash of an item after installing it."
     )
-    record.add_argument("kind", choices=["skill", "rule"])
+    record.add_argument("kind", choices=KINDS)
     record.add_argument("name")
     record.add_argument("target", help="Where the item was installed.")
     record.set_defaults(handler=run_record)
 
     forget = commands.add_parser("forget", help="Drop an item's record.")
-    forget.add_argument("kind", choices=["skill", "rule"])
+    forget.add_argument("kind", choices=KINDS)
     forget.add_argument("name")
     forget.add_argument(
         "--target", help="Only the record for this target (default: every one)."
