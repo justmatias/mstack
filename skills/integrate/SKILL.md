@@ -129,7 +129,7 @@ metadata:
   upstream-license: "<SPDX id>, <copyright line>, https://github.com/<owner>/<repo>/blob/<sha>/LICENSE"
 ```
 
-For something written from the idea only (step 2, no license), use `metadata.inspired-by` with the URL instead, and no `license` or `upstream-license`. When the target already credits another upstream, add this one under a suffixed key (`adapted-from-<label>`, `upstream-commit-<label>`, `upstream-license-<label>`), as `reflect` does with `upstream-commit-deep`.
+For something written from the idea only (step 2, no license), use `metadata.inspired-by` with the URL instead, and no `license` or `upstream-license`. When the target already credits another upstream, add this one under a suffixed key (`adapted-from-<label>`, `upstream-commit-<label>`, `upstream-license-<label>`).
 
 ### Skills
 

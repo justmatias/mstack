@@ -2,7 +2,7 @@
 
 Two principles: **English only**, and **Practices, not domain**.
 
-Every mstack skill, every reference and every reviewer or synthesizer template follows these two principles. They take priority over any other step.
+Every mstack skill, every reference and every subagent prompt follows these two principles. They take priority over any other step.
 
 ## 1. English only
 

@@ -65,5 +65,3 @@ The skills are written for both environments. Map the tool names:
 | Spawn a subagent | `Agent` (`subagent_type: "general-purpose"`; `"Explore"` for read-only) | `Task` (`subagent_type: generalPurpose`; `readonly: true` for read-only) |
 | Ask the user a choice | `AskUserQuestion` (absent in `-p` mode: ask in plain text) | `AskQuestion` |
 | Skills folder | `.claude/skills/`, `~/.claude/skills/` | `.cursor/skills/`, `~/.cursor/skills/` |
-| Per-role models rule | `~/.claude/rules/pstack-models.md` | `~/.cursor/rules/pstack-models.mdc` |
-| Model slug `claude-opus-5-5-xhigh` | `model: "opus"`, `effort: "xhigh"` | as written |
