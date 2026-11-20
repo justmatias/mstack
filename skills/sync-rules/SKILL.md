@@ -48,7 +48,7 @@ Run the mechanical part:
 mstack coverage --json
 ```
 
-It reports `missing-checks-section`, `unknown-check`, `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
+It reports `missing-checks-section`, `unknown-check`, `unknown-hook` (an `enforced-by-hook:` id that `.pre-commit-config.yaml` does not configure), `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
 
 | Category | Meaning |
 | --- | --- |
@@ -82,7 +82,7 @@ One commit per synced rule (YAML, tests and `.mdc` together), with a Conventiona
 ## 7. Verify
 
 ```bash
-make lint-rules
+mstack lint
 make demo          # when the repo has fixtures/invalid/
 ```
 

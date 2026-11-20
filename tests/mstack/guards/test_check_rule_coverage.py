@@ -46,3 +46,119 @@ def test_missing_source_fails(run_mstack, rules_sandbox: Path):
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
         "missing-source"
     ]
+
+
+def coverage_issues(run_mstack, rules_sandbox: Path) -> tuple[int, list[tuple]]:
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+    issues = json.loads(completed.stdout)["issues"]
+    return completed.returncode, [
+        (issue["kind"], issue.get("check")) for issue in issues
+    ]
+
+
+# The sandbox has this repo's .pre-commit-config.yaml: gitleaks is a remote hook,
+# lint-rules a local one.
+@pytest.mark.parametrize("hook_id", ["gitleaks", "lint-rules"], ids=["remote", "local"])
+def test_configured_hook_counts_as_check(
+    run_mstack, rules_sandbox: Path, add_hook_line, hook_id: str
+):
+    add_hook_line(hook_id)
+
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+
+    assert completed.returncode == 0, completed.stdout
+    logging_rule = next(
+        rule
+        for rule in json.loads(completed.stdout)["rules"]
+        if rule["mdc"].endswith("logging.mdc")
+    )
+    assert logging_rule["hooks"] == [hook_id]
+
+
+def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):
+    add_hook_line("no-such-hook")
+
+    assert coverage_issues(run_mstack, rules_sandbox) == (
+        1,
+        [("unknown-hook", "no-such-hook")],
+    )
+
+
+def test_missing_pre_commit_config_makes_every_hook_unknown(
+    run_mstack, rules_sandbox: Path, add_hook_line
+):
+    (rules_sandbox / ".pre-commit-config.yaml").unlink()
+    add_hook_line("gitleaks")
+
+    exit_code, issues = coverage_issues(run_mstack, rules_sandbox)
+
+    assert exit_code == 1
+    assert ("unknown-hook", "gitleaks") in issues
+    assert {kind for kind, _ in issues} == {"unknown-hook"}
+
+
+@pytest.mark.usefixtures("_only_hook_in_checks_section")
+def test_checks_section_with_only_hooks_is_not_missing(run_mstack, rules_sandbox: Path):
+    assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
+
+
+@pytest.fixture
+def import_linter_layout(tmp_path: Path) -> Path:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "rules").mkdir()
+    (tmp_path / "rules" / "layers.mdc").write_text(
+        "# Layers\n\n- The core does not import adapters.\n\n"
+        "## Checks\n- enforced-by: core-is-pure\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "sgconfig.yml").write_text("ruleDirs: []\n", encoding="utf-8")
+    (tmp_path / ".importlinter").write_text(
+        "[importlinter]\nroot_package = app\n\n"
+        "[importlinter:contract:core-is-pure]\nname = core-is-pure\n"
+        "type = forbidden\nsource_modules = app.core\nforbidden_modules = app.adapters\n",
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def coverage_arguments(layout: Path) -> list[str]:
+    return [
+        "--rules-dir",
+        str(layout / "rules"),
+        "--config",
+        str(layout / "sgconfig.yml"),
+        "--importlinter",
+        str(layout / ".importlinter"),
+        "--json",
+    ]
+
+
+def test_import_linter_contract_counts_as_check(run_mstack, import_linter_layout: Path):
+    completed = run_mstack(
+        "coverage",
+        *coverage_arguments(import_linter_layout),
+        working_directory=import_linter_layout,
+    )
+
+    assert completed.returncode == 0, completed.stdout
+    assert json.loads(completed.stdout)["rules"][0]["checks"] == ["core-is-pure"]
+
+
+def test_removed_import_linter_contract_is_unknown_check(
+    run_mstack, import_linter_layout: Path
+):
+    (import_linter_layout / ".importlinter").write_text(
+        "[importlinter]\nroot_package = app\n", encoding="utf-8"
+    )
+
+    completed = run_mstack(
+        "coverage",
+        *coverage_arguments(import_linter_layout),
+        working_directory=import_linter_layout,
+    )
+
+    assert completed.returncode == 1
+    assert [
+        (issue["kind"], issue["check"])
+        for issue in json.loads(completed.stdout)["issues"]
+    ] == [("unknown-check", "core-is-pure")]

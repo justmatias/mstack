@@ -1,5 +1,4 @@
 import json
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -35,24 +34,3 @@ def scan_findings():
         return [json.loads(line) for line in completed.stdout.splitlines() if line]
 
     return scan
-
-
-@pytest.fixture
-def import_linter_sandbox(tmp_path: Path) -> Path:
-    shutil.copytree(
-        REPOSITORY_ROOT / "fixtures" / "valid", tmp_path / "fixtures" / "valid"
-    )
-    shutil.copy(
-        REPOSITORY_ROOT / "fixtures" / "__init__.py",
-        tmp_path / "fixtures" / "__init__.py",
-    )
-    shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
-    return tmp_path
-
-
-@pytest.fixture
-def run_lint_imports():
-    def run(working_directory: Path) -> subprocess.CompletedProcess:
-        return run_command(["lint-imports"], working_directory)
-
-    return run

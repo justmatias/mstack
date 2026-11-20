@@ -12,15 +12,10 @@ Suggested order: `runtime-lint-command` first; it unblocks most of the rest.
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [remove-architecture-layers-rule](remove-architecture-layers-rule.md) | Drop the fixture-only rule and everything that exists only for it | none |
-| [runtime-lint-command](runtime-lint-command.md) | Ship ast-grep and import-linter with the CLI, and add `mstack lint` | project-config |
 | [doctor](doctor.md) | `mstack doctor`: verify a machine's setup in one command | install-manifest, skill-validation (soft) |
 | [init-command](init-command.md) | `mstack init`: scaffold rules-as-checks in any repo | runtime-lint-command |
 | [pre-commit-hooks](pre-commit-hooks.md) | `.pre-commit-hooks.yaml` so other repos use the guards as hooks | runtime-lint-command |
 | [reusable-ci-action](reusable-ci-action.md) | A GitHub Action that runs `mstack lint` in any repo | runtime-lint-command |
-| [hook-checks](hook-checks.md) | Let a rule be enforced by a pre-commit hook (prerequisite of the shell and git packs) | none |
-| [rule-pack-shell](rule-pack-shell.md) | Shell script rules and checks | hook-checks |
-| [rule-pack-git-commits](rule-pack-git-commits.md) | Git and commit-message rules, with `mstack commit-msg` | hook-checks |
 | [portability](portability.md) | Linux, macOS, Windows and WSL behave the same | runtime-lint-command (soft) |
 
 ### Next

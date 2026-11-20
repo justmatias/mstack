@@ -1,0 +1,23 @@
+---
+description: Commits and commit messages
+alwaysApply: true
+---
+
+# Git commits
+
+- Commit subjects follow Conventional Commits: `type(scope)!: summary`, with a type from the repo's allowed list.
+- The subject is at most 72 characters, in the imperative mood ("add", not "added"), with no trailing period.
+- When there is a body, separate it from the subject with a blank line, and explain why the change was made, not what it does.
+- One logical change per commit.
+- Never commit secrets, keys or local settings files.
+- Never commit directly to the default branch; branch first.
+- Don't force-push shared branches.
+
+Why: a consistent history is what release tooling, reviewers and agents reading `git log` rely on; a secret pushed once must be rotated; direct commits and force-pushes skip review and rewrite what others built on.
+
+## Checks
+- enforced-by-hook: mstack-commit-msg
+- enforced-by-hook: gitleaks
+- enforced-by-hook: detect-private-key
+- enforced-by-hook: no-commit-to-branch
+- enforcement: llm-review

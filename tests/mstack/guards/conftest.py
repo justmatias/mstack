@@ -10,8 +10,11 @@ from tests.conftest import REPOSITORY_ROOT
 def rules_sandbox(tmp_path: Path) -> Path:
     shutil.copytree(REPOSITORY_ROOT / "rules", tmp_path / "rules")
     shutil.copytree(REPOSITORY_ROOT / "lint", tmp_path / "lint")
-    shutil.copy(REPOSITORY_ROOT / ".importlinter", tmp_path / ".importlinter")
     shutil.copy(REPOSITORY_ROOT / ".mstack.toml", tmp_path / ".mstack.toml")
+    shutil.copy(
+        REPOSITORY_ROOT / ".pre-commit-config.yaml",
+        tmp_path / ".pre-commit-config.yaml",
+    )
     return tmp_path
 
 
@@ -92,3 +95,38 @@ def edit_skill(skills_sandbox: Path):
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
     return edit
+
+
+@pytest.fixture
+def add_hook_line(rules_sandbox: Path):
+    def add(hook_id: str, mdc_name: str = "logging.mdc") -> None:
+        mdc = rules_sandbox / "rules" / mdc_name
+        mdc.write_text(
+            mdc.read_text(encoding="utf-8") + f"- enforced-by-hook: {hook_id}\n",
+            encoding="utf-8",
+        )
+
+    return add
+
+
+@pytest.fixture
+def _only_hook_in_checks_section(rules_sandbox: Path) -> None:
+    mdc = rules_sandbox / "rules" / "naming.mdc"
+    prose = mdc.read_text(encoding="utf-8").split("## Checks")[0]
+    mdc.write_text(
+        prose + "## Checks\n- enforced-by-hook: gitleaks\n", encoding="utf-8"
+    )
+
+
+@pytest.fixture
+def shell_exception_file(tmp_path: Path):
+    def write(header: str) -> Path:
+        path = tmp_path / "task.sh"
+        path.write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n"
+            f'{header}# ast-grep-ignore: no-eval\neval "$1"\n',
+            encoding="utf-8",
+        )
+        return path
+
+    return write

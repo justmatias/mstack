@@ -2,6 +2,62 @@
 
 <!-- version list -->
 
+## v3.6.0 (2026-11-20)
+
+### Bug Fixes
+
+- **platform**: Portable config paths and test homes on Windows
+  ([#33](https://github.com/justmatias/mstack/pull/33),
+  [`9f4f831`](https://github.com/justmatias/mstack/commit/9f4f83126d24cc5a9733d0c8932bdae862515307))
+
+### Features
+
+- **coverage**: Let a rule be enforced by a pre-commit hook
+  ([#33](https://github.com/justmatias/mstack/pull/33),
+  [`9f4f831`](https://github.com/justmatias/mstack/commit/9f4f83126d24cc5a9733d0c8932bdae862515307))
+
+- **rules**: Add shell script rules and checks ([#33](https://github.com/justmatias/mstack/pull/33),
+  [`9f4f831`](https://github.com/justmatias/mstack/commit/9f4f83126d24cc5a9733d0c8932bdae862515307))
+
+### Testing
+
+- **lint**: Copy the pre-commit config into the lint sandbox
+  ([#33](https://github.com/justmatias/mstack/pull/33),
+  [`9f4f831`](https://github.com/justmatias/mstack/commit/9f4f83126d24cc5a9733d0c8932bdae862515307))
+
+- **lint**: Name the scanned sample so leak-check ignores the rules' prose
+  ([#33](https://github.com/justmatias/mstack/pull/33),
+  [`9f4f831`](https://github.com/justmatias/mstack/commit/9f4f83126d24cc5a9733d0c8932bdae862515307))
+
+
+## v3.5.0 (2026-11-20)
+
+### Bug Fixes
+
+- **coverage**: Ignore malformed entries in the pre-commit config
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+- **platform**: Portable config paths and test homes on Windows
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+### Features
+
+- **coverage**: Let a rule be enforced by a pre-commit hook
+  ([#32](https://github.com/justmatias/mstack/pull/32),
+  [`9ec992d`](https://github.com/justmatias/mstack/commit/9ec992d7f247b92102ea46fc6391e0cff62e20b1))
+
+
+## v3.4.0 (2026-11-20)
+
+### Features
+
+- **lint**: Ship ast-grep and import-linter with the CLI and add mstack lint
+  ([#26](https://github.com/justmatias/mstack/pull/26),
+  [`64f6b14`](https://github.com/justmatias/mstack/commit/64f6b142849c0f42fb010b8b8434d6b82f3464bc))
+
+
 ## v3.3.0 (2026-11-20)
 
 ### Features
