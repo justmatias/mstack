@@ -1,68 +1,53 @@
-# Engram as the agent memory layer
+# Engram as an optional memory server
 
 - **Phase:** future
-- **Depends on:** nothing open. Builds on `mcp/`, `instructions/` and `mstack doctor`. Better with `host-profiles` (personal and work memory kept apart) and `claude-code-plugin`.
+- **Depends on:** nothing open. Ships through `mcp/`, which `setup-mstack` already installs.
 
 ## Problem
 
-mstack keeps what should be **enforced** (rules and checks) and **how to work** (skills). It has no place for what agents **learn while working**: decisions, gotchas, how a project is laid out. Those stay in each tool's own memory, on each machine, and are lost between tools. [Engram](https://github.com/Gentleman-Programming/engram) (MIT) is a single binary that stores curated agent memories in local SQLite with full-text search. It exposes them over MCP to Claude Code, Cursor, Codex, Gemini CLI and others, and can export them to git (`engram sync`) for use on another machine.
+mstack keeps what should be **enforced** (rules and checks) and **how to work** (skills). What agents **learn while working** (decisions, gotchas, how a project is laid out) stays in each tool's own memory and is lost between tools. Claude Code's built-in memory covers it for Claude Code alone, but Cursor, Codex and the others don't share it. [Engram](https://github.com/Gentleman-Programming/engram) (MIT) is a single binary that stores agent memories in local SQLite with full-text search and exposes them over MCP to Claude Code, Cursor, Codex, Gemini CLI and others.
 
 ## Goal
 
-Engram becomes the optional memory layer of the stack: installed and verified the same way on every machine, wired into the agents mstack configures, and feeding `reflect`, so a learning that keeps coming back is promoted from memory to a rule with a check.
+A machine that uses more than one agent can opt into Engram as a shared memory, wired in by `setup-mstack` like any other MCP server, and `reflect` can use what it holds as evidence for a new rule.
 
 ## Out of scope
 
-- Replacing rules or skills with memories. A memory is a hint an agent may retrieve; a rule with a check is enforced. mstack's core idea stays the same.
-- Hosting Engram Cloud.
-- Vendoring Engram, or copying its skills or instructions into this repo without going through `integrate`.
+- Replacing rules or skills with memories. A memory is a hint an agent may retrieve; a rule with a check is enforced.
+- Replacing Claude Code's built-in memory. Engram runs next to it.
+- Installing the Engram binary, hosting Engram Cloud, or syncing memories across machines (`engram sync`). Memories hold project details, and this repo holds practices only.
+- Separate databases per machine role. Use `ENGRAM_DATA_DIR` on that machine if needed.
 
 ## Design
 
-**Layers, and what goes where:**
+**What goes where:**
 
 | Kind of knowledge | Lives in | Enforced |
 | --- | --- | --- |
 | A convention that can be checked | rule + check | yes, by `mstack lint` |
 | A convention that needs judgment | rule with `llm-review` | in review |
 | A workflow | skill | when invoked |
-| A project fact, decision or gotcha | engram memory | no, retrieved on demand |
+| A project fact, decision or gotcha | memory (built-in or Engram) | no, retrieved on demand |
 
-**Install and verify:**
-
-- mstack doesn't install the binary. `doctor` checks that `engram` is on `PATH` and its version is at least the minimum (recorded in `mcp/engram.json`), and prints the official install command for the platform (Homebrew, `go install`, or a release archive).
-- **Agent wiring:** prefer mstack's own `mcp/engram.json` (`engram mcp --tools=agent`), installed by `setup-mstack` like any other `mcp/` file, so mstack's plan, backups and `doctor` cover it. Using `engram setup <agent>` is the alternative when its plugin or hooks are wanted; then mstack records that Engram owns that config and doesn't touch it. Never both for the same agent: `doctor` flags duplicate MCP entries.
-- **Instructions:** a short section in `instructions/global.md` about when to save a memory (a decision, a non-obvious fix, a project convention not yet in a rule) and when to search one (at the start of a task in a known project). The same principles apply: English, and no secrets.
-
-**Personal and work data stay apart:**
-
-- Separate databases per profile, with `ENGRAM_DATA_DIR` set by the host profile (`host-profiles`), for example `~/.engram/personal` and `~/.engram/work`.
-- `engram sync` exports into the **project repo's** `.engram/` folder, so work memories travel with work repos and personal ones with personal repos. mstack never syncs memories through its own repo, because they hold project details and this repo holds practices only.
-- Prompts are not exported (Engram's default); the spec keeps it that way.
-
-**Promotion into rules (`reflect`, `correct`):**
-
-- New optional source in `discovery.md`: when the Engram MCP tools are available, search the current project's memories for corrections and conventions.
-- A convention found in memories repeatedly counts as evidence, like a repeated correction in a transcript. It goes through the same principles (abstracted, no domain), and becomes a rule with a check. The reply suggests removing the memory once a rule covers it, so the two don't diverge.
+- **Wiring:** `mcp/engram.json` (`engram mcp --tools=agent`), installed by `setup-mstack` like any other `mcp/` file, so its plan and backups cover it. The setup offers it only when `engram` is on `PATH`, and otherwise mentions it with the official install link. If the user already ran `engram setup <agent>`, the setup sees the existing `engram` server and keeps it: never both for the same agent.
+- **Promotion into rules (`reflect`, `correct`):** a new optional source in `discovery.md`. When the Engram MCP tools are available, search the current project's memories for corrections and conventions. A convention that comes up repeatedly counts as evidence, like a repeated correction in a transcript, and goes through the same principles (abstracted, no domain). The reply suggests removing the memory once a rule covers it, so the two don't diverge.
 
 ## Changes
 
-- `mcp/engram.json`, a section in `instructions/global.md`, a `doctor` check, an `ENGRAM_DATA_DIR` setting in the profiles.
-- `skills/sync/references/discovery.md`: the memory source. `reflect` and `correct`: the promotion step.
-- `README.md`: one row in "What's inside" and a note that Engram is optional.
+- `mcp/engram.json`.
+- `.agents/skills/setup-mstack/SKILL.md`: offer it only when `engram` is on `PATH`, and keep an existing `engram` server.
+- `skills/toolkit/sync/references/discovery.md`: the memory source. `reflect` and `correct`: the promotion step.
+- `README.md`: a note that Engram is optional.
 
 ## Tests
 
-- `doctor` with and without `engram` on `PATH`, and with an old version.
-- Install of `mcp/engram.json` in a temporary `HOME`, and duplicate detection when the agent's config already has an `engram` server.
+- `mcp/engram.json` holds no secret or machine-specific path (gitleaks and `domain-check` already cover `mcp/`).
 
 ## Acceptance criteria
 
 - [ ] On a machine with Engram installed, setup wires it into the selected agents, and a second run changes nothing.
-- [ ] Personal and work memories end up in different databases.
 - [ ] `reflect` can cite a memory as evidence, without copying its content into a rule.
 
 ## Open questions
 
-- Check Engram's current docs when implementing: the minimum version, the `--tools` profiles, and how `engram sync` merges chunks from two machines.
-- Should Engram replace Claude Code's built-in memory, or run next to it? Recommendation: next to it at first; decide after a few weeks of use.
+- Check Engram's current docs when implementing: the `--tools` profiles and the MCP command line.

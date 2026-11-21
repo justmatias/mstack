@@ -1,43 +1,55 @@
 # Claude Code plugin
 
 - **Phase:** future
-- **Depends on:** nothing open. Packages `skills/` and `agents/`, validated by `mstack skills-check`. Better with `agent-hooks`.
+- **Depends on:** nothing open. Packages `skills/` and `agents/`, validated by `mstack skills-check`. Better with `agent-hooks`, whose hooks the plugin can ship.
 
 ## Problem
 
-Claude Code has a native way to distribute skills, subagents, hooks and MCP servers: plugins from a marketplace, installed and updated by Claude Code itself. mstack copies files into `~/.claude/` instead, so updates depend on re-running setup on each machine.
+Claude Code has a native way to distribute skills, subagents, hooks and MCP servers: plugins from a marketplace, installed and updated by Claude Code itself. mstack copies files into `~/.claude/` instead. Updating a machine means `git pull`, running `setup-mstack` again, and `mstack doctor` with `/repair` to catch drift. On a machine that only uses Claude Code, the plugin would make updates automatic.
 
 ## Goal
 
-The repo is also a Claude Code marketplace with one `mstack` plugin. On any machine, adding the marketplace and installing the plugin gives the same skills, agents and hooks, and Claude Code handles updates.
+The repo is also a Claude Code marketplace with one `mstack` plugin. On a Claude Code-only machine, adding the marketplace and installing the plugin gives the same skills and agents as the copied install, and Claude Code handles updates.
 
 ## Out of scope
 
-- Rules and settings fragments: plugins don't install user rules or merge `settings.json`, so `setup-mstack` still handles those.
-- Cursor (it loads `~/.claude/skills/`, not Claude Code plugins). Cursor users keep the copy-based install.
+- Rules, global instructions and settings: plugins don't install user rules or merge `settings.json`, so `setup-mstack` still handles those.
+- Machines that also use Cursor. Cursor loads `~/.claude/skills/`, not Claude Code plugins, so those machines need the copied skills anyway, and Claude Code would then list each skill twice (`mstack:sync` and `sync`). They keep the copy-based install.
 
 ## Design
 
-- Add `.claude-plugin/marketplace.json` (the marketplace, listing one plugin with `source: "./"`) and `.claude-plugin/plugin.json` (name, description, version, author, license). Check the current plugin docs for the exact schema and folder layout when implementing; `claude plugin validate` must pass.
-- Plugin components come from the existing folders: `skills/` (except `setup-mstack`), `agents/`, and `hooks/hooks.json` generated from the hooks in `settings/claude.json`.
-- Plugin skills are namespaced (`mstack:sync`). Relative links between skills (`../sync/references/`) keep working because the plugin keeps the same layout. Update skill text that refers to other skills by bare name only where it matters.
+- Add `.claude-plugin/marketplace.json` (the marketplace, listing one plugin) and `.claude-plugin/plugin.json` (name, description, version, author, license). Check the current plugin docs for the exact schema; `claude plugin validate` must pass.
+- **Layout:** the checkout groups skills as `skills/<group>/<name>/`, while every install, and `skills-check`'s link resolution, treat them as flat `<name>/` folders. The plugin must see the flat layout, so links between skills (`../sync/references/`) keep working. Two options, to choose at implementation time:
+  1. `plugin.json` lists each skill folder explicitly, if the schema allows custom skill paths and links still resolve between siblings.
+  2. A release step builds the plugin into a generated folder with the flat layout, and the marketplace points at it (a release branch or a release asset).
+- Plugin components: every skill except `setup-mstack` (it lives in `.agents/skills/` and is never installed), `agents/`, and, once `agent-hooks` ships, its hooks as `hooks/hooks.json`.
+- Plugin skills are namespaced (`mstack:sync`). Update skill text that refers to other skills by bare name only where it matters.
 - **Version:** semantic-release writes the version into `plugin.json` too (`version_variables` or a JSON updater in `[tool.semantic_release]`).
-- **No double install:** a machine uses either the plugin or copied skills. `setup-mstack` and `doctor` detect the installed plugin and skip or flag copied mstack skills.
+- **No double install:** a machine uses either the plugin or copied skills. `setup-mstack` asks which one when the user picks Claude Code only, and skips copying skills and agents when the plugin is installed. `doctor` flags copied mstack skills next to the plugin.
 
 ## Changes
 
-- `.claude-plugin/`, the generated `hooks/hooks.json`, and the semantic-release config.
+- `.claude-plugin/`, the layout step chosen above, and the semantic-release config.
 - A CI step running `claude plugin validate` (or a schema check when the CLI isn't available in CI).
-- `README.md`, "Getting started": an alternative step 2, "Claude Code plugin", with the two commands.
+- `README.md`, "Getting started": a Claude Code-only alternative with the two commands.
 - `setup-mstack` and `doctor`: plugin detection.
 
 ## Tests
 
-- Schema validation in CI. `plugin.json` version equals `pyproject.toml` version (a test).
-- A test that every skill folder is picked up by the plugin layout, except `setup-mstack`.
+- Schema validation in CI. `plugin.json` version equals `pyproject.toml` version.
+- Every skill in `skills/<group>/` except `setup-mstack` is in the plugin, under its flat name, and its relative links resolve there.
+
+## Docs
+
+- `README.md`: the install alternative, and that machines with Cursor keep the copied install.
+- `.agents/skills/setup-mstack/SKILL.md`: the plugin-or-copy choice.
 
 ## Acceptance criteria
 
-- [ ] On a clean machine, adding the marketplace and installing the plugin makes every mstack skill available.
+- [ ] On a clean Claude Code-only machine, adding the marketplace and installing the plugin makes every mstack skill and agent available.
 - [ ] A release updates the plugin version.
 - [ ] Copied skills and the plugin never coexist without doctor flagging it.
+
+## Open questions
+
+- Whether `plugin.json` supports custom skill paths, which decides between the two layout options.
