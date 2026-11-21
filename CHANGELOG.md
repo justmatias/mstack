@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v5.2.0 (2026-11-21)
+
+### Features
+
+- **skills**: Add five skills adapted from pstack
+  ([`8f739b0`](https://github.com/justmatias/mstack/commit/8f739b0da3fa8b38dadf7666fe8d78859481b07f))
+
+- **skills**: Delete the merged branch at the end of full-send
+  ([`3c083ca`](https://github.com/justmatias/mstack/commit/3c083ca555ac9515193622d6c93b0ff9b5af6199))
+
+
 ## v5.1.1 (2026-11-21)
 
 ### Bug Fixes
