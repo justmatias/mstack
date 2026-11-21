@@ -16,6 +16,7 @@ from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.targets import skill_sources
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
+from mstack.render import main as render_main
 from tests.mstack.conftest import git
 
 
@@ -185,6 +186,92 @@ def test_mstack_on_path_with_another_version(
 def run_doctor(capsys, *arguments: str) -> tuple[int, dict]:
     exit_code = main(["--json", *arguments])
     return exit_code, json.loads(capsys.readouterr().out)
+
+
+@pytest.fixture
+def codex_install(capsys, home, checkout, monkeypatch):
+    folder = home / "codex-profile"
+    folder.mkdir()
+    monkeypatch.setenv("CODEX_HOME", str(folder))
+    for name, source in skill_sources(checkout).items():
+        shutil.copytree(source, home / ".agents" / "skills" / name)
+    (checkout / "instructions" / "global.md").write_text(
+        "Global guidance.\n", encoding="utf-8"
+    )
+    assert render_main(["--combined", str(checkout)]) == 0
+    block = capsys.readouterr().out
+    (folder / "AGENTS.md").write_text(
+        f"Personal guidance.\n\n{block}", encoding="utf-8"
+    )
+    return folder
+
+
+def test_codex_doctor_passes_when_the_shared_skills_and_block_match(
+    codex_install, capsys, checkout, monkeypatch
+):
+    monkeypatch.setattr(
+        mstack.doctor, "CHECKS", [check_skills_installed, check_rules, check_drift]
+    )
+
+    exit_code, report = run_doctor(capsys, "--checkout", str(checkout))
+
+    assert exit_code == 0, report
+    assert report["tool"] == "codex"
+    assert all(result["status"] == "ok" for result in report["results"])
+    text = (codex_install / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Global guidance." in text
+    assert "Applies to files matching" in text
+    assert "## Checks" not in text
+
+
+def test_codex_rules_reports_a_missing_block_when_an_override_takes_precedence(
+    codex_install, context
+):
+    override = codex_install / "AGENTS.override.md"
+    override.write_text("Temporary guidance.\n", encoding="utf-8")
+
+    results = check_rules(context(tool="codex"))
+
+    assert statuses(results) == {("rules", "codex"): "error"}
+    assert str(override) in results[0].detail
+
+
+def test_codex_rule_drift_warns_when_the_managed_block_differs(codex_install, context):
+    path = codex_install / "AGENTS.md"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(
+        text.replace("Global guidance.", "Edited guidance."), encoding="utf-8"
+    )
+
+    assert drift_rows(check_drift(context(tool="codex"))) == [("rule codex", "warn")]
+
+
+@pytest.mark.usefixtures("codex_install")
+def test_cursor_shares_the_codex_skills_when_home_matches(context):
+    results = check_skills_installed(context(tool="cursor,codex"))
+
+    assert [result.status for result in results if result.check == "installed"] == [
+        "ok"
+    ]
+
+
+@pytest.mark.usefixtures("codex_install", "installed_home")
+def test_cursor_warns_when_required_claude_and_codex_copies_overlap(context):
+    results = check_skills_installed(context(tool="claude,cursor,codex"))
+
+    assert statuses(results)[("skills", "duplicates")] == "warn"
+
+
+@pytest.mark.usefixtures("codex_install")
+def test_cursor_checks_a_separate_copy_when_codex_runs_in_wsl(context, tmp_path):
+    windows = tmp_path / "windows"
+    results = check_skills_installed(
+        context(tool="cursor,codex", platform="wsl", cursor_home=windows)
+    )
+
+    installed = [result for result in results if result.check == "installed"]
+    assert [result.status for result in installed] == ["error", "ok"]
+    assert str(windows / ".cursor" / "skills") in installed[0].detail
 
 
 @pytest.mark.usefixtures("home")

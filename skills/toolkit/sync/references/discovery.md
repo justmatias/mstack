@@ -12,7 +12,7 @@ The paths below are the defaults. A repo can put its rules and checks elsewhere 
 | --- | --- | --- |
 | `.cursor/rules/**/*.mdc` (the configured `rules_dir`) | Cursor | **Source of truth.** Frontmatter `description`, `globs`, `alwaysApply`. |
 | `.cursorrules` | Cursor (legacy) | One flat file. Propose moving its rules into `.mdc` files. |
-| `AGENTS.md` | Cursor, Claude Code, others | Agent instructions. |
+| `AGENTS.md` | Codex, Cursor, Claude Code via `CLAUDE.md` | Agent instructions. |
 | `CLAUDE.md`, `.claude/rules/*.md` | Claude Code | Claude Code never reads `.mdc` files, so teams often duplicate rules here. |
 | `.github/copilot-instructions.md` | GitHub Copilot | Same idea as `AGENTS.md`. |
 
@@ -42,6 +42,7 @@ git ls-files '.cursor/rules/**' .cursorrules AGENTS.md CLAUDE.md '.claude/rules/
 | --- | --- |
 | `~/.cursor/rules/*.mdc` | Cursor user rules |
 | `~/.claude/CLAUDE.md`, `~/.claude/rules/*.md` | Claude Code user memory |
+| `~/.codex/AGENTS.md` or the non-empty `AGENTS.override.md`. `CODEX_HOME` overrides the folder | Codex user instructions |
 
 On WSL, Cursor runs on Windows, so its user folder is the Windows profile's `.cursor` (`/mnt/c/Users/<user>/.cursor`), not `~/.cursor` inside WSL. `mstack platform` prints the folder each tool uses.
 
@@ -58,10 +59,10 @@ Read only this workspace's folder. Never glob across other projects: that reads 
 
 ## Agent tool names
 
-The skills are written for both environments. Map the tool names:
+Map the tool names for the current environment.
 
-| Concept | Claude Code | Cursor |
-| --- | --- | --- |
-| Spawn a subagent | `Agent` (`subagent_type: "general-purpose"`; `"Explore"` for read-only) | `Task` (`subagent_type: generalPurpose`; `readonly: true` for read-only) |
-| Ask the user a choice | `AskUserQuestion` (absent in `-p` mode: ask in plain text) | `AskQuestion` |
-| Skills folder | `.claude/skills/`, `~/.claude/skills/` | `.cursor/skills/`, `~/.cursor/skills/` |
+| Concept | Claude Code | Cursor | Codex |
+| --- | --- | --- | --- |
+| Spawn a subagent | `Agent` (`subagent_type: "general-purpose"`; `"Explore"` for read-only) | `Task` (`subagent_type: generalPurpose`; `readonly: true` for read-only) | `spawn_agent` when available |
+| Ask the user a choice | `AskUserQuestion` (absent in `-p` mode: ask in plain text) | `AskQuestion` | Ask in plain text when a structured input tool is unavailable |
+| Skills folder | `.claude/skills/`, `~/.claude/skills/` | `.cursor/skills/`, `~/.cursor/skills/` | `.agents/skills/`, `~/.agents/skills/` |

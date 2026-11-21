@@ -21,10 +21,10 @@ from mstack.doctor.platform import check_platform
 from mstack.doctor.rules import check_rules
 from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.source import check_source
-from mstack.doctor.targets import Tool
+from mstack.doctor.targets import TOOLS
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
-from mstack.platform import detect, tool_homes
+from mstack.platform import codex_folder, detect, tool_homes
 
 logger = logging.getLogger(__name__)
 
@@ -59,12 +59,24 @@ def installed_checkout() -> Path | None:
     return None
 
 
-def default_tool(home: Path, cursor_home: Path) -> Tool:
-    claude = (home / ".claude").is_dir()
-    cursor = (cursor_home / ".cursor").is_dir()
-    if claude and cursor:
+def default_tool(home: Path, cursor_home: Path) -> str:
+    folders = (home / ".claude", cursor_home / ".cursor", codex_folder(home))
+    detected = [
+        tool for tool, folder in zip(TOOLS, folders, strict=True) if folder.is_dir()
+    ]
+    if detected == ["claude", "cursor"]:
         return "both"
-    return "cursor" if cursor else "claude"
+    return ",".join(detected) or "claude"
+
+
+def parse_tool(value: str) -> str:
+    if value == "both":
+        return value
+    tools = [tool.strip() for tool in value.split(",")]
+    selected = set(tools)
+    if selected.difference(TOOLS) or len(selected) != len(tools):
+        raise argparse.ArgumentTypeError(f"invalid tool selection: {value!r}")
+    return ",".join(tool for tool in TOOLS if tool in selected)
 
 
 def run_checks(context: Context, checks: list[Check] | None = None) -> list[Result]:
@@ -93,8 +105,12 @@ def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--tool",
-        choices=["claude", "cursor", "both"],
-        help="Which tool's folders to check (default: the ones that exist).",
+        type=parse_tool,
+        metavar="TOOLS",
+        help=(
+            "Comma-separated claude, cursor and codex (default: existing folders). "
+            "'both' selects Claude Code and Cursor."
+        ),
     )
     parser.add_argument(
         "--checkout",

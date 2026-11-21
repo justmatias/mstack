@@ -21,7 +21,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 
 ## Getting started
 
-You need git, [`uv`](https://docs.astral.sh/uv/), and Claude Code or Cursor.
+You need git, [`uv`](https://docs.astral.sh/uv/), and at least one of Claude Code, Cursor or Codex.
 
 **1. Clone and run the setup.**
 
@@ -37,9 +37,9 @@ The setup skill lives in `.agents/skills/setup-mstack/`, the project skills fold
 | --- | --- | --- | --- | --- |
 | Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/`, a managed block in `~/.claude/CLAUDE.md` | `claude mcp add-json --scope user` | merged into `~/.claude/settings.json` |
 | Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | none |
-| Both | `~/.claude/` only (Cursor loads it too) | both of the above | both of the above | merged into `~/.claude/settings.json` |
+| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/config.toml` | none |
 
-On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), so with both tools the skills and agents get a copy in each home; `mstack platform` prints where each tool's files go.
+When tools share a home, Cursor can use the skills from Claude Code or Codex and the agents from Claude Code. If all three share a home, doctor warns about the two skill copies Cursor can see. On WSL, Cursor reads the Windows profile, so setup gives Cursor its own copies. `mstack platform` prints the tool folders, including the `CODEX_HOME` override for `~/.codex`.
 
 **2. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
 
@@ -87,7 +87,9 @@ Skills live in five groups, which setup flattens on install:
 | `no-comments` | Delete comments that should not exist with the `comment-sicko` subagent, fix the code that caused them, and offer to encode real constraints as types, tests or lints. |
 | `repair` | Close the gaps `mstack doctor` reports: reinstall the CLI, update drifted skills and rules with a backup, and rerun doctor until it is clean. |
 
-**3. Verify.** `mstack doctor` checks that this machine has everything: the tools, the CLI, the checkout, every skill and rule, and whether an installed copy drifted from the checkout. It prints the fix for each problem and exits 1 on any error; run `/repair` to apply them. `--online` also compares with the latest release.
+**3. Verify.** `mstack doctor` checks the tools, CLI, checkout, and installed skills and rules for the selected tools. Use `mstack doctor --tool codex` for Codex alone or a comma-separated list for a mix. It prints the fix for each problem and exits 1 on any error. Run `/repair` (`$repair` in Codex) to apply fixes. `--online` also compares with the latest release.
+
+Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup --apply` to prune them. Cleanup keeps the newest batch in each location and only prunes other batches older than 30 days.
 
 **4. Update.** `git pull` in the checkout, then run the setup again. Copies that only mstack changed update with a backup; it asks before touching your own edits.
 
@@ -98,7 +100,7 @@ Skills live in five groups, which setup flattens on install:
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: v5.2.0   # pin a full release tag (or a commit sha), never a branch
+    rev: v5.3.0   # pin a full release tag (or a commit sha), never a branch
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change

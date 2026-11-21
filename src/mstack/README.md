@@ -8,12 +8,14 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `mstack lint` | `lint.py`, `changed_files.py` | Runs every check in order (see below). |
 | `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
 | `mstack init` | `init.py`, `templates/` | Scaffolds the rules-as-checks layout in a repo (see below). |
-| `mstack doctor [--tool claude\|cursor\|both] [--checkout DIR] [--online] [--json]` | `doctor/` | Checks that this machine is set up (see below). |
+| `mstack doctor [--tool TOOLS] [--checkout DIR] [--online] [--json]` | `doctor/` | Checks that this machine is set up (see below). |
+| `mstack cleanup [--apply] [--checkout DIR]` | `cleanup.py` | Previews old backup batches and their sizes. `--apply` deletes eligible batches. |
 | `mstack platform [--json]` | `platform.py` | Prints the detected platform (`linux`, `macos`, `windows` or `wsl`) and each tool's user folder. On WSL, Cursor's is the Windows profile's `.cursor`, found with `cmd.exe` and `wslpath`; `MSTACK_WINDOWS_HOME` overrides it and `MSTACK_PLATFORM` overrides the detection. `mstack doctor` uses the same folders, so on WSL with both tools skills and agents get a copy in each home. |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. An `.mdc` with an upstream credit in its frontmatter must have it complete (`credit`, the same keys as a skill's). `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
 | `mstack domain-check` | `guards/check_domain.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, hosts, IP addresses or emails. It does not look for secrets: use gitleaks. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
 | `mstack render-rule <file.mdc>` | `render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`, and the upstream credit, if any, as its last lines). |
+| `mstack render-rule --combined <checkout>` | `render.py` | Print the managed Codex instructions block with the rendered rules and optional `instructions/global.md`. |
 | `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
 
 `mstack skills-check [DIR ...] [--profile mstack|generic] [--json]` takes folders of skills, or a single skill folder. Relative links resolve as if the skills were installed side by side, so a link to a sibling skill (`../<name>/...`) works whichever group the checkout keeps it in, and a link out of the skills folder fails.
@@ -31,6 +33,15 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `english` | mstack | a non-ASCII letter outside code and double-quoted examples (warning) |
 
 Use `--profile generic` for skills that aren't mstack's, such as a user's `~/.claude/skills/`.
+
+### `mstack cleanup`
+
+Running `mstack cleanup` lists timestamped batches under known user and uv tool
+`.mstack-backups` directories, with their sizes in bytes. It keeps the newest
+batch in each directory and only lists other batches older than 30 days.
+Run `mstack cleanup --apply` to recalculate the list and delete those batches.
+Add `--checkout DIR` to include that project's configured rules folder,
+`skills/`, and the immediate skill groups.
 
 ### `mstack lint`
 
@@ -70,16 +81,16 @@ It prints every file as `create`, `append` or `exists, skipped` and asks before 
 
 ### `mstack doctor`
 
-Reports only, and prints the fix for each problem. `--tool` defaults to the tools whose folders exist (`~/.claude`, `~/.cursor`); the checkout defaults to the one the CLI was installed from. Exit 1 on any `error`; `--json` prints the report to stdout, and the table goes to stderr.
+Reports the fix for each problem. `--tool` takes a comma-separated list of `claude`, `cursor` and `codex`, with `both` as an alias for Claude Code and Cursor. By default, doctor checks the tools whose folders exist (`~/.claude`, `~/.cursor` and `~/.codex` or `CODEX_HOME`). The checkout defaults to the one the CLI was installed from. Any error gives exit code 1. With `--json`, the report goes to stdout and the table goes to stderr.
 
 | Group | Checks | Status when it fails |
 | --- | --- | --- |
 | `tools` | `uv` and `git` on `PATH`; `gh` (used by `correct` and `integrate`) | error; warn for `gh` |
 | `cli` | `mstack` on `PATH` reports this version (`mstack --version`); the bundled ast-grep runs | error |
 | `source` | the checkout exists and is a git repo; uncommitted changes | error; warn |
-| `skills` | every mstack skill is in the tool's skills folder; every skill there passes `skills-check --profile generic`; none is in both `~/.claude/skills/` and `~/.cursor/skills/` | error; warn for duplicates |
-| `rules` | every mstack rule is in `~/.claude/rules/` without frontmatter (Claude Code only) | error |
-| `drift` | every installed mstack skill, agent and Claude Code rule equals the checkout's (a rule as `render-rule` prints it), ignoring `.DS_Store`, `__pycache__`, `.mstack-backups` and line endings. Doctor does not say which side changed; `repair` works that out | warn; error when the checkout's own rule does not render |
+| `skills` | expected folders contain every mstack skill and pass `skills-check --profile generic`. Codex uses `~/.agents/skills/`. Cursor warns when a skill appears in multiple user skill folders it loads | error; warn for duplicates |
+| `rules` | Claude Code rules exist without frontmatter. The active Codex global instructions file has exactly one managed block | error |
+| `drift` | skills, Claude Code and Cursor agents, and rendered Claude Code and Codex rules match the checkout. For Codex, only the text inside the managed block is compared | warn; error when the checkout's rules fail to render |
 | `platform` | on WSL with Cursor: the Windows profile was found (from `mstack.platform`), so Cursor's files are checked there | warn |
 | `version` | with `--online` only: the latest `v*` tag on the checkout's `origin` (`git ls-remote`) is not newer | warn |
 

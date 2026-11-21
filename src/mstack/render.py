@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 FRONTMATTER_DELIMITER = "---"
 CHECKS_HEADING = "## Checks"
+BLOCK_START = "<!-- mstack:begin -->"
+BLOCK_END = "<!-- mstack:end -->"
 
 
 class FrontmatterError(ValueError):
@@ -79,17 +81,41 @@ def render_rule(mdc_text: str) -> str:
     return body + "\n"
 
 
+def render_combined_rules(checkout: Path) -> str:
+    """Render the managed block for Codex's global instructions."""
+    instructions = checkout / "instructions" / "global.md"
+    sections = [BLOCK_START]
+    if instructions.is_file():
+        sections.append(instructions.read_text(encoding="utf-8").strip())
+    sections.extend(
+        render_rule(rule.read_text(encoding="utf-8")).rstrip()
+        for rule in sorted((checkout / "rules").glob("*.mdc"))
+    )
+    sections.append(BLOCK_END)
+    return "\n\n".join(sections) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="mstack render-rule",
-        description="Print an .mdc rule converted into a Claude Code user rule.",
+        description="Render an .mdc rule or a Codex managed instructions block.",
     )
-    parser.add_argument("mdc", type=Path, help="The .mdc rule to convert.")
+    parser.add_argument("source", type=Path, help="An .mdc file or a checkout folder.")
+    parser.add_argument(
+        "--combined",
+        action="store_true",
+        help="Render the block from a checkout folder.",
+    )
     arguments = parser.parse_args(argv)
     try:
-        rendered = render_rule(arguments.mdc.read_text(encoding="utf-8"))
+        if arguments.combined:
+            if not (arguments.source / "rules").is_dir():
+                parser.error("--combined requires a checkout folder containing rules/")
+            rendered = render_combined_rules(arguments.source)
+        else:
+            rendered = render_rule(arguments.source.read_text(encoding="utf-8"))
     except (OSError, FrontmatterError) as error:
-        logger.error("render-rule: %s: %s", arguments.mdc, error)
+        logger.error("render-rule: %s: %s", arguments.source, error)
         return 1
     sys.stdout.write(rendered)
     return 0

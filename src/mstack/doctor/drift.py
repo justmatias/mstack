@@ -8,16 +8,20 @@ history to tell which, and asks before touching the user's edits.
 from pathlib import Path
 
 from mstack.doctor.model import REPAIR_FIX, Context, Result
+from mstack.doctor.rules import codex_block
 from mstack.doctor.targets import (
     agent_names,
+    codex_instructions,
     copied_folders,
     file_content,
     rule_names,
     same_tree,
+    skill_folders,
     skill_sources,
     uses_claude,
+    uses_codex,
 )
-from mstack.render import FrontmatterError, render_rule
+from mstack.render import FrontmatterError, render_combined_rules, render_rule
 
 
 def drifted(kind: str, name: str, installed: Path) -> Result:
@@ -32,7 +36,7 @@ def drifted(kind: str, name: str, installed: Path) -> Result:
 
 def skill_drift(context: Context, checkout: Path) -> list[Result]:
     results = []
-    for folder in copied_folders(context.tool, context.home, context.cursor, "skills"):
+    for folder in skill_folders(context.tool, context.home, context.cursor):
         for name, source in skill_sources(checkout).items():
             installed = folder / name
             if (installed / "SKILL.md").is_file() and not same_tree(source, installed):
@@ -79,6 +83,27 @@ def rule_drift(context: Context, checkout: Path) -> list[Result]:
     return results
 
 
+def codex_rule_drift(context: Context, checkout: Path) -> list[Result]:
+    if not uses_codex(context.tool):
+        return []
+    path = codex_instructions(context.codex)
+    installed = codex_block(path)
+    if installed is None:
+        return []
+    try:
+        expected = render_combined_rules(checkout)
+    except FrontmatterError as error:
+        return [
+            Result(
+                group="drift",
+                check="rule codex",
+                status="error",
+                detail=f"the checkout's rules cannot be rendered: {error}",
+            )
+        ]
+    return [drifted("rule", "codex", path)] if installed != expected else []
+
+
 def check_drift(context: Context) -> list[Result]:
     checkout = context.checkout
     if checkout is None or not checkout.is_dir():
@@ -86,6 +111,7 @@ def check_drift(context: Context) -> list[Result]:
     results = (
         skill_drift(context, checkout)
         + rule_drift(context, checkout)
+        + codex_rule_drift(context, checkout)
         + agent_drift(context, checkout)
     )
     if results:
