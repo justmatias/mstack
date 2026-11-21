@@ -15,6 +15,14 @@ valid:
     import os
 
     "not a docstring"
+  - |
+    b"These are bytes."
+  - |
+    f"This is a formatted string with {1} replacement."
+  - |
+    ("A formatted " f"string with {1} replacement.")
+  - |
+    "String addition " + "is an expression."
 invalid:
   - |
     """Helpers to load the settings."""
@@ -26,3 +34,7 @@ invalid:
     """Run the tool."""
 
     import sys
+  - |
+    (("A parenthesized docstring."))
+  - |
+    ("An implicitly " r"concatenated docstring.")

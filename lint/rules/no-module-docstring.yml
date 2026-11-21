@@ -12,7 +12,22 @@ rule:
   inside:
     kind: module
   has:
-    kind: string
+    any:
+      - kind: string
+      - kind: concatenated_string
+    stopBy:
+      not:
+        kind: parenthesized_expression
+  not:
+    has:
+      kind: string_start
+      regex: "(?i)^[a-z]*[bft]"
+      stopBy:
+        not:
+          any:
+            - kind: parenthesized_expression
+            - kind: concatenated_string
+            - kind: string
   nthChild:
     position: 1
     ofRule:

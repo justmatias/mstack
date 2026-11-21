@@ -8,6 +8,9 @@ valid:
   - |
     def store(_seed_database):
         return Store()
+  - |
+    def test_saves_item(item: _Item) -> None:
+        assert item.saved
 invalid:
   - |
     def test_items_are_listed(_seed_database, store):
@@ -16,3 +19,6 @@ invalid:
     def test_write_fails(_fail_fsync):
         with pytest.raises(OSError):
             save()
+  - |
+    def test_items_are_listed(_seed_database: None, store: Store) -> None:
+        assert store.list()

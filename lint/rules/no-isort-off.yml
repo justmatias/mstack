@@ -9,4 +9,4 @@ metadata:
   source: rules/python-modules.mdc
 rule:
   kind: comment
-  regex: "isort:\\s*(off|on)\\b"
+  regex: "^#\\s*isort:\\s*(off|on)\\s*$"

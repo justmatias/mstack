@@ -5,6 +5,8 @@ valid:
   - |
     # isort-style ordering: standard library first
     import os
+  - |
+    # Never use `isort: off` to fix an import cycle.
 invalid:
   - |
     # isort: off
