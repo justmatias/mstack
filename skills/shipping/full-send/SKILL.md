@@ -24,6 +24,7 @@ The user grants you permission to:
 
 - merge the PR once the merge gate passes;
 - force-push the PR's own branch with `--force-with-lease` after a rebase;
+- delete the PR's own branch, local and remote, once the PR is merged;
 - use the test methods that the proof needs, without asking first.
 
 ## Testing permission
@@ -40,9 +41,10 @@ Rules about *how* to test still apply: follow the ones that name the correct com
 4. **Open the PR** with [open-pr](../open-pr/SKILL.md), after rebasing onto the latest default branch. Add one short line to the description saying how you proved the change.
 5. **Babysit it** with [babysit-pr](../babysit-pr/SKILL.md). Fix real findings and CI failures, and get proof for each fix before you push it.
 6. **Merge** when the merge gate passes.
-7. **Report** in the final message: the PR link, the merge commit, your proof, and each decision you made for the user.
+7. **Clean up** once GitHub reports the PR as merged: delete its branch (see "Branch cleanup").
+8. **Report** in the final message: the PR link, the merge commit, your proof, and each decision you made for the user.
 
-Stay active from step 1 to step 7. If you end your turn while checks or bots are pending, the work stops, because nobody will prompt you again: wait with the watcher from `babysit-pr`, so something wakes you when the PR changes.
+Stay active from step 1 to step 8. If you end your turn while checks or bots are pending, the work stops, because nobody will prompt you again: wait with the watcher from `babysit-pr`, so something wakes you when the PR changes.
 
 ## Proof
 
@@ -66,6 +68,15 @@ Full confidence means all of these are true on the latest commit:
 - The branch is up to date with the default branch, and GitHub reports it as mergeable.
 
 Merge with the method the repo uses: check the allowed methods and recent merged PRs. If the repo uses a merge queue or auto-merge, stay until GitHub reports the PR as merged. Merge through branch protection as configured, and never use `--admin` or any other bypass. You may ignore an automated review that only asks for "human review" when you have high confidence in your changes.
+
+## Branch cleanup
+
+Delete the branch only after GitHub reports the PR as merged, and only the PR's own branch, never the default branch or another one.
+
+- Remote: `git push origin --delete <branch>`, unless the repo already deletes head branches on merge (check that it is gone first).
+- Local: switch to the default branch, pull it, then `git branch -D <branch>` (squash merges leave the branch looking unmerged, so `-d` refuses).
+- Keep the branch if another open PR still targets it (a stacked PR): retarget that PR first, or leave the branch and say so in the report.
+- If the PR was not merged, delete nothing.
 
 ## Asking the user
 
