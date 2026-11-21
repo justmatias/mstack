@@ -89,6 +89,36 @@
       "other": "research",
       "origin": "mattpocock/skills",
       "reason": "mstack research is adapted from mattpocock/skills research, under the same name: users who installed mattpocock/skills already have a skill with this name"
+    },
+    {
+      "skill": "architect",
+      "other": "architect",
+      "origin": "pstack",
+      "reason": "mstack architect is adapted from pstack architect, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "blast-radius",
+      "other": "blast-radius",
+      "origin": "pstack",
+      "reason": "mstack blast-radius is adapted from pstack blast-radius, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "ketchup",
+      "other": "ketchup",
+      "origin": "pstack",
+      "reason": "mstack ketchup is adapted from pstack ketchup, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "show-me-your-work",
+      "other": "show-me-your-work",
+      "origin": "pstack",
+      "reason": "mstack show-me-your-work is adapted from pstack show-me-your-work, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "tdd",
+      "other": "tdd",
+      "origin": "pstack",
+      "reason": "mstack tdd is adapted from pstack tdd, under the same name: users who installed pstack already have a skill with this name"
     }
   ]
 }
