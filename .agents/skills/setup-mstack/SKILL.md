@@ -34,7 +34,7 @@ Ask first: **Claude Code, Cursor, or both?** Then run `uv run mstack platform` i
 
 | Item | Claude Code | Cursor | Both |
 | --- | --- | --- | --- |
-| Skills (`skills/<name>/`), agents (`agents/<name>.md`) | `~/.claude/skills/`, `~/.claude/agents/` | `~/.cursor/skills/`, `~/.cursor/agents/` | `~/.claude/` only: Cursor loads it too, and a second copy shows every item twice. On WSL, a copy in each home |
+| Skills (`skills/<group>/<name>/`, installed flat as `<name>/`: the group is never part of the installed path), agents (`agents/<name>.md`) | `~/.claude/skills/`, `~/.claude/agents/` | `~/.cursor/skills/`, `~/.cursor/agents/` | `~/.claude/` only: Cursor loads it too, and a second copy shows every item twice. On WSL, a copy in each home |
 | Rules (`rules/<name>.mdc`) | `~/.claude/rules/<name>.md` | pasted into Cursor Settings → Rules → User Rules | both |
 | Global instructions (`instructions/global.md`) | a `<!-- mstack:begin -->` … `<!-- mstack:end -->` block in `~/.claude/CLAUDE.md` | pasted with the rules | both |
 | MCP servers (`mcp/<name>.json`) | `claude mcp add-json --scope user <name> '<json>'` | `mcpServers.<name>` in `~/.cursor/mcp.json` | both |

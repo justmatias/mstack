@@ -13,6 +13,7 @@ from mstack.doctor.drift import check_drift
 from mstack.doctor.platform import check_platform
 from mstack.doctor.rules import check_rules
 from mstack.doctor.skills import check_skills_installed
+from mstack.doctor.targets import skill_sources
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
 from tests.mstack.conftest import git
@@ -101,7 +102,7 @@ def test_drift_warns_when_the_installed_skill_was_edited(context, home: Path):
 
 @pytest.mark.usefixtures("installed_home")
 def test_drift_warns_when_the_checkout_skill_changed(context, checkout: Path):
-    (checkout / "skills" / "sync" / "references" / "new.md").write_text(
+    (skill_sources(checkout)["sync"] / "references" / "new.md").write_text(
         "New.\n", encoding="utf-8"
     )
 

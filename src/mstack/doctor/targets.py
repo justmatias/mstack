@@ -35,10 +35,19 @@ def copied_folders(
     return [claude, cursor] if cursor_home != home else [claude]
 
 
+def skill_sources(checkout: Path) -> dict[str, Path]:
+    """Each skill's folder in the checkout, by name.
+
+    The checkout groups skills by topic (`skills/<group>/<name>`), but they are
+    installed flat, so the name is the key and the group is not part of it.
+    """
+    skills_folder = checkout / "skills"
+    folders = [*skills_folder.glob("*/SKILL.md"), *skills_folder.glob("*/*/SKILL.md")]
+    return {path.parent.name: path.parent for path in sorted(folders)}
+
+
 def skill_names(checkout: Path) -> list[str]:
-    return [
-        skill.parent.name for skill in sorted((checkout / "skills").glob("*/SKILL.md"))
-    ]
+    return list(skill_sources(checkout))
 
 
 def rule_names(checkout: Path) -> list[str]:

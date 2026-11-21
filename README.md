@@ -12,7 +12,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | --- | --- |
 | `rules/` | Conventions in prose (`.mdc`), the source of truth agents read before writing code. |
 | `lint/` | The checks that enforce those rules (ast-grep). |
-| `skills/` | Agent skills that keep rules and checks in sync and turn corrections into new rules. |
+| `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
 | `agents/` | Subagent definitions. |
 | `mcp/` | MCP servers, one per file, with `${VAR}` placeholders for secrets. |
 | `instructions/` | Global instructions for every project (`global.md`). |
@@ -42,6 +42,16 @@ The setup skill lives in `.agents/skills/setup-mstack/`, the project skills fold
 On native Windows, `~` is `%USERPROFILE%`. On WSL, Cursor reads the Windows profile (`/mnt/c/Users/<user>/.cursor`), so with both tools the skills and agents get a copy in each home; `mstack platform` prints where each tool's files go.
 
 **2. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
+
+Skills live in five groups, which setup flattens on install:
+
+| Group | Skills |
+| --- | --- |
+| `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
+| `engineering/` | `review`, `declutter`, `no-comments`, `modernize` |
+| `shipping/` | `open-pull-request`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
+| `learning/` | `how`, `why`, `teach` |
+| `productivity/` | `bro`, `unslop`, `sharpen`, `recall` |
 
 | Skill | Use it to |
 | --- | --- |

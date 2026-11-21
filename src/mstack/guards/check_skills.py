@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 from collections.abc import Iterator
@@ -62,20 +63,41 @@ def warning(
     return issue(skill, check, detail, file=file, line=line) | {"severity": "warning"}
 
 
+def is_skill(directory: Path) -> bool:
+    return (directory / SKILL_FILE).is_file()
+
+
+def skills_in(folder: Path) -> list[Path]:
+    """The skills directly under a folder, hidden folders left out."""
+    return [
+        child
+        for child in sorted(folder.iterdir())
+        if not child.name.startswith(".") and is_skill(child)
+    ]
+
+
 def find_skills(directories: list[Path]) -> tuple[list[Path], list[Path]]:
+    """Find skills in a skills folder, in a group folder inside it, or given directly.
+
+    The repo may group skills by topic (`skills/<group>/<name>/SKILL.md`), while
+    an installed folder is flat (`<folder>/<name>/SKILL.md`).
+    """
     skills: list[Path] = []
     missing: list[Path] = []
     for directory in directories:
         if not directory.is_dir():
             missing.append(directory)
-        elif (directory / SKILL_FILE).is_file():
+        elif is_skill(directory):
             skills.append(directory)
         else:
-            skills.extend(
-                child
-                for child in sorted(directory.iterdir())
-                if not child.name.startswith(".") and (child / SKILL_FILE).is_file()
-            )
+            skills.extend(skills_in(directory))
+            for group in sorted(directory.iterdir()):
+                if (
+                    group.is_dir()
+                    and not group.name.startswith(".")
+                    and not is_skill(group)
+                ):
+                    skills.extend(skills_in(group))
     return skills, missing
 
 
@@ -168,7 +190,29 @@ def principles_issues(skill: Path, text: str) -> list[dict]:
     return []
 
 
-def link_targets(path: Path) -> Iterator[tuple[int, str, Path]]:
+def resolve_link(
+    path: Path, skill: Path, relative: str, skills_by_name: dict[str, Path]
+) -> Path | None:
+    """Resolve a link the way it resolves once skills are installed side by side.
+
+    Installed, every skill sits at `<folder>/<name>`, so `../<name>/...` reaches a
+    sibling whatever group the repo keeps it in. Returns None when the link
+    leaves the skills folder.
+    """
+    installed_directory = Path(skill.name) / path.parent.relative_to(skill)
+    logical = os.path.normpath(installed_directory / relative)
+    parts = Path(logical).parts
+    if not parts or parts[0] == os.pardir or Path(logical).is_absolute():
+        return None
+    root = skills_by_name.get(parts[0])
+    if root is None:
+        return skill.parent / logical
+    return (root / Path(*parts[1:])).resolve()
+
+
+def link_targets(
+    path: Path, skill: Path, skills_by_name: dict[str, Path]
+) -> Iterator[tuple[int, str, Path | None]]:
     for line_number, line in prose_lines(path.read_text(encoding="utf-8")):
         for match in LINK.finditer(line):
             target = match["target"]
@@ -176,21 +220,24 @@ def link_targets(path: Path) -> Iterator[tuple[int, str, Path]]:
                 continue
             relative = unquote(target.split("#", 1)[0])
             if relative:
-                yield line_number, target, (path.parent / relative).resolve()
+                resolved = resolve_link(path, skill, relative, skills_by_name)
+                yield line_number, target, resolved
 
 
-def link_issues(skill: Path, root: Path) -> tuple[list[dict], set[Path]]:
+def link_issues(
+    skill: Path, skills_by_name: dict[str, Path]
+) -> tuple[list[dict], set[Path]]:
     problems: list[dict] = []
     linked: set[Path] = set()
     for path in markdown_files(skill):
-        for line_number, target, resolved in link_targets(path):
-            linked.add(resolved)
-            if not resolved.is_relative_to(root.resolve()):
+        for line_number, target, resolved in link_targets(path, skill, skills_by_name):
+            if resolved is None:
                 detail = f"'{target}' points outside the skills folder"
-            elif not resolved.exists():
-                detail = f"'{target}' does not exist"
             else:
-                continue
+                linked.add(resolved)
+                if resolved.exists():
+                    continue
+                detail = f"'{target}' does not exist"
             problems.append(issue(skill, "links", detail, file=path, line=line_number))
     return problems, linked
 
@@ -281,8 +328,9 @@ def check_skills(directories: list[Path], profile: str = "mstack") -> dict:
     ]
     linked: set[Path] = set()
     texts: dict[Path, str] = {}
+    skills_by_name = {skill.name: skill for skill in skills}
     for skill in skills:
-        skill_links, skill_linked = link_issues(skill, skill.parent)
+        skill_links, skill_linked = link_issues(skill, skills_by_name)
         issues.extend(skill_links)
         linked |= skill_linked
         texts.update(

@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from mstack.doctor.model import Context
+from mstack.doctor.targets import skill_sources
 from mstack.render import render_rule
 from tests.conftest import REPOSITORY_ROOT
 from tests.mstack.conftest import init_git_repository
@@ -31,8 +32,8 @@ def checkout(tmp_path: Path) -> Path:
 @pytest.fixture
 def installed_home(home: Path, checkout: Path) -> Path:
     """What setup leaves for Claude Code: every skill and rendered rule."""
-    for skill in (checkout / "skills").iterdir():
-        shutil.copytree(skill, home / ".claude" / "skills" / skill.name)
+    for name, skill in skill_sources(checkout).items():
+        shutil.copytree(skill, home / ".claude" / "skills" / name)
     rules = home / ".claude" / "rules"
     rules.mkdir(parents=True)
     for mdc in (checkout / "rules").glob("*.mdc"):
