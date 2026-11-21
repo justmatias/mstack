@@ -48,10 +48,10 @@ Skills live in five groups, which setup flattens on install:
 | Group | Skills |
 | --- | --- |
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
-| `engineering/` | `review`, `declutter`, `no-comments`, `modernize`, `research` |
-| `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
+| `engineering/` | `review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
+| `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
-| `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `grill-me`, `handoff` |
+| `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `ketchup`, `grill-me`, `handoff` |
 
 | Skill | Use it to |
 | --- | --- |
@@ -60,14 +60,18 @@ Skills live in five groups, which setup flattens on install:
 | `correct` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate` | Bring skills or rules from a GitHub URL into `skills/` or `rules/`, merged into what already exists, with their license, credit and a check for each rule. |
 | `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
+| `blast-radius` | Find what a change could break outside its diff, and prove the one fact its safety rests on by running real code. |
 | `open-pr` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |
 | `review-loop` | Loop an independent reviewer over a change: pick the reviewer from the agents and CLIs available, answer each finding with the smallest fix or evidence-backed pushback, and stop on approval, a stuck dispute or a 3-round budget. |
 | `babysit-pr` | Watch a pull request through CI and review with one watcher, verify each bot finding before acting, keep the PR small, and rebase when the base moves. |
 | `full-send` | Take a task to a merged PR unattended: prove the change, run the review loop, open and babysit the PR, merge once the gate passes. Only when you say "full send". |
 | `full-stop` | The same as `full-send`, but stop with the PR ready for you to merge and never merge it. Only when you say "full stop". |
+| `show-me-your-work` | Keep an append-only decision log for unattended work, audit it against the transcript, and have another model flag what you should look at. |
 | `declutter` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
+| `architect` | Sketch types, signatures and module boundaries before code, compare two shapes, and pick the one with the clearest ownership. |
+| `tdd` | Fix a bug test-first: a regression test that fails for the right reason, then the smallest fix, with before and after evidence. |
 | `research` | Investigate a question against primary sources in a background agent and save the findings, with a source for each claim, as a Markdown file in the repo. |
 | `bro` | Restate the last message in plain language, shorter and without jargon. |
 | `how` | Explain how a part of the codebase works, from one read-only subagent, so you can change it with a clear mental model. |
@@ -77,6 +81,7 @@ Skills live in five groups, which setup flattens on install:
 | `unslop` | Cut AI tells from any writing, by numbered rules. |
 | `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
 | `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
+| `ketchup` | Catch you up on what changed in this chat since your last message, and list every call waiting on you with a recommended pick. |
 | `grill-me` | Interview you about a plan in rounds, with a recommended answer for each question, until every decision is settled. |
 | `handoff` | Write a handoff document in the temp directory so a fresh agent can continue the work, with suggested skills and secrets redacted. |
 | `no-comments` | Delete comments that should not exist with the `comment-sicko` subagent, fix the code that caused them, and offer to encode real constraints as types, tests or lints. |
@@ -93,7 +98,7 @@ Skills live in five groups, which setup flattens on install:
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: v5.1.1   # pin a full release tag (or a commit sha), never a branch
+    rev: v5.2.0   # pin a full release tag (or a commit sha), never a branch
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
