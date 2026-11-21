@@ -1,6 +1,6 @@
 ---
-name: open-pull-request
-description: "Open a pull request that is fast to review: check the branch has no PR yet and the diff matches the goal, write a title in the repo's convention that says why the change matters, and a body that leads with the problem, then shows a Summary as the smallest useful visual (pseudocode, call tree, component tree, file tree, Mermaid or a diff sketch), Evidence with a before and after, and a Merge Danger note (one-way or two-way door, blast radius). Use for /open-pull-request, open a PR, file a PR, create a pull request, write the PR body, or describe this PR."
+name: open-pr
+description: "Open a pull request that is fast to review: check the branch has no PR yet and the diff matches the goal, write a title in the repo's convention that says why the change matters, and a body that leads with the problem, then shows a Summary as the smallest useful visual (pseudocode, call tree, component tree, file tree, Mermaid or a diff sketch), Evidence with a before and after, and a Merge Danger note (one-way or two-way door, blast radius). Use for /open-pr, open a PR, file a PR, create a pull request, write the PR body, or describe this PR."
 license: MIT
 metadata:
   adapted-from: "skills/engineering/pr in mattpocock/skills (https://github.com/mattpocock/skills/tree/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/pr). Thanks to Matt Pocock for the original, which itself credits the show-me skill by Dex Horthy (HumanLayer)."
@@ -11,7 +11,7 @@ metadata:
   upstream-license-file-pr: "MIT, https://github.com/t3dotgg/tstack/blob/11e37a74d0a6868c121cd0910ab2b3bd9873b92a/LICENSE"
 ---
 
-# Open pull request
+# Open PR
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including the PR body, even when the diff, the commits or the issue are not. (2) **Practices, not domain**: the body describes the change and its evidence; it never copies business rules, values, URLs or ticket contents beyond what a reviewer needs to judge this diff. Details: [../sync/references/principles.md](../sync/references/principles.md).
 

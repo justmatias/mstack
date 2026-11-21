@@ -29,7 +29,7 @@ The actual comment starts here.
 - `<user>` is the user's name or GitHub login (`gh api user --jq .login`).
 - The context line starts with the robot emoji and sits inside the note. Add no horizontal rule, Setext underline, heading, signature footer or second attribution.
 
-Apply it to top-level PR comments, inline review comments, replies to bots or reviewers, and the written explanation you post before resolving or dismissing feedback. Skip it for PR descriptions (see [open-pull-request](../open-pull-request/SKILL.md)), commit messages, and text the user asked to post verbatim without attribution.
+Apply it to top-level PR comments, inline review comments, replies to bots or reviewers, and the written explanation you post before resolving or dismissing feedback. Skip it for PR descriptions (see [open-pr](../open-pr/SKILL.md)), commit messages, and text the user asked to post verbatim without attribution.
 
 ## Writing
 
