@@ -2,6 +2,93 @@
 
 <!-- version list -->
 
+## v5.1.1 (2026-11-21)
+
+### Bug Fixes
+
+- **ci**: Keep the bump-level regexes in variables
+  ([#53](https://github.com/justmatias/mstack/pull/53),
+  [`2540dd5`](https://github.com/justmatias/mstack/commit/2540dd54d77501e7317ff1aebadf22f8aa93987f))
+
+- **ci**: Make the release-prepare bump commit and re-run cleanly
+  ([`347bcea`](https://github.com/justmatias/mstack/commit/347bceaac47a30f00362e4f3897674e2ff7432ae))
+
+- **ci**: Quote the bump level values for shellcheck
+  ([#53](https://github.com/justmatias/mstack/pull/53),
+  [`2540dd5`](https://github.com/justmatias/mstack/commit/2540dd54d77501e7317ff1aebadf22f8aa93987f))
+
+- **skills**: Remove stale top-level copies of shipping skills
+  ([#49](https://github.com/justmatias/mstack/pull/49),
+  [`5a9037a`](https://github.com/justmatias/mstack/commit/5a9037afae89defd39d2300d027a3b2f78dc3c65))
+
+### Continuous Integration
+
+- **release**: Bump the version inside the PR instead of pushing to main
+  ([#53](https://github.com/justmatias/mstack/pull/53),
+  [`2540dd5`](https://github.com/justmatias/mstack/commit/2540dd54d77501e7317ff1aebadf22f8aa93987f))
+
+- **release**: Bump the version inside the PR so main never needs a push
+  ([#53](https://github.com/justmatias/mstack/pull/53),
+  [`2540dd5`](https://github.com/justmatias/mstack/commit/2540dd54d77501e7317ff1aebadf22f8aa93987f))
+
+- **release**: Update the pinned mstack revision in the README on each release
+  ([#52](https://github.com/justmatias/mstack/pull/52),
+  [`d10003d`](https://github.com/justmatias/mstack/commit/d10003ddade6c978836907b9060ed0b981ea2244))
+
+### Documentation
+
+- **skills**: Pin reflect and correct to the upstream pstack commit
+  ([#48](https://github.com/justmatias/mstack/pull/48),
+  [`d640c98`](https://github.com/justmatias/mstack/commit/d640c98afcb754703abd28fe48465b70b46204b6))
+
+- **specs**: Drop specs the agent-driven setup made moot
+  ([#54](https://github.com/justmatias/mstack/pull/54),
+  [`489ec5f`](https://github.com/justmatias/mstack/commit/489ec5fd1edd20111084455227e9e61da9e33e89))
+
+### Features
+
+- **skills**: Add full-send, full-stop, babysit-pr and review-loop
+  ([#47](https://github.com/justmatias/mstack/pull/47),
+  [`93a366a`](https://github.com/justmatias/mstack/commit/93a366a72684628c5f38adae07a423abe18de192))
+
+- **skills**: Add full-send, full-stop, babysit-pr and review-loop
+  ([#45](https://github.com/justmatias/mstack/pull/45),
+  [`f6a8ddd`](https://github.com/justmatias/mstack/commit/f6a8dddb9f5097932266b28ef0d0ece94a9029d5))
+
+- **skills**: Add grill-me, handoff and research from mattpocock/skills
+  ([#50](https://github.com/justmatias/mstack/pull/50),
+  [`86513b5`](https://github.com/justmatias/mstack/commit/86513b590d4036537b5412752d6c7dd377f961a9))
+
+- **skills**: Add implement cadence and declutter step to full-send
+  ([#47](https://github.com/justmatias/mstack/pull/47),
+  [`93a366a`](https://github.com/justmatias/mstack/commit/93a366a72684628c5f38adae07a423abe18de192))
+
+- **skills**: Add implement cadence and declutter step to full-send
+  ([#45](https://github.com/justmatias/mstack/pull/45),
+  [`f6a8ddd`](https://github.com/justmatias/mstack/commit/f6a8dddb9f5097932266b28ef0d0ece94a9029d5))
+
+- **skills**: Add show-me skill adapted from humanlayer/skills
+  ([#49](https://github.com/justmatias/mstack/pull/49),
+  [`5a9037a`](https://github.com/justmatias/mstack/commit/5a9037afae89defd39d2300d027a3b2f78dc3c65))
+
+### Refactoring
+
+- **skills**: Group skills by topic ([#47](https://github.com/justmatias/mstack/pull/47),
+  [`93a366a`](https://github.com/justmatias/mstack/commit/93a366a72684628c5f38adae07a423abe18de192))
+
+- **skills**: Rename open-pull-request to open-pr
+  ([#51](https://github.com/justmatias/mstack/pull/51),
+  [`962d65c`](https://github.com/justmatias/mstack/commit/962d65c118b946b6f7e57eaa4a57739576934acd))
+
+- **skills**: Trim duplicated text from four skills
+  ([#51](https://github.com/justmatias/mstack/pull/51),
+  [`962d65c`](https://github.com/justmatias/mstack/commit/962d65c118b946b6f7e57eaa4a57739576934acd))
+
+- **skills**: Trim duplicated text from integrate, declutter, show-me and open-pull-request
+  ([#51](https://github.com/justmatias/mstack/pull/51),
+  [`962d65c`](https://github.com/justmatias/mstack/commit/962d65c118b946b6f7e57eaa4a57739576934acd))
+
+
 ## v5.1.0 (2026-11-20)
 
 ### Documentation

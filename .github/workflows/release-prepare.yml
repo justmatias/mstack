@@ -74,13 +74,24 @@ jobs:
         if: steps.level.outputs.level != 'none'
         env:
           BUMP_LEVEL: ${{ steps.level.outputs.level }}
+          # The drop step above finds the release commit by this author.
+          GIT_COMMIT_AUTHOR: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
         run: |
           git checkout -B main
-          uvx --from python-semantic-release semantic-release version \
+          # The tag is made on main after merge, so this runs with --no-tag, and
+          # semantic-release only sets the commit_sha output when it tags. It
+          # then refuses to write its outputs, so give it nowhere to write them.
+          env -u GITHUB_OUTPUT uvx --from python-semantic-release semantic-release version \
             "--${BUMP_LEVEL}" --no-push --no-tag --no-vcs-release
 
       - name: Push the release commit to the PR branch
         env:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        # A rebuilt release commit gets a new sha even when nothing changed, and
+        # pushing it would start this workflow again, forever.
         run: |
+          if git diff --quiet "origin/${HEAD_REF}" HEAD; then
+            echo "The PR branch already holds this release; nothing to push."
+            exit 0
+          fi
           git push --force-with-lease origin "HEAD:refs/heads/${HEAD_REF}"
