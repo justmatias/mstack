@@ -4,9 +4,9 @@ description: "Mine the active transcript for coding conventions and durable lear
 disable-model-invocation: true
 license: MIT
 metadata:
-  adapted-from: "pstack/skills/reflect in cursor/plugins (https://github.com/cursor/plugins/tree/main/pstack). Thanks to Lauren Tan for the original skill."
+  adapted-from: "pstack/skills/reflect in cursor/plugins (https://github.com/cursor/plugins/tree/aaeb0ea3a0584995aa8f55ce44c6c5259414b896/pstack/skills/reflect). Thanks to Lauren Tan for the original skill."
   upstream-commit: "2f87c854fe3e2fcda44ca86b46ede35aad3c46b7"
-  upstream-license: "MIT, Copyright (c) 2026 Lauren Tan, https://github.com/cursor/plugins/blob/main/pstack/LICENSE"
+  upstream-license: "MIT, Copyright (c) 2026 Lauren Tan, https://github.com/cursor/plugins/blob/aaeb0ea3a0584995aa8f55ce44c6c5259414b896/pstack/LICENSE"
 ---
 
 # Reflect rules
