@@ -98,7 +98,7 @@ Skills live in five groups, which setup flattens on install:
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: v5.1.1   # pin a full release tag (or a commit sha), never a branch
+    rev: v5.2.0   # pin a full release tag (or a commit sha), never a branch
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
