@@ -48,10 +48,10 @@ Skills live in five groups, which setup flattens on install:
 | Group | Skills |
 | --- | --- |
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
-| `engineering/` | `review`, `declutter`, `no-comments`, `modernize` |
+| `engineering/` | `review`, `declutter`, `no-comments`, `modernize`, `research` |
 | `shipping/` | `open-pull-request`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
-| `productivity/` | `bro`, `unslop`, `sharpen`, `recall` |
+| `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `grill-me`, `handoff` |
 
 | Skill | Use it to |
 | --- | --- |
@@ -68,6 +68,7 @@ Skills live in five groups, which setup flattens on install:
 | `full-stop` | The same as `full-send`, but stop with the PR ready for you to merge and never merge it. Only when you say "full stop". |
 | `declutter` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
+| `research` | Investigate a question against primary sources in a background agent and save the findings, with a source for each claim, as a Markdown file in the repo. |
 | `bro` | Restate the last message in plain language, shorter and without jargon. |
 | `how` | Explain how a part of the codebase works, from one read-only subagent, so you can change it with a clear mental model. |
 | `why` | Answer why code is the way it is from its commits and PR discussions, citing what the authors wrote and marking inferences. |
@@ -76,6 +77,8 @@ Skills live in five groups, which setup flattens on install:
 | `unslop` | Cut AI tells from any writing, by numbered rules. |
 | `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
 | `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
+| `grill-me` | Interview you about a plan in rounds, with a recommended answer for each question, until every decision is settled. |
+| `handoff` | Write a handoff document in the temp directory so a fresh agent can continue the work, with suggested skills and secrets redacted. |
 | `no-comments` | Delete comments that should not exist with the `comment-sicko` subagent, fix the code that caused them, and offer to encode real constraints as types, tests or lints. |
 | `repair` | Close the gaps `mstack doctor` reports: reinstall the CLI, update drifted skills and rules with a backup, and rerun doctor until it is clean. |
 

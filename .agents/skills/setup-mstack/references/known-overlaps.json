@@ -71,6 +71,24 @@
       "other": "teach",
       "origin": "pstack",
       "reason": "mstack teach is adapted from pstack teach, under the same name: users who installed pstack already have a skill with this name"
+    },
+    {
+      "skill": "grill-me",
+      "other": "grill-me",
+      "origin": "mattpocock/skills",
+      "reason": "mstack grill-me is adapted from mattpocock/skills grill-me, under the same name (merged with the grilling skill it calls): users who installed mattpocock/skills already have a skill with this name"
+    },
+    {
+      "skill": "handoff",
+      "other": "handoff",
+      "origin": "mattpocock/skills",
+      "reason": "mstack handoff is adapted from mattpocock/skills handoff, under the same name: users who installed mattpocock/skills already have a skill with this name"
+    },
+    {
+      "skill": "research",
+      "other": "research",
+      "origin": "mattpocock/skills",
+      "reason": "mstack research is adapted from mattpocock/skills research, under the same name: users who installed mattpocock/skills already have a skill with this name"
     }
   ]
 }
