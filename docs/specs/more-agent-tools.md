@@ -30,7 +30,7 @@ Skills are closer than they look. `.agents/skills/` is becoming the shared folde
 - **Renderers:** generalize `render-rule`, so the setup and doctor agree on the installed text: `separate-files` (Claude Code), `combined-block` (one `AGENTS.md` / `GEMINI.md` with `<!-- mstack:begin -->` … `<!-- mstack:end -->`, one section per rule), and `paste` (Cursor today). Codex and opencode read a user-level `AGENTS.md` (the exact paths come from their docs, see below), so they take `combined-block`.
 - **Paths:** check each tool's current docs for user-level locations and skills support when implementing, and record the source in a comment in the target definition. Don't guess.
 - **Copilot** is configured per repo. Its target is used by `mstack init --copilot` (writes or updates `.github/copilot-instructions.md` with the managed block) rather than by the user-level install.
-- `--tool` accepts the new names, as a list (`--tool claude,codex`) now that "both" no longer covers every mix, and `host-profiles` can list them.
+- `--tool` accepts the new names, as a list (`--tool claude,codex`) now that "both" no longer covers every mix.
 - `discovery.md`'s tool-name mapping table gets a column per tool where skills are supported.
 
 ## Changes

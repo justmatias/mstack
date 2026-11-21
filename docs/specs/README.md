@@ -17,11 +17,9 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [claude-code-plugin](claude-code-plugin.md) | Distribute skills, agents and hooks as a Claude Code plugin | |
-| [host-profiles](host-profiles.md) | Per-machine profiles (personal, work) choosing what gets installed | |
-| [per-host-secrets](per-host-secrets.md) | `${VAR}` placeholders resolved per machine, never stored in the repo | |
+| [claude-code-plugin](claude-code-plugin.md) | Distribute skills, agents and hooks as a Claude Code plugin, for Claude Code-only machines | |
 | [more-agent-tools](more-agent-tools.md) | Codex, opencode, Gemini CLI and Copilot targets, with one shared `~/.agents/skills/` copy | |
-| [engram-memory](engram-memory.md) | Engram as the optional, per-profile agent memory layer, feeding `reflect` | |
+| [engram-memory](engram-memory.md) | Engram as an optional MCP memory server, feeding `reflect` | |
 
 ## Writing a spec
 
