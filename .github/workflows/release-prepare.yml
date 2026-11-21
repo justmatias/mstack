@@ -38,11 +38,14 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          if [[ "$PR_TITLE" =~ ^[a-z]+(\([^)]*\))?!: ]]; then
+          breaking='^[a-z]+(\([^)]*\))?!:'
+          feature='^feat(\([^)]*\))?:'
+          fix='^(fix|perf)(\([^)]*\))?:'
+          if [[ "$PR_TITLE" =~ $breaking ]]; then
             level=major
-          elif [[ "$PR_TITLE" =~ ^feat(\([^)]*\))?: ]]; then
+          elif [[ "$PR_TITLE" =~ $feature ]]; then
             level=minor
-          elif [[ "$PR_TITLE" =~ ^(fix|perf)(\([^)]*\))?: ]]; then
+          elif [[ "$PR_TITLE" =~ $fix ]]; then
             level=patch
           else
             level=none
