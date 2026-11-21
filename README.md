@@ -49,7 +49,7 @@ Skills live in five groups, which setup flattens on install:
 | --- | --- |
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
 | `engineering/` | `review`, `declutter`, `no-comments`, `modernize`, `research` |
-| `shipping/` | `open-pull-request`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
+| `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
 | `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `grill-me`, `handoff` |
 
@@ -60,7 +60,7 @@ Skills live in five groups, which setup flattens on install:
 | `correct` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate` | Bring skills or rules from a GitHub URL into `skills/` or `rules/`, merged into what already exists, with their license, credit and a check for each rule. |
 | `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
-| `open-pull-request` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
+| `open-pr` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |
 | `review-loop` | Loop an independent reviewer over a change: pick the reviewer from the agents and CLIs available, answer each finding with the smallest fix or evidence-backed pushback, and stop on approval, a stuck dispute or a 3-round budget. |
 | `babysit-pr` | Watch a pull request through CI and review with one watcher, verify each bot finding before acting, keep the PR small, and rebase when the base moves. |
