@@ -93,7 +93,7 @@ Skills live in five groups, which setup flattens on install:
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: vX.Y.Z   # pin a full release tag (or a commit sha), never a branch
+    rev: v5.1.0   # pin a full release tag (or a commit sha), never a branch
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
@@ -123,7 +123,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: justmatias/mstack@vX.Y.Z   # a full tag or sha; @v3 follows the major's fixes
+      - uses: justmatias/mstack@vX.Y.Z   # a full tag or sha; the @v<major> tag follows the major's fixes
 ```
 
 Inputs: `mode` (`full`, `changed` or `both`; default `both` on pull requests, `full` otherwise), `base-ref` (default `origin/<base branch>`), `mstack-version` (default the action's own ref, so CLI and action match), `python-version` and `working-directory`. Every release moves the `v<major>` tag. On other CI providers, run the same two commands: `uvx --from git+https://github.com/justmatias/mstack@<tag> mstack lint`, and on merge requests the same with `--changed --base-ref origin/<base branch>`.
