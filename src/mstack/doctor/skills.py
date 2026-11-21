@@ -1,12 +1,9 @@
+from itertools import combinations
 from pathlib import Path
 
 from mstack.doctor.model import REPAIR_FIX, Context, Result
-from mstack.doctor.targets import copied_folders, skill_names
+from mstack.doctor.targets import skill_folders, skill_names, uses_cursor
 from mstack.guards.check_skills import check_skills
-
-
-def skills_folders(context: Context) -> list[Path]:
-    return copied_folders(context.tool, context.home, context.cursor, "skills")
 
 
 def missing_results(context: Context, folder: Path) -> list[Result]:
@@ -61,35 +58,35 @@ def validation_results(folder: Path) -> list[Result]:
 
 
 def duplicate_results(context: Context) -> list[Result]:
-    """Only when Cursor shares the home: it then loads ~/.claude/skills as well."""
-    claude = context.home / ".claude" / "skills"
-    cursor = context.cursor / ".cursor" / "skills"
-    if context.cursor != context.home or not (claude.is_dir() and cursor.is_dir()):
+    if not uses_cursor(context.tool):
         return []
-    names = {path.name for path in claude.iterdir() if (path / "SKILL.md").is_file()}
-    duplicates = sorted(
-        path.name
-        for path in cursor.iterdir()
-        if path.name in names and (path / "SKILL.md").is_file()
-    )
-    if not duplicates:
-        return []
+    # Cursor reads these compatibility folders from its own home, including on WSL.
+    # https://cursor.com/docs/skills
+    folders = {
+        folder: {path.parent.name for path in folder.glob("*/SKILL.md")}
+        for folder in (
+            context.cursor / name / "skills"
+            for name in (".claude", ".cursor", ".agents", ".codex")
+        )
+    }
     return [
         Result(
             group="skills",
             check="duplicates",
             status="warn",
             detail=(
-                f"in both {claude} and {cursor} (Cursor shows them twice): "
-                + ", ".join(duplicates)
+                f"in both {first} and {second} (Cursor shows them twice): "
+                + ", ".join(sorted(duplicates))
             ),
-            fix=f"delete the copies in {cursor}",
+            fix="review the copies and back up redundant ones before removing them",
         )
+        for first, second in combinations(folders, 2)
+        if (duplicates := folders[first] & folders[second])
     ]
 
 
 def check_skills_installed(context: Context) -> list[Result]:
     results = []
-    for folder in skills_folders(context):
+    for folder in skill_folders(context.tool, context.home, context.cursor):
         results += missing_results(context, folder) + validation_results(folder)
     return results + duplicate_results(context)

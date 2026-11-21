@@ -1,6 +1,6 @@
 ---
 name: setup-mstack
-description: "Install or update mstack on this machine: the mstack CLI, the skills (skills/), rules (rules/), subagents (agents/), MCP servers (mcp/), global instructions (instructions/) and settings (settings/), into the user-level folders Claude Code and Cursor load. Compares each item with what is already installed, shows one plan, and asks only where the user's own setup differs. Use for /setup-mstack ($setup-mstack in Codex), set up mstack, install mstack, update mstack, or after pulling a new version of the mstack repo."
+description: "Install or update mstack on this machine for Claude Code, Cursor or Codex: the CLI, skills, rules, subagents, MCP servers, global instructions and settings. Compares each item with what is already installed, shows one plan, and asks only where the user's own setup differs. Use for /setup-mstack ($setup-mstack in Codex), set up mstack, install mstack, update mstack, or after pulling a new version of the mstack repo."
 disable-model-invocation: true
 ---
 
@@ -15,7 +15,7 @@ You decide how to do the work, with ordinary file tools and the shell the machin
 ## Done means
 
 1. `mstack --help` works from any folder, and `mstack --version` matches `<mstack>/pyproject.toml`.
-2. Every tool the user picked loads every mstack skill, rule and agent, exactly once.
+2. Every tool the user picked loads the mstack skills, rules and agents. If Cursor also loads a copy needed by another selected tool, doctor reports the duplicate.
 3. Every MCP server, setting and global instruction mstack ships is configured, without losing a key or a line of the user's.
 4. Nothing of the user's was lost: everything replaced is in a backup, and every difference from their own setup was their decision.
 5. `mstack doctor` reports no errors (step 5).
@@ -30,15 +30,21 @@ You decide how to do the work, with ordinary file tools and the shell the machin
 
 ## 1. Find out where things go
 
-Ask first: **Claude Code, Cursor, or both?** Then run `uv run mstack platform` in `<mstack>` and say where each tool's user folder is. Everything below that says `~/.claude` or `~/.cursor` means the folders it prints.
+Ask which tools to configure: **Claude Code, Cursor, Codex, or any combination?** Run `uv run mstack platform` in `<mstack>` and show the relevant folders. Use the paths it prints, including `CODEX_HOME` when set in the shell that runs Codex.
 
-| Item | Claude Code | Cursor | Both |
+| Item | Claude Code | Cursor | Codex |
 | --- | --- | --- | --- |
-| Skills (`skills/<group>/<name>/`, installed flat as `<name>/`: the group is never part of the installed path), agents (`agents/<name>.md`) | `~/.claude/skills/`, `~/.claude/agents/` | `~/.cursor/skills/`, `~/.cursor/agents/` | `~/.claude/` only: Cursor loads it too, and a second copy shows every item twice. On WSL, a copy in each home |
-| Rules (`rules/<name>.mdc`) | `~/.claude/rules/<name>.md` | pasted into Cursor Settings → Rules → User Rules | both |
-| Global instructions (`instructions/global.md`) | a `<!-- mstack:begin -->` … `<!-- mstack:end -->` block in `~/.claude/CLAUDE.md` | pasted with the rules | both |
-| MCP servers (`mcp/<name>.json`) | `claude mcp add-json --scope user <name> '<json>'` | `mcpServers.<name>` in `~/.cursor/mcp.json` | both |
-| Settings (`settings/claude.json`) | deep-merged into `~/.claude/settings.json` | none | Claude Code's |
+| Skills (`skills/<group>/<name>/`, installed flat as `<name>/`) | `~/.claude/skills/` | `~/.cursor/skills/`, subject to sharing below | `~/.agents/skills/` in the home where Codex runs |
+| Agents (`agents/<name>.md`) | `~/.claude/agents/` | `~/.cursor/agents/`, subject to sharing below | `<codex>/agents/<name>.toml` |
+| Rules (`rules/<name>.mdc`) | `~/.claude/rules/<name>.md` | pasted into Cursor Settings → Rules → User Rules | a managed block in `<codex>/AGENTS.md` |
+| Global instructions (`instructions/global.md`) | a `<!-- mstack:begin -->` … `<!-- mstack:end -->` block in `~/.claude/CLAUDE.md` | pasted with the rules | included in the rules block |
+| MCP servers (`mcp/<name>.json`) | `claude mcp add-json --scope user <name> '<json>'` | `mcpServers.<name>` in `~/.cursor/mcp.json` | `mcp_servers.<name>` in `<codex>/config.toml` |
+| Settings (`settings/claude.json`) | deep-merged into `~/.claude/settings.json` | none | none |
+
+- **Skill sharing:** Install in `~/.claude/skills/` when Claude Code is selected and in `~/.agents/skills/` when Codex is selected. If Cursor shares the home with either, it uses those skills. If all three share the home, Cursor can see both required copies. Install a separate Cursor copy when it shares the home with neither, including when it runs on Windows and the other tools run in WSL.
+- **Agent sharing:** Cursor can share Claude Code's agents if they run in the same home. Codex agents use TOML with `name` and `description` from the Markdown frontmatter and `developer_instructions` from its body. Preserve any upstream credit in TOML comments.
+- **Codex instructions:** Use a non-empty `<codex>/AGENTS.override.md` if present, since Codex gives it precedence. Run `uv run mstack render-rule --combined <mstack>` for the full block. Replace one existing block or append it after the user's text, leaving the surrounding content intact. If the markers are malformed or duplicated, show the proposed repair for approval before editing.
+- **Codex MCP:** Keep the user's other TOML entries. For a local server use `command`, `args` and `env` for literal values. Forward environment variables by name using `env_vars` when the variable keeps its name, or an explicit user-approved launcher when it needs remapping. For an HTTP server use `url`. Check the result with `codex mcp list`.
 
 Each folder's `README.md` explains its format and is never installed. Today `agents/`, `mcp/`, `instructions/` and `settings/` may hold nothing else: then skip them.
 
@@ -53,7 +59,7 @@ Sort each item into one of these, and work out the rest yourself:
 - **Missing**: install it.
 - **Same**: nothing to do.
 - **Different**: find out which side changed. `git -C <mstack> log -p -- <path>` shows mstack's history for the item: if the installed copy equals an older mstack version, only mstack moved on, so update it (with a backup) without asking. Otherwise the user edited it, or it is someone else's item under the same name: ask (step 4).
-- **Old setup leftovers**: a symlink into an mstack checkout (replace it with a copy), a skill renamed since (`integrate-skills` → `integrate`, `reflect-rules` → `reflect`, `correct-rules` → `correct`, `sync-rules` → `sync`: offer to remove the old one), or a copy in `~/.cursor/skills/` that `~/.claude/skills/` already has when both tools share the home (remove it).
+- **Old setup leftovers**: a symlink into an mstack checkout (replace it with a copy), a skill renamed since (`integrate-skills` → `integrate`, `reflect-rules` → `reflect`, `correct-rules` → `correct`, `sync-rules` → `sync`: offer to remove the old one), or an extra skill copy in a compatibility folder. Verify that all selected tools can still find the skill before proposing removal.
 - **Similar**: another skill, rule, agent or MCP server already installed that does the same job under another name. [known-overlaps.json](references/known-overlaps.json) lists the ones mstack knows about (an upstream that an mstack skill was adapted from); otherwise compare names and descriptions, read both, and keep only real overlaps. An overlap under the same name shows up as **Different**: recommend **Combine** for it.
 
 For a merged item (MCP server, settings, instructions), only what mstack ships counts: the user's other keys and the text outside the mstack block are theirs and never make the item different. List every key you would add or change, with the old and new value.
@@ -78,7 +84,7 @@ The choices: **keep** theirs, **update** to mstack's (back up first), **replace*
 1. **The CLI first**, since the skills run it as `mstack <command>`. If `mstack --version` does not match this checkout, tell the user and run `uv tool install --editable <mstack> --reinstall` (it brings `ast-grep` too). If `uv` is missing, give the user the install command for their system from <https://docs.astral.sh/uv/>.
 2. Apply what was approved, backing up first. For a merged item, read the target, merge mstack's keys in (objects by key, lists as unions, mstack's values win only for the keys it ships), and write valid JSON back; for instructions, replace the text between the markers, or append the block if there is none. For an MCP server already configured in Claude Code, `claude mcp remove --scope user <name>` first.
 3. **Cursor rules**: print the approved rules and the global instructions as one block of plain text (each rule's `description` as a heading, then its rendered text), and tell the user to paste it into Cursor Settings → Rules → User Rules.
-4. Run `mstack doctor --tool <claude|cursor|both>`. Fix every error and run it again; mention the warnings. A `drift` warning on an item the user chose to keep is expected: say so. Also check what doctor does not: `claude mcp list` shows the servers, `~/.claude/settings.json` and `~/.cursor/mcp.json` are valid JSON with the user's keys still there, and `~/.claude/CLAUDE.md` has one mstack block.
+4. Run `mstack doctor --tool` with the selected names separated by commas, for example `mstack doctor --tool claude,codex`. Fix every error and run it again. Mention any warnings, including drift on an item the user chose to keep. For the selected tools, also verify the resulting MCP registrations, settings and agents. Check that `~/.claude/CLAUDE.md` has one mstack block when installing Claude Code global instructions.
 
 ## 6. Reply
 
@@ -86,8 +92,8 @@ A short list. Leave out empty lines:
 
 - Added / updated / combined / replaced / kept: the items, by kind.
 - Removed: leftovers and duplicates.
-- Keys written in `settings.json` and `mcp.json`.
+- Keys written in `settings.json`, `mcp.json` or `config.toml`.
 - Environment variables to set on this machine (every `${VAR}` an installed item uses).
 - Cursor rules: printed for pasting, or skipped.
 - Backups: `<folder>/.mstack-backups/<timestamp>/`.
-- Open a new Claude Code or Cursor session to load everything. Later, `mstack doctor` shows drift, and `/repair` fixes it.
+- Open a new session in the tools you configured. Later, `mstack doctor` shows drift, and `/repair` (`$repair` in Codex) fixes it.

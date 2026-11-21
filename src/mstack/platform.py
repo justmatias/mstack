@@ -26,6 +26,12 @@ PLATFORM_VARIABLE = "MSTACK_PLATFORM"
 WINDOWS_HOME_VARIABLE = "MSTACK_WINDOWS_HOME"
 
 
+def codex_folder(home: Path) -> Path:
+    # https://developers.openai.com/codex/guides/agents-md
+    override = os.environ.get("CODEX_HOME")
+    return Path(override).expanduser() if override else home / ".codex"
+
+
 def detect(
     system: str | None = None,
     proc_version: Path = PROC_VERSION,
@@ -109,15 +115,18 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     platform = detect()
     homes = tool_homes(platform)
+    folders = {tool: home / f".{tool}" for tool, home in homes.items()}
+    homes["codex"] = homes["claude"]
+    folders["codex"] = codex_folder(homes["codex"])
     if arguments.json:
         payload = {
             "platform": platform,
             "homes": {tool: str(home) for tool, home in homes.items()},
-            "folders": {tool: str(home / f".{tool}") for tool, home in homes.items()},
+            "folders": {tool: str(folder) for tool, folder in folders.items()},
         }
         sys.stdout.write(json.dumps(payload, indent=2) + "\n")
         return 0
     lines = [f"platform: {platform}"]
-    lines.extend(f"{tool}: {home / f'.{tool}'}" for tool, home in homes.items())
+    lines.extend(f"{tool}: {folder}" for tool, folder in folders.items())
     sys.stdout.write("\n".join(lines) + "\n")
     return 0

@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## 1. Run doctor
 
-1. Run `mstack doctor --json` (add `--tool <claude|cursor|both>` if the user names one, and `--online` if they asked about updates). If `mstack` is not on `PATH`, or it fails to start, the CLI is the first gap: go to the `cli` row in step 2, then run doctor again.
+1. Run `mstack doctor --json` (add `--tool` with the named tools separated by commas, and `--online` if they asked about updates). If `mstack` is not on `PATH`, or it fails to start, the CLI is the first gap: go to the `cli` row in step 2, then run doctor again.
 2. Read `checkout`, `tool` and `platform` from the JSON, and keep every result whose `status` is not `ok`. `<mstack>` below is that `checkout`: the setup instructions this skill defers to are in `<mstack>/.agents/skills/setup-mstack/SKILL.md`, which is never installed, so read it from there.
 3. If nothing is left, say so in one line and stop.
 
@@ -30,7 +30,9 @@ Group the results by `group` and `check`, and pick the fix from this table. A re
 | `skills` / `installed`, `rules` / `installed`, `drift` / any | Step 3, for the named items only | Depends on the state |
 | `rules` / `frontmatter` | Back up the rule, then rewrite it with `mstack render-rule <mstack>/rules/<name>.mdc > ~/.claude/rules/<name>.md` | No |
 | `skills` / `valid` | If the skill is an mstack one, step 3 reinstalls it. If it is the user's own, show the issue and the smallest edit that fixes it | Yes, for the user's own skill |
-| `skills` / `duplicates` | Back up each copy in `~/.cursor/skills/` and remove it: Cursor already loads `~/.claude/skills/` | No |
+| `drift` / `rule codex` (error) | The checkout's combined rules do not render. Report the error | No fix |
+| `rules` / `codex`, `drift` / `rule codex` (warning) | Compare the block with `mstack render-rule --combined <mstack>`. Follow step 3 and the setup skill's Codex instructions for the file named in the report | Yes, for malformed markers or user edits |
+| `skills` / `duplicates` | Use the setup skill's folder choices. Back up and remove a redundant copy only if every selected tool can still load a copy and the user has approved removal of any personal edits | Yes, for personal edits |
 | `platform` / `wsl-cursor` | Ask for the Windows profile (`/mnt/c/Users/<user>`), check that it has a `.cursor` folder, and tell the user to export `MSTACK_WINDOWS_HOME` in their shell profile. Use it for every `mstack` command in this run | Yes |
 | `version` / `latest` | If `git -C <mstack> status --porcelain` is empty and the branch tracks `origin`, `git -C <mstack> pull --ff-only`; then reinstall the CLI and run doctor again: the drift rows that appear go through step 3. With uncommitted changes or a branch that is not the default, report it and stop | Yes: it changes the checkout |
 | `drift` / `rule <name>` (error) | The checkout's rule does not render: report it, it is a bug in the checkout | No fix |
@@ -49,7 +51,7 @@ Always:
 
 - **Back up first**, into `<folder>/.mstack-backups/<UTC timestamp>/<name>` inside the folder the item came from, never as `<name>.bak` next to it.
 - Install rules with `mstack render-rule`, never by hand, or doctor reports them as drift again.
-- With Cursor, skills and agents go to `~/.claude/` only when both tools share the home, and to both homes on WSL.
+- Use the setup skill's folder choices for the selected tools.
 
 ## 4. Show the plan and wait
 

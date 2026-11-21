@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 from mstack.config import StrictModel
-from mstack.doctor.targets import Tool
-from mstack.platform import Platform
+from mstack.platform import Platform, codex_folder
 
 Status = Literal["ok", "warn", "error"]
 REPAIR_FIX = "ask your agent to run the repair skill (/repair in Claude Code)"
@@ -18,13 +17,17 @@ class Context(StrictModel):
     # profile). See mstack.platform.
     cursor_home: Path | None = None
     platform: Platform = "linux"
-    tool: Tool
+    tool: str
     checkout: Path | None
     online: bool = False
 
     @property
     def cursor(self) -> Path:
         return self.cursor_home or self.home
+
+    @property
+    def codex(self) -> Path:
+        return codex_folder(self.home)
 
 
 class Result(StrictModel):
