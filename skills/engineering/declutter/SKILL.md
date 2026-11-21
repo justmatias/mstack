@@ -23,15 +23,14 @@ This skill edits files. It does not commit unless the user asks.
 | `declutter <path or symbol>` | That file, folder or function only |
 | `declutter --report` | Same scope, but only list the opportunities; change nothing |
 
-**When not to use it:** the code is already clear; you do not yet understand what it does; the simpler version would be measurably slower on a hot path; or the module is about to be rewritten anyway.
+**When not to use it:** the code is already clear, you do not yet understand it, the simpler version would be measurably slower on a hot path, or the module is about to be rewritten.
 
 ## Principles of the change
 
-1. **Behavior stays identical.** Same outputs for every input, same errors, same side effects in the same order. Existing tests pass without being edited. If you are not sure a change preserves behavior, do not make it.
-2. **The repo's conventions win.** Simplifying means making the code more like the rest of the codebase, not like your preferences. A repo rule always overrides a signal below.
-3. **Clarity over cleverness.** A compact form that needs a mental pause to parse is worse than an explicit one.
-4. **Do not over-simplify.** Inlining a helper that gave a concept its name, merging two simple functions into one complex one, or removing an abstraction that exists for testability makes code harder, not simpler.
-5. **Stay in scope.** Simplify what is in scope. No drive-by refactors of unrelated code unless the user widens the scope.
+1. **Behavior stays identical:** same outputs, errors and side effects in the same order. Existing tests pass unedited. If unsure a change preserves behavior, do not make it.
+2. **The repo's conventions win** over any signal below. Simplifying means matching the codebase, not your preferences.
+3. **Clarity over cleverness, and no over-simplifying.** Do not inline a helper that names a concept, merge simple functions into a complex one, or remove an abstraction that exists for testability.
+4. **Stay in scope.** No drive-by refactors unless the user widens it.
 
 ## 1. Collect the conventions
 
@@ -40,13 +39,7 @@ This skill edits files. It does not commit unless the user asks.
 
 ## 2. Understand before touching
 
-Before changing or removing anything, find out why it is there (Chesterton's fence: do not take down a fence until you know why it was put up). For each piece in scope, answer:
-
-- What is its job? What calls it, and what does it call?
-- What are its edge cases and error paths, and which tests pin them?
-- Why might it have been written this way: performance, a platform constraint, a past bug? `git log -L` or `git blame` on the lines often says.
-
-If you cannot answer these, read more before going on. Code with no tests around the behavior you would touch gets a test first, or is left alone and reported.
+Before changing or removing anything, find out why it is there (Chesterton's fence): its job, callers and callees, edge cases and the tests that pin them, and why it may look this way (performance, a platform constraint, a past bug: `git blame` or `git log -L` often says). If you cannot answer, read more. Code with no tests around the behavior you would touch gets a test first, or is left alone and reported.
 
 ## 3. Find the opportunities
 
@@ -66,28 +59,6 @@ Start from the code smells in [review's smell baseline](../review/references/sme
 | Comment that restates the code | `# add one` above `count += 1` | Delete it. Keep comments that explain why |
 | Verbose construct | Building a list or dict in a loop, `if cond: return True else: return False` | The language's direct form (a comprehension, `return cond`) |
 
-For example, nested checks:
-
-```python
-def handle(item):
-    if item is not None:
-        if item.is_ready():
-            return do_work(item)
-        raise NotReadyError()
-    raise MissingItemError()
-```
-
-read more easily as guard clauses, with the same errors in the same order:
-
-```python
-def handle(item):
-    if item is None:
-        raise MissingItemError()
-    if not item.is_ready():
-        raise NotReadyError()
-    return do_work(item)
-```
-
 Judgment calls (state passed through many layers, an abstraction that might be load-bearing) are flagged to the user, not refactored on your own.
 
 With `--report`, list the opportunities by file and line, with the signal and the proposed change, and stop here.
@@ -106,22 +77,15 @@ Keep refactoring apart from feature and bug-fix work: if the user commits, simpl
 
 ## 5. Compare before and after
 
-Step back and look at the whole diff:
+Look at the whole diff: is it easier to understand, not just shorter; does it introduce a pattern the codebase does not use; is it reviewable with nothing unrelated mixed in? Revert any simplification that made code harder to follow.
 
-- Is it genuinely easier to understand, not just shorter?
-- Does it introduce a pattern the rest of the codebase does not use?
-- Is it clean and reviewable, with nothing unrelated mixed in?
+**Red flags.** Stop and reconsider when:
 
-If a simplification made the code harder to follow, revert it. Not every attempt succeeds.
-
-**Red flags.** Stop and reconsider when you notice any of these:
-
-- a test had to change for the simplification to pass (behavior changed);
-- the "simpler" version is longer and harder to follow;
-- a rename follows your taste rather than the repo's conventions;
-- error handling was removed or weakened "to make it cleaner";
+- a test had to change for it to pass;
+- error handling was removed or weakened;
+- a rename follows your taste, not the repo's conventions;
 - you simplified code you do not fully understand;
-- you kept an abstraction only because "it might be useful later" (if nothing uses it now, it goes), or removed one without checking why it was there.
+- you kept an abstraction only because "it might be useful later" (if nothing uses it now, it goes), or removed one without checking why it existed.
 
 ## 6. Reply
 

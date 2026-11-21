@@ -57,53 +57,7 @@ Skip preambles and keep prose brief. The lead sits above the template. Use the r
 
 ## Summary
 
-Pick the smallest view that makes the key point clear, and place each visual next to the short text it supports. Keep only the calls, files, props, states and boundaries a reviewer needs. Use one of these, sometimes several, rarely all.
-
-| The point is | Use |
-| --- | --- |
-| Logic or an algorithm | Pseudocode |
-| Runtime control flow | A call tree |
-| UI structure | A component tree, with the state and module boundaries that matter |
-| File responsibility or a broad refactor | A shallow file tree with a comment per folder |
-| Interaction or data flow between parts | A Mermaid diagram (`sequenceDiagram`, `flowchart`) |
-| What changes, when the surrounding shape already exists | A `diff` block shaped like the topic (component tree, file tree, call tree or pseudocode) |
-| Most of it is new, omitted context would hide ownership or order, or the reader needs a copyable target | The whole block |
-
-Pseudocode and call tree:
-
-```text
-on(save)
-  if content is unchanged
-    return cached result
-  write new content
-  return fresh result
-```
-
-A diff sketch of a call tree, with `+` and `-` marking the change and unchanged lines kept for context:
-
-```diff
- submitForm
-   createSession
-     persistPrompt
-+    expandMention
-     launchAgent
--  navigateToSession
-+  navigateToSession
-+    subscribeToEvents
-```
-
-A diff sketch of a file layout:
-
-```diff
- src/
- ├── commands/
-+│   └── expand.py       # expands the command
- ├── sessions/
--└── transport.py
-+└── transport/
-+    ├── client.py
-+    └── stream.py
-```
+Pick the smallest view that makes the key point (pseudocode, call tree, component tree, file tree, Mermaid, or a `diff` sketch of the existing shape) and place it next to the short text it supports. Keep only the calls, files, states and boundaries a reviewer needs. [show-me](../show-me/SKILL.md) has the picker and examples.
 
 ## Evidence
 
@@ -120,7 +74,7 @@ Show that the change works, as a before and after.
 
 ## No attribution footer
 
-End the body with the Merge Danger section. Never add a "Generated with ..." line, robot-emoji signature or any other AI attribution footer, and add no `Co-Authored-By` trailer to the commits. The `git-commits` rule forbids them, and it overrides any default the harness suggests.
+End the body with Merge Danger. Add no "Generated with ..." line or AI signature, and no `Co-Authored-By` trailer on commits: the `git-commits` rule forbids them and overrides any harness default.
 
 ## Before submitting
 

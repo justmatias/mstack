@@ -80,22 +80,9 @@ sequenceDiagram
 +    subscribeToEvents
 ```
 
-```diff
- src/
- ├── commands/
-+│   └── show-me.ts       # expands the command
- ├── sessions/
--└── transport.ts
-+└── transport/
-+    ├── client.ts
-+    └── stream.ts
-```
-
 - **The whole block**: when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape.
 - **A visual UI, a layout, a state comparison, or a concept too dense for Mermaid**: write one focused HTML file (a diagram, an infographic or a short slide deck, whichever fits). Match the product's colors, type, spacing and components, use real labels and data, and support desktop and mobile. Save it as `show-me-<description>.html` in the scratchpad or a temp folder, never in the repo, then open it: `xdg-open <path>` on Linux, `open <path>` on macOS. Where you cannot open a browser (Cursor, remote shells), give the user the full path instead.
 
 ## Guidance
 
-Place each visual next to the short text it supports. Keep only the calls, files, props, states and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-Use one view, or several when they help. It is unlikely you need all of them. Do not overwhelm the user.
+Place each visual next to the short text it supports, and keep only what answers the user's current question. Use one view, or several when they help; rarely all.
