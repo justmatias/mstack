@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: "Mine the active transcript for coding conventions and durable learnings, and turn each into a prose rule in .cursor/rules plus its automated check (ast-grep, import-linter), or into a skill edit. Waits for approval before writing anything. Use when the user says reflect, reflect on the rules, turn my corrections into rules, or make this preference a rule."
+description: "Mine the active transcript for coding conventions and durable learnings, and turn each into an automated check, a prose rule for judgment, or a skill edit. Waits for approval before writing anything. Use when the user says reflect, reflect on the rules, turn my corrections into rules, or make this preference a rule."
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -51,8 +51,8 @@ Classify each coding convention as pattern, architecture, judgment or borderline
 Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog. Before preparing a check, apply step 0 of [authoring-a-check.md](../sync/references/authoring-a-check.md): only a concrete construct that one simple rule denies from the file alone gets a static check; anything else becomes a rule with `enforcement: llm-review`. For borderline rows, prepare both options and let the user pick in step 4. For each Accepted `rule:` row, prepare the full change now, without writing it yet:
 
 1. **Find the related rule.** Search the `rules_dir` for a rule on the same topic. Prefer editing it over adding a duplicate.
-2. **Write the prose rule**: the bullet, its `Why:` line, and the `## Checks` line, following [rule-format.md](../sync/references/rule-format.md).
-3. **Write the check** for pattern and architecture rows that passed step 0, following [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
+2. **Write prose for judgment**: the bullet, its `Why:` line, and `## Checks`, following [rule-format.md](../sync/references/rule-format.md).
+3. **Enforce checkable standards.** Use an existing linter when it covers the standard. For other pattern and architecture rows that passed step 0, follow [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
 5. **Verify** with `mstack domain-check` over the prepared files, and reread them for English.
 

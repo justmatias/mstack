@@ -6,8 +6,6 @@ note: |
   Constructors that only assign self.x = x duplicate the field list
   and drift out of sync with it. Scope: classes whose only method is
   __init__ and whose __init__ only assigns parameters to attributes.
-metadata:
-  source: rules/python-models.mdc
 rule:
   kind: class_definition
   not:

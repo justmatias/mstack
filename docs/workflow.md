@@ -1,6 +1,6 @@
 # How to use mstack
 
-This is the end-to-end workflow: set up a machine once, adopt rules as checks in a repo, then work in a loop where every correction you give an agent becomes a rule, and every rule that can be checked becomes a check. The [README](../README.md) has the reference tables; [`src/mstack/README.md`](../src/mstack/README.md) documents every command and flag.
+This is the end-to-end workflow: set up a machine once, adopt rules as checks in a repo, then turn recurring corrections into automated checks or guidance for review. The [README](../README.md) has the reference tables; [`src/mstack/README.md`](../src/mstack/README.md) documents every command and flag.
 
 mstack works the same on Linux, macOS, Windows and WSL, with Claude Code, Cursor or both, so you can bring it to any machine you work on.
 
@@ -10,15 +10,16 @@ mstack works the same on Linux, macOS, Windows and WSL, with Claude Code, Cursor
 flowchart LR
     rule["Prose rule<br/>rules_dir/*.mdc"] -- "## Checks" --> check["Check<br/>ast-grep, import-linter,<br/>a pre-commit hook"]
     rule -- "enforcement: llm-review" --> review["review skill"]
-    check -- "metadata.source" --> rule
+    check -. "optional metadata.source" .-> rule
     check --> lint["mstack lint<br/>pre-commit, CI"]
     correction["You correct an agent"] --> reflect["reflect / correct"]
     reflect --> rule
+    reflect --> check
 ```
 
-- A **rule** is prose in an `.mdc` file: what to do, and why. It is the source of truth that agents read.
+- An `.mdc` file gives agents guidance for decisions that automated checks leave open.
 - Each rule ends with a `## Checks` section that names how it is enforced: `enforced-by: <id>` (an ast-grep rule or an import-linter contract), `enforced-by-hook: <id>` (a pre-commit hook such as gitleaks), or `enforcement: llm-review` (a judgment call that only a reviewer can check).
-- Each check points back to its rule (`metadata.source`), and `mstack coverage` fails when the two stop pointing at each other.
+- A check can stand on its own. If an ast-grep check declares `metadata.source`, `mstack coverage` verifies the prose file exists and lists the check.
 - `mstack lint` runs everything: the checks' own tests, the scan, import-linter and the guards. The same command runs locally, in pre-commit and in CI.
 
 ## 1. Set up a machine (once per machine)
@@ -62,7 +63,7 @@ flowchart TD
     rev --> merge["Merge"]
     write -. "you correct it" .-> refl["/reflect at the end of the session"]
     rev -. "the same finding again" .-> corr["/correct or /sync"]
-    refl --> rules["New rule + check"]
+    refl --> rules["Check or prose rule"]
     corr --> rules
     rules --> write
 ```
@@ -77,9 +78,9 @@ flowchart TD
 
 | Situation | Run | Result |
 | --- | --- | --- |
-| You corrected the agent during a session | `/reflect` at the end | Each durable correction becomes a rule with a check (or `llm-review`), or a skill edit. You approve each row |
+| You corrected the agent during a session | `/reflect` at the end | Each durable correction becomes a check, review guidance, or a skill edit. You approve each row |
 | The same mistake keeps coming back in a repo | `/correct` | Mines commits, reverts, review comments and exceptions, and fixes each repeated mistake at the highest level that works: architecture, then a check, then a test, then prose |
-| You edited a rule by hand, or a check has no rule | `/sync` | Brings prose and checks back in line, in both directions |
+| You edited a rule or changed a declared check link | `/sync` | Brings prose and checks back in line, in both directions |
 | A good skill or rule exists on GitHub | `/integrate <url>` | Merges it into what you already have, with its license and credit, and gives every imported rule a check |
 
 ### Exceptions
@@ -114,7 +115,7 @@ make test                  # pytest
 make demo                  # fixtures/invalid/ must fail the scan
 ```
 
-- **Add a rule to mstack:** write `rules/<name>.mdc`, then run `/sync` in this repo. It adds the check under `lint/` and its tests. Add a sample that breaks the rule under `fixtures/invalid/`: the tests prove every file there is still caught. Code in `fixtures/valid/` must stay clean.
+- **Add a rule to mstack.** Put review guidance in `rules/<name>.mdc`. Put a new automated check and its cases under `lint/`. Add a sample that breaks the check under `fixtures/invalid/`. Code in `fixtures/valid/` must stay clean.
 - **Add a skill:** a folder in a topic group, `skills/<group>/<name>/` (`toolkit`, `engineering`, `shipping`, `learning` or `productivity`), with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
 - **Agents, MCP servers, settings and global instructions** go in `agents/`, `mcp/`, `settings/` and `instructions/`; each folder's README gives the format. Secrets are always `${VAR}` placeholders.
 - **Planned work** is in [`docs/specs/`](specs/README.md). When a spec ships, delete it in the same pull request.

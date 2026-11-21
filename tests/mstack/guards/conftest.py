@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -20,10 +21,15 @@ def rules_sandbox(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def _delete_enforced_by_line(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / "rules" / "error-handling.mdc"
-    mdc.write_text(
-        mdc.read_text().replace("- enforced-by: no-swallowed-exception\n", "")
+def _add_unlisted_check(rules_sandbox: Path) -> None:
+    (rules_sandbox / "rules" / "linked.mdc").write_text(
+        "# Linked rule\n\n## Checks\n- enforcement: llm-review\n",
+        encoding="utf-8",
+    )
+    (rules_sandbox / "lint" / "rules" / "no-linked-placeholder.yml").write_text(
+        "id: no-linked-placeholder\nlanguage: Python\n"
+        "metadata:\n  source: rules/linked.mdc\nrule:\n  kind: pass_statement\n",
+        encoding="utf-8",
     )
 
 
@@ -35,14 +41,17 @@ def _delete_checks_section(rules_sandbox: Path) -> None:
 
 @pytest.fixture
 def _add_unknown_check(rules_sandbox: Path) -> None:
-    mdc = rules_sandbox / "rules" / "error-handling.mdc"
+    mdc = rules_sandbox / "rules" / "naming.mdc"
     mdc.write_text(mdc.read_text() + "- enforced-by: no-such-check\n")
 
 
 @pytest.fixture
-def _point_rule_to_missing_source(rules_sandbox: Path) -> None:
-    rule = rules_sandbox / "lint" / "rules" / "no-bare-except.yml"
-    rule.write_text(rule.read_text().replace("error-handling.mdc", "missing.mdc"))
+def _add_check_with_missing_source(rules_sandbox: Path) -> None:
+    (rules_sandbox / "lint" / "rules" / "no-linked-placeholder.yml").write_text(
+        "id: no-linked-placeholder\nlanguage: Python\n"
+        "metadata:\n  source: rules/missing.mdc\nrule:\n  kind: pass_statement\n",
+        encoding="utf-8",
+    )
 
 
 @pytest.fixture
@@ -103,7 +112,7 @@ def edit_skill(skills_sandbox: Path):
 
 @pytest.fixture
 def add_hook_line(rules_sandbox: Path):
-    def add(hook_id: str, mdc_name: str = "error-handling.mdc") -> None:
+    def add(hook_id: str, mdc_name: str = "naming.mdc") -> None:
         mdc = rules_sandbox / "rules" / mdc_name
         mdc.write_text(
             mdc.read_text(encoding="utf-8") + f"- enforced-by-hook: {hook_id}\n",
@@ -134,3 +143,47 @@ def shell_exception_file(tmp_path: Path):
         return path
 
     return write
+
+
+def coverage_issues(run_mstack, rules_sandbox: Path) -> tuple[int, list[tuple]]:
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+    issues = json.loads(completed.stdout)["issues"]
+    return completed.returncode, [
+        (issue["kind"], issue.get("check")) for issue in issues
+    ]
+
+
+@pytest.fixture
+def import_linter_layout(tmp_path: Path) -> Path:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "rules").mkdir()
+    (tmp_path / "rules" / "layers.mdc").write_text(
+        "# Layers\n\n- The core does not import adapters.\n\n"
+        "## Checks\n- enforced-by: core-is-pure\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "sgconfig.yml").write_text("ruleDirs: []\n", encoding="utf-8")
+    (tmp_path / ".importlinter").write_text(
+        "[importlinter]\nroot_package = app\n\n"
+        "[importlinter:contract:core-is-pure]\nname = core-is-pure\n"
+        "type = forbidden\nsource_modules = app.core\nforbidden_modules = app.adapters\n",
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def coverage_arguments(layout: Path) -> list[str]:
+    return [
+        "--rules-dir",
+        str(layout / "rules"),
+        "--config",
+        str(layout / "sgconfig.yml"),
+        "--importlinter",
+        str(layout / ".importlinter"),
+        "--json",
+    ]
+
+
+def credit_rule(rules_sandbox: Path, credit: str) -> None:
+    mdc = rules_sandbox / "rules" / "naming.mdc"
+    mdc.write_text(mdc.read_text().replace("---\n", f"---\n{credit}", 1))

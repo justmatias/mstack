@@ -6,21 +6,13 @@ alwaysApply: false
 
 # Tests
 
-- Don't sleep in tests. Wait for the condition you need, or inject a fake clock.
-- `pytest.raises` names the exact exception you expect, never `Exception` or `BaseException`.
-- Every `skip` and `xfail` says why (`reason="..."`).
 - One behavior per test, and its name says which: `test_<behavior>_when_<condition>`.
 - Test public behavior, not private helpers or internals.
 - Unit tests don't reach the network or the real clock.
-- Delete a test that cannot fail: one with no assertion, or one that only asserts a mock it just configured.
-- Write tests as plain top-level functions, never in classes (`unittest.TestCase` or plain). A test module holds test functions only; its setup lives in `conftest.py` (see the pytest fixtures rule).
-- When each implementation module has its own test module, give each test module its own subfolder with a local `conftest.py` for its setup. A fixture shared by sibling test modules stays in the parent `conftest.py`. Add a local `conftest.py` only when it has real setup to hold.
+- Delete a test that cannot fail, such as one that only asserts a mock it just configured.
+- Give a test module a local `conftest.py` when its setup needs a scope of its own. Keep fixtures shared by sibling modules in the parent `conftest.py`.
 
-Why: sleeps make tests slow and flaky; a broad `pytest.raises` passes on the wrong error; an unexplained skip is never revisited; tests tied to internals break on every refactor while missing real regressions; plain functions need no class boilerplate, and a per-module `conftest.py` keeps each test reading as "given these objects, assert this" while parent fixtures already cascade into subfolders, so copying them only creates drift.
+Why: tests tied to internals break on refactors and can miss regressions. Keep specialized setup near the tests that use it.
 
 ## Checks
-- enforced-by: no-sleep-in-tests
-- enforced-by: no-broad-pytest-raises
-- enforced-by: no-skip-without-reason
-- enforced-by: test-module-has-only-tests
 - enforcement: llm-review

@@ -5,8 +5,6 @@ message: "Break the import cycle by importing from the defining submodule, not w
 note: |
   Reordering imports changes only the initialization order, not the import graph,
   so the cycle stays and a formatter can bring the ImportError back later.
-metadata:
-  source: rules/python-modules.mdc
 rule:
   kind: comment
   regex: "^#\\s*isort:\\s*(off|on)\\s*$"

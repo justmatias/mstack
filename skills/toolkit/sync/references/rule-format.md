@@ -2,7 +2,7 @@
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the source is not. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code. Details: [principles.md](principles.md).
 
-A rule has two halves that point to each other: the prose rule in `.cursor/rules/*.mdc` (source of truth) and zero or more checks (ast-grep YAML in `lint-rules/rules/`, or import-linter contracts in `.importlinter`).
+Use prose in `.cursor/rules/*.mdc` for guidance that checks leave open. Automate standards with a configured linter, ast-grep YAML in `lint-rules/rules/`, or import-linter contracts in `.importlinter`. A check can stand alone.
 
 ## The `.mdc` file
 
@@ -30,7 +30,7 @@ Why: one sentence on why the team follows the rule.
 - `globs`: which files it applies to. Use structural globs only.
 - `alwaysApply`: `true` only for rules that apply to every request.
 - One bullet per atomic rule: one verifiable statement each.
-- A `Why:` line. Checks enforce the *what*; the prose keeps the *why*.
+- A `Why:` line for the guidance that a reviewer needs.
 - A rule adapted from another repo (through `integrate`) also carries its credit in the frontmatter: `license`, and `metadata.adapted-from`, `upstream-commit` (a 40-character sha) and `upstream-license`, the same keys as a skill. `mstack coverage` reports `credit` when they are incomplete, and `mstack render-rule` keeps the credit as the last lines of the installed rule.
 
 ## The `## Checks` section
@@ -49,7 +49,7 @@ A file may mix these when some bullets are checkable and others are judgment. A 
 
 ## `metadata.source` in the YAML
 
-Every ast-grep rule points back to its prose rule:
+An ast-grep check can link to related prose using `metadata.source`. Omit the link for a standalone check.
 
 ```yaml
 id: no-print-in-app
@@ -66,7 +66,7 @@ rule:
   pattern: print($$$ARGS)
 ```
 
-`mstack coverage` fails when `metadata.source` is missing or does not exist, or when that `.mdc` does not list the id in its Checks section.
+When an ast-grep check declares `metadata.source`, `mstack coverage` verifies that the file exists and lists the id in its Checks section.
 
 Path-matching facts (ast-grep 0.51): `files`/`ignores` globs match the path exactly as it was passed to `ast-grep scan`. Write them as `**/<folder>/**` so relative and absolute paths both match.
 

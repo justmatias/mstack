@@ -5,8 +5,6 @@ message: Move the fixture to the conftest.py next to this test module
 note: |
   A fixture in a test module cannot be shared, so the next test file that needs it
   copies it. conftest.py is where pytest looks for shared setup.
-metadata:
-  source: rules/pytest-fixtures.mdc
 files:
   - "**/test_*.py"
 rule:

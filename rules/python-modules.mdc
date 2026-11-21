@@ -6,15 +6,10 @@ alwaysApply: false
 
 # Python modules and imports
 
-- No module-level docstrings (the string before the imports). Class and function docstrings are fine where they add value.
-- No parent-relative imports (`from ..x import y`). Same-directory relative imports (`from .x import y`) are fine.
-- Inside a package, import from the package's `__init__.py` re-export (`from app.graph import Item`), not from the defining submodule (`from app.graph.models import Item`), including from code inside that same package. Import from the submodule only when the symbol is not re-exported.
-- When importing from the package root would create a cycle, import from the defining submodule instead. Never fix a cycle by reordering the imports in `__init__.py` or with `# isort: off`.
+- Prefer the public package re-export when a symbol is available there.
+- When a re-export introduces an import cycle, import directly from the defining submodule. Avoid relying on import order to mask a cycle.
 
-Why: re-exports keep import depth at two levels and match the public API. Reordering only changes initialization order, not the import graph, so the cycle stays and a formatter can silently re-sort the block and bring a partial-initialization `ImportError` back later. Importing from the defining submodule removes the cycle itself.
+Why: re-exports give callers a stable public API. Import order can hide a cycle until a formatter or another caller changes the order.
 
 ## Checks
-- enforced-by: no-module-docstring
-- enforced-by: no-parent-relative-import
-- enforced-by: no-isort-off
 - enforcement: llm-review

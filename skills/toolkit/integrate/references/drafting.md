@@ -30,7 +30,7 @@ For something written from the idea only (no license), use `metadata.inspired-by
 
 1. **One `.mdc` per topic**, named for it (`fixtures.mdc`, not `upstream-rules.mdc`), with a `description`, structural `globs` and `alwaysApply: false` unless it applies to every request.
 2. **Atomic bullets in your own words:** one verifiable statement each, with a `Why:` line. Never paste upstream wording, examples or code.
-3. **Checks:** every new or merged bullet is enforced through [sync](../../sync/SKILL.md), which picks the tool, writes the check, its fixtures and rule test, and proves it fails on a synthetic mistake. An upstream check may seed it, rewritten under the target's ids and `metadata.source`. Draft checks in `<tmp>/draft/lint/...`; run `sync` on the target only after approval.
+3. **Checks:** use [sync](../../sync/SKILL.md) to select enforcement. Use an existing linter when it covers the standard. For a new check, add cases and prove it fails on a synthetic mistake. An upstream check may seed it, rewritten under the target's ids and `metadata.source`. Draft checks in `<tmp>/draft/lint/...`; run `sync` on the target only after approval.
 4. No principles header in rules.
 
 ## Merge

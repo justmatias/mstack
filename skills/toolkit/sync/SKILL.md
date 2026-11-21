@@ -7,7 +7,7 @@ description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, 
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, even when the source is not; propose translations of non-English rules, never apply them unasked. (2) **Practices, not domain**: extract coding practices only, never business names, rules, values, URLs or verbatim repo code. Details: [references/principles.md](references/principles.md).
 
-Keep `.cursor/rules/` (prose, source of truth) and `lint-rules/` (checks) saying the same thing. Every checkable rule gets a check, every check points to its rule, and every judgment rule is marked as such.
+Keep `.cursor/rules/` focused on judgment guidance. Enforce checkable standards with existing linters or checks in `lint-rules/`. Remove prose a check already enforces. Checks can stand alone. Verify any links either side declares.
 
 The paths here are the defaults; a repo may move them in `.mstack.toml`. Run `mstack config` to see the configured `rules_dir` and `sgconfig` (default `lint-rules/sgconfig.yml`), and use those.
 
@@ -50,13 +50,14 @@ Run the mechanical part:
 mstack coverage --json
 ```
 
-It reports `missing-checks-section`, `unknown-check`, `unknown-hook` (an `enforced-by-hook:` id that `.pre-commit-config.yaml` does not configure), `orphan` (YAML without `metadata.source`), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
+It reports `missing-checks-section`, `unknown-check`, `unknown-hook` (an `enforced-by-hook:` id that `.pre-commit-config.yaml` does not configure), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
 
 | Category | Meaning |
 | --- | --- |
 | `new` | Checkable rule with no check |
 | `stale` | The rule changed and the check did not (or the check enforces something else) |
-| `orphan` | YAML or contract with no `.mdc` that lists it, or whose source is gone |
+| `broken-link` | A check declares a source that is missing or does not list it |
+| `duplicate` | Prose repeats behavior already enforced by a configured check |
 | `judgment-unmarked` | Judgment rule with no `enforcement: llm-review` |
 | `non-english` | The prose rule is not in English |
 | `outside-mdc` | Rule found only in `AGENTS.md`/`CLAUDE.md`/`.cursorrules`/copilot instructions |
@@ -74,12 +75,13 @@ In `--check` mode, print the table, write nothing, and fail if any row is not `o
 ## 6. Apply what was approved
 
 - `new`, `stale`: follow [authoring-a-check.md](references/authoring-a-check.md) end to end, including the synthetic invalid case and the severity decision.
-- `orphan`: propose writing the rule in prose in the matching `.mdc` (reverse sync: YAML → `.cursor/rules`), or deleting the check. Do whichever was approved.
+- `broken-link`: repair a link that connects distinct guidance to a check. Otherwise remove the link and keep the standalone check.
+- `duplicate`: remove the repeated prose. Use the existing linter when it covers the standard.
 - `judgment-unmarked`: add `- enforcement: llm-review` to its Checks section.
 - `non-english`: propose an English translation that keeps the meaning; apply it only if approved. Generated checks are in English either way.
 - `outside-mdc`: propose moving or copying the rule into `.cursor/rules/`, so there is one source of truth.
 
-One commit per synced rule (YAML, tests and `.mdc` together), with a Conventional Commits message such as `feat(rules): add no-print-in-app check`.
+One commit per synced rule (include its check and tests when they change), with a Conventional Commits message such as `feat(rules): add no-print-in-app check`.
 
 ## 7. Verify
 

@@ -1,10 +1,3 @@
-"""`mstack lint`: run every check in order, in any repo.
-
-The steps are the same flow `make lint-rules` ran: the ast-grep rule tests, the
-ast-grep scan, import-linter, and the coverage, exceptions and domain-check guards.
-Every step runs even after one fails, so a single run shows every problem.
-"""
-
 import argparse
 import contextlib
 import io
@@ -218,7 +211,7 @@ def run_guard(main: Callable[[list[str]], int]) -> StepResult:
 
 def step_coverage(run: LintRun) -> StepResult:
     rules_dir = run.config.values.rules_dir
-    if not rules_dir.is_dir():
+    if not rules_dir.is_dir() and not run.config.values.sgconfig.is_file():
         return StepResult(ok=True, skipped=f"no rules folder at {rules_dir}")
     return run_guard(check_rule_coverage.main)
 

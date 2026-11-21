@@ -3,6 +3,12 @@ from pathlib import Path
 
 import pytest
 
+from tests.mstack.guards.conftest import (
+    coverage_arguments,
+    coverage_issues,
+    credit_rule,
+)
+
 
 def test_repository_rules_are_covered(run_mstack):
     completed = run_mstack("coverage")
@@ -10,15 +16,30 @@ def test_repository_rules_are_covered(run_mstack):
     assert completed.returncode == 0, completed.stderr
 
 
-@pytest.mark.usefixtures("_delete_enforced_by_line")
-def test_deleting_enforced_by_line_fails(run_mstack, rules_sandbox: Path):
+def test_coverage_passes_when_a_check_has_no_prose_source(
+    run_mstack, rules_sandbox: Path
+):
+    (rules_sandbox / "lint" / "rules" / "no-placeholder.yml").write_text(
+        "id: no-placeholder\nlanguage: Python\nrule:\n  kind: pass_statement\n",
+        encoding="utf-8",
+    )
+
+    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+
+    assert completed.returncode == 0, completed.stdout
+
+
+@pytest.mark.usefixtures("_add_unlisted_check")
+def test_coverage_fails_when_the_source_does_not_list_the_check(
+    run_mstack, rules_sandbox: Path
+):
     completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert completed.returncode == 1
     assert [
         (issue["kind"], issue["check"])
         for issue in json.loads(completed.stdout)["issues"]
-    ] == [("unlisted-check", "no-swallowed-exception")]
+    ] == [("unlisted-check", "no-linked-placeholder")]
 
 
 @pytest.mark.usefixtures("_delete_checks_section")
@@ -39,20 +60,12 @@ def test_unknown_check_fails(run_mstack, rules_sandbox: Path):
     ]
 
 
-@pytest.mark.usefixtures("_point_rule_to_missing_source")
+@pytest.mark.usefixtures("_add_check_with_missing_source")
 def test_missing_source_fails(run_mstack, rules_sandbox: Path):
     completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert [issue["kind"] for issue in json.loads(completed.stdout)["issues"]] == [
         "missing-source"
-    ]
-
-
-def coverage_issues(run_mstack, rules_sandbox: Path) -> tuple[int, list[tuple]]:
-    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
-    issues = json.loads(completed.stdout)["issues"]
-    return completed.returncode, [
-        (issue["kind"], issue.get("check")) for issue in issues
     ]
 
 
@@ -67,12 +80,12 @@ def test_configured_hook_counts_as_check(
     completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
 
     assert completed.returncode == 0, completed.stdout
-    error_handling_rule = next(
+    naming_rule = next(
         rule
         for rule in json.loads(completed.stdout)["rules"]
-        if rule["mdc"].endswith("error-handling.mdc")
+        if rule["mdc"].endswith("naming.mdc")
     )
-    assert error_handling_rule["hooks"] == [hook_id]
+    assert naming_rule["hooks"] == [hook_id]
 
 
 def test_unknown_hook_fails(run_mstack, rules_sandbox: Path, add_hook_line):
@@ -100,37 +113,6 @@ def test_missing_pre_commit_config_makes_every_hook_unknown(
 @pytest.mark.usefixtures("_only_hook_in_checks_section")
 def test_checks_section_with_only_hooks_is_not_missing(run_mstack, rules_sandbox: Path):
     assert coverage_issues(run_mstack, rules_sandbox) == (0, [])
-
-
-@pytest.fixture
-def import_linter_layout(tmp_path: Path) -> Path:
-    (tmp_path / ".git").mkdir()
-    (tmp_path / "rules").mkdir()
-    (tmp_path / "rules" / "layers.mdc").write_text(
-        "# Layers\n\n- The core does not import adapters.\n\n"
-        "## Checks\n- enforced-by: core-is-pure\n",
-        encoding="utf-8",
-    )
-    (tmp_path / "sgconfig.yml").write_text("ruleDirs: []\n", encoding="utf-8")
-    (tmp_path / ".importlinter").write_text(
-        "[importlinter]\nroot_package = app\n\n"
-        "[importlinter:contract:core-is-pure]\nname = core-is-pure\n"
-        "type = forbidden\nsource_modules = app.core\nforbidden_modules = app.adapters\n",
-        encoding="utf-8",
-    )
-    return tmp_path
-
-
-def coverage_arguments(layout: Path) -> list[str]:
-    return [
-        "--rules-dir",
-        str(layout / "rules"),
-        "--config",
-        str(layout / "sgconfig.yml"),
-        "--importlinter",
-        str(layout / ".importlinter"),
-        "--json",
-    ]
 
 
 def test_import_linter_contract_counts_as_check(run_mstack, import_linter_layout: Path):
@@ -162,11 +144,6 @@ def test_removed_import_linter_contract_is_unknown_check(
         (issue["kind"], issue["check"])
         for issue in json.loads(completed.stdout)["issues"]
     ] == [("unknown-check", "core-is-pure")]
-
-
-def credit_rule(rules_sandbox: Path, credit: str) -> None:
-    mdc = rules_sandbox / "rules" / "naming.mdc"
-    mdc.write_text(mdc.read_text().replace("---\n", f"---\n{credit}", 1))
 
 
 def test_complete_rule_credit_passes(run_mstack, rules_sandbox: Path):

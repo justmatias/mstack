@@ -5,8 +5,6 @@ message: Name the exception type you expect (except ValueError:) instead of a ba
 note: |
   A bare except also catches KeyboardInterrupt and SystemExit,
   and hides bugs that should propagate.
-metadata:
-  source: rules/error-handling.mdc
 rule:
   kind: except_clause
   not:

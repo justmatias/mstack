@@ -40,7 +40,7 @@ Group the mistakes into classes. A class counts once it has happened twice.
 3. **Test the behavior.** Fix or delete any test that still passes when the behavior it checks breaks, or that fails when only the internals change.
 4. **Write docs or agent rules last, for judgment calls and for classes too costly to check statically.** Nothing fails when an agent skips them: mark them `enforcement: llm-review`, and the PR reviewer comments on them.
 
-**Always leave a prose trail, at every level.** Even when the fix is architectural or a lint, create or update the `.mdc` in `.cursor/rules/` with the "why" and its `## Checks` section. The written rule stays as source of truth and index; once a check covers it, shorten it rather than deleting it. (This differs from pstack's `correct`, which drops the rule once its mistake can't happen.)
+Keep the fix and its rationale with the enforcement. When a check covers a prose rule, remove the repeated guidance and keep any judgment the check leaves to review.
 
 ## Fix and prove
 

@@ -5,8 +5,6 @@ message: Keep only top-level test_ functions here; move classes and helpers to c
 note: |
   Plain test functions need no class boilerplate, and setup in conftest.py keeps
   each test reading as "given these objects, assert this".
-metadata:
-  source: rules/testing.mdc
 files:
   - "**/test_*.py"
 rule:

@@ -5,8 +5,6 @@ message: Apply an action fixture with @pytest.mark.usefixtures("_name"), not as 
 note: |
   An underscore fixture only acts. Taking it as a parameter leaves an unused
   argument; usefixtures shows at the call site that it is there for its side effect.
-metadata:
-  source: rules/pytest-fixtures.mdc
 files:
   - "**/test_*.py"
 rule:
