@@ -1,0 +1,21 @@
+---
+description: How to structure and test an MCP server
+globs: "**/mcp/**/*.py"
+alwaysApply: false
+---
+
+# MCP servers
+
+- Build the server as a `<pkg>/mcp/` subpackage: `app.py` constructs the server and registers every tool eagerly at import time with a module-level loop over `add_tool`, `tools/<tool_name>.py` holds one plain function per tool, `tools/__init__.py` aggregates them into a `TOOLS` list, and `__init__.py` re-exports the run function and the tools.
+- Check the installed SDK's `add_tool` signature before writing the call: the official `mcp` package takes the function positionally and the third-party `fastmcp` package takes `tool=` as a keyword.
+- The blocking entrypoint is a tiny separate function (`def run_mcp_server(): mcp.run()`) marked `# pragma: no cover`, and the CLI's `serve` command calls it directly.
+- A tool is a thin wrapper over the function the CLI already calls. Never reimplement business logic in the MCP layer.
+- A tool that changes state takes `confirm: bool = False`. When `False` it returns a preview of what would happen and changes nothing; it acts only when called again with `confirm=True`.
+- Test tools by calling the plain functions directly, and write those tests first. For a protocol-level test, drive a real `ClientSession` in-process with `mcp.shared.memory.create_connected_server_and_client_session`; never spawn a subprocess.
+
+Why: undecorated functions and eager registration make every tool testable without MCP machinery or a blocking server, and a `confirm` preview keeps a human in the loop before a destructive action.
+
+## Checks
+- enforced-by: no-mcp-tool-decorator
+- enforced-by: no-lazy-mcp-tool-registration
+- enforcement: llm-review

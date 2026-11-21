@@ -1,0 +1,16 @@
+id: no-lazy-mcp-tool-registration
+language: Python
+severity: error
+message: Register MCP tools at module level in mcp/app.py, not inside a function
+note: |
+  Eager registration lets tests import the server object and see every tool without
+  calling the blocking run function.
+metadata:
+  source: rules/mcp-servers.mdc
+files:
+  - "**/mcp/**"
+rule:
+  pattern: $SERVER.add_tool($$$)
+  inside:
+    kind: function_definition
+    stopBy: end

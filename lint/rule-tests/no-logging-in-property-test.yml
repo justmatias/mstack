@@ -1,0 +1,30 @@
+id: no-logging-in-property
+valid:
+  - |
+    class Foo:
+        @property
+        def name(self) -> str:
+            return self._name
+
+        def rename(self, name: str) -> None:
+            logger.info("Renamed %s to %s", self._name, name)
+            self._name = name
+  # Near miss: a property that reads an error from another object.
+  - |
+    class Foo:
+        @property
+        def last_error(self):
+            return self.result.error()
+invalid:
+  - |
+    class Foo:
+        @property
+        def name(self) -> str:
+            logger.debug("Reading the name")
+            return self._name
+  - |
+    class Foo:
+        @property
+        def items(self):
+            self.logger.info("Listing %d items", len(self._items))
+            return list(self._items)

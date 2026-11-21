@@ -1,0 +1,24 @@
+id: no-logging-in-property
+language: Python
+severity: error
+message: Do not log inside a property; log the operation that changes the state instead
+note: |
+  A property is a read. Logging it fires on every access and buries the messages
+  that explain what changed.
+metadata:
+  source: rules/logging.mdc
+rule:
+  pattern: $LOGGER.$LEVEL($$$)
+  inside:
+    kind: function_definition
+    stopBy: end
+    inside:
+      kind: decorated_definition
+      has:
+        kind: decorator
+        pattern: "@property"
+constraints:
+  LOGGER:
+    regex: "(?i)^(log|logger|logging|_log|_logger|self\\.(_)?log(ger)?)$"
+  LEVEL:
+    regex: "^(debug|info|warning|warn|error|exception|critical|log)$"

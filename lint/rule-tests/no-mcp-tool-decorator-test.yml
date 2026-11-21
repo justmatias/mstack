@@ -1,0 +1,18 @@
+id: no-mcp-tool-decorator
+valid:
+  - |
+    def list_items(limit: int = 10) -> list[str]:
+        return do_work(limit)
+  - |
+    @functools.cache
+    def load_settings():
+        return Settings()
+invalid:
+  - |
+    @mcp.tool()
+    def list_items(limit: int = 10) -> list[str]:
+        return do_work(limit)
+  - |
+    @server.tool
+    def list_items() -> list[str]:
+        return do_work()

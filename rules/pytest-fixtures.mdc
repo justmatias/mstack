@@ -1,0 +1,21 @@
+---
+description: Where pytest fixtures live, how they are named and when to use them
+globs: "**/tests/**/*.py, **/test_*.py, **/conftest.py"
+alwaysApply: false
+---
+
+# Pytest fixtures
+
+- Define every `@pytest.fixture` in `conftest.py`, never in a `test_*.py` file, even when only one test file uses it. When adding tests for a new package, create the matching `conftest.py` next to them.
+- Setup repeated across two or more tests (path construction, file writes, mock setup, object construction) becomes a fixture.
+- A fixture whose value the test uses is a normal parameter named for the value (`settings_file`). A fixture that only acts (monkeypatching, writing a file, seeding state) has a leading underscore and a verb-phrase name (`_write_settings_file`) and is applied with `@pytest.mark.usefixtures("_name")`, never as a parameter.
+- Never name an action fixture after the object it touches: a noun reads like a value the test receives. When some tests need only the side effect and others the value, split it in two: an underscore fixture does the work and a noun fixture depends on it and returns the value.
+- Do not wrap a factory in a fixture that returns it unchanged. Define one fixture per concrete instance a test needs, named for what it represents. Keep a factory-callable fixture only when tests call it with different arguments each time.
+- When a parameter exists only to force fixture creation order and pylint reports `unused-argument`, disable it on that parameter with a comment saying why. Never rename it with a leading underscore: pytest matches fixtures by parameter name. When it provides a side effect and no ordering, use `usefixtures` instead.
+
+Why: tests stay terse when construction lives in fixtures, and a fixture next to its test invites a copy as soon as a second file needs it. `usefixtures("_do_thing")` shows at the call site that the fixture is there for its side effect only.
+
+## Checks
+- enforced-by: no-fixture-in-test-module
+- enforced-by: no-underscore-fixture-parameter
+- enforcement: llm-review

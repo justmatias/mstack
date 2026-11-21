@@ -1,0 +1,17 @@
+---
+description: What to log when a logger is available
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Logging
+
+- When a logger is available in the module or project, log state-changing operations, side effects and one-time surprising behavior (generating a config file, a rollback restoring or deleting files), by default and without being asked.
+- Do not log pure reads: getters, accessors and properties.
+- Log only what is worth explaining after the fact. Skip messages with no diagnostic value.
+
+Why: a configured logger that nothing calls gives no value, and logging has to be consistent across the codebase, not added only on request.
+
+## Checks
+- enforced-by: no-logging-in-property
+- enforcement: llm-review

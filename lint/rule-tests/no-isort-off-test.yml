@@ -1,0 +1,15 @@
+id: no-isort-off
+valid:
+  - |
+    from app.core.models import Item  # the root re-export would be a cycle
+  - |
+    # isort-style ordering: standard library first
+    import os
+invalid:
+  - |
+    # isort: off
+    from app.core import Item
+    from app import do_work
+    # isort: on
+  - |
+    import app.core  # isort:off

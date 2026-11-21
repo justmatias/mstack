@@ -1,0 +1,28 @@
+id: no-module-docstring
+valid:
+  - |
+    import os
+
+
+    def load():
+        """Load the settings from the environment."""
+        return os.environ
+  - |
+    class Foo:
+        """A docstring on a class is fine."""
+  # Near miss: a string statement that is not the first one.
+  - |
+    import os
+
+    "not a docstring"
+invalid:
+  - |
+    """Helpers to load the settings."""
+
+    import os
+  - |
+    #!/usr/bin/env python
+    # A comment before the docstring does not hide it.
+    """Run the tool."""
+
+    import sys
