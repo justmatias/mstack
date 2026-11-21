@@ -4,7 +4,7 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack import config, doctor, init, lint, platform, render
+from mstack import cleanup, config, doctor, init, lint, platform, render
 from mstack.guards import (
     check_commit_msg,
     check_domain,
@@ -16,6 +16,7 @@ from mstack.guards import (
 logger = logging.getLogger(__name__)
 
 COMMANDS: dict[str, Callable[[list[str]], int]] = {
+    "cleanup": cleanup.main,
     "commit-msg": check_commit_msg.main,
     "config": config.main,
     "coverage": check_rule_coverage.main,

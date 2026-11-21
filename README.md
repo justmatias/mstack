@@ -89,6 +89,8 @@ Skills live in five groups, which setup flattens on install:
 
 **3. Verify.** `mstack doctor` checks the tools, CLI, checkout, and installed skills and rules for the selected tools. Use `mstack doctor --tool codex` for Codex alone or a comma-separated list for a mix. It prints the fix for each problem and exits 1 on any error. Run `/repair` (`$repair` in Codex) to apply fixes. `--online` also compares with the latest release.
 
+Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup --apply` to prune them. Cleanup keeps the newest batch in each location and only prunes other batches older than 30 days.
+
 **4. Update.** `git pull` in the checkout, then run the setup again. Copies that only mstack changed update with a backup; it asks before touching your own edits.
 
 ## Use the checks in another repo

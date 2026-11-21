@@ -9,6 +9,7 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
 | `mstack init` | `init.py`, `templates/` | Scaffolds the rules-as-checks layout in a repo (see below). |
 | `mstack doctor [--tool TOOLS] [--checkout DIR] [--online] [--json]` | `doctor/` | Checks that this machine is set up (see below). |
+| `mstack cleanup [--apply] [--checkout DIR]` | `cleanup.py` | Previews old backup batches and their sizes. `--apply` deletes eligible batches. |
 | `mstack platform [--json]` | `platform.py` | Prints the detected platform (`linux`, `macos`, `windows` or `wsl`) and each tool's user folder. On WSL, Cursor's is the Windows profile's `.cursor`, found with `cmd.exe` and `wslpath`; `MSTACK_WINDOWS_HOME` overrides it and `MSTACK_PLATFORM` overrides the detection. `mstack doctor` uses the same folders, so on WSL with both tools skills and agents get a copy in each home. |
 | `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and every ast-grep rule or import-linter contract points back to an `.mdc` that lists it. An `.mdc` with an upstream credit in its frontmatter must have it complete (`credit`, the same keys as a skill's). `--json` lists each rule's `checks` and `hooks`. |
 | `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
@@ -32,6 +33,15 @@ The `mstack` command: `mstack lint` and the guards that `make lint-rules` and th
 | `english` | mstack | a non-ASCII letter outside code and double-quoted examples (warning) |
 
 Use `--profile generic` for skills that aren't mstack's, such as a user's `~/.claude/skills/`.
+
+### `mstack cleanup`
+
+Running `mstack cleanup` lists timestamped batches under known user and uv tool
+`.mstack-backups` directories, with their sizes in bytes. It keeps the newest
+batch in each directory and only lists other batches older than 30 days.
+Run `mstack cleanup --apply` to recalculate the list and delete those batches.
+Add `--checkout DIR` to include that project's configured rules folder,
+`skills/`, and the immediate skill groups.
 
 ### `mstack lint`
 
