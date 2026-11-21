@@ -37,7 +37,7 @@ Rules about *how* to test still apply: follow the ones that name the correct com
 1. **Finish the change.** Complete the goal with the smallest change that works, and fix the case that happened, not every case that could. If you are on the default branch, create a branch first. If the goal is a ticket reference, fetch it from the issue tracker and state its title before starting; ask when the reference is ambiguous. While working, run the typecheck regularly and single test files often, and the full suite once at the end. When the change works and its code is heavier than it needs to be, run [declutter](../declutter/SKILL.md) on the changed code before step 2.
 2. **Prove it.** Get proof for every change you made (see "Proof").
 3. **Get feedback.** Run [review-loop](../review-loop/SKILL.md) on the change.
-4. **Open the PR** with [open-pull-request](../open-pull-request/SKILL.md), after rebasing onto the latest default branch. Add one short line to the description saying how you proved the change.
+4. **Open the PR** with [open-pr](../open-pr/SKILL.md), after rebasing onto the latest default branch. Add one short line to the description saying how you proved the change.
 5. **Babysit it** with [babysit-pr](../babysit-pr/SKILL.md). Fix real findings and CI failures, and get proof for each fix before you push it.
 6. **Merge** when the merge gate passes.
 7. **Report** in the final message: the PR link, the merge commit, your proof, and each decision you made for the user.
