@@ -50,7 +50,7 @@ Skills live in five groups, which setup flattens on install:
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
 | `engineering/` | `review`, `declutter`, `no-comments`, `modernize` |
 | `shipping/` | `open-pull-request`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop` |
-| `learning/` | `how`, `why`, `teach` |
+| `learning/` | `how`, `why`, `teach`, `show-me` |
 | `productivity/` | `bro`, `unslop`, `sharpen`, `recall` |
 
 | Skill | Use it to |
@@ -72,6 +72,7 @@ Skills live in five groups, which setup flattens on install:
 | `how` | Explain how a part of the codebase works, from one read-only subagent, so you can change it with a clear mental model. |
 | `why` | Answer why code is the way it is from its commits and PR discussions, citing what the authors wrote and marking inferences. |
 | `teach` | Explain a change or subsystem plainly in one account, built on `how` and `why`. |
+| `show-me` | Show the current topic visually: pseudocode, call or file trees, Mermaid, diffs, or one focused HTML page. |
 | `unslop` | Cut AI tells from any writing, by numbered rules. |
 | `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
 | `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
