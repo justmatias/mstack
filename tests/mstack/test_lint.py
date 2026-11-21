@@ -1,10 +1,7 @@
-import json
 import shutil
 import sys
 import sysconfig
 from pathlib import Path
-
-import pytest
 
 from mstack.lint import STEPS, find_tool
 from tests.conftest import REPOSITORY_ROOT
@@ -14,41 +11,6 @@ INVALID = REPOSITORY_ROOT / "fixtures" / "invalid"
 BARE_EXCEPT = INVALID / "error-handling" / "bare_except.py"
 # no-manual-init-boilerplate is a warning: the full scan tolerates it.
 MANUAL_INIT = INVALID / "python-models" / "manual_init.py"
-
-
-@pytest.fixture
-def run_lint(run_mstack, lint_sandbox: Path):
-    def run(*arguments: str) -> tuple[int, dict]:
-        completed = run_mstack(
-            "lint", "--json", *arguments, working_directory=lint_sandbox
-        )
-        return completed.returncode, json.loads(completed.stdout)
-
-    return run
-
-
-@pytest.fixture
-def import_contract(lint_sandbox: Path):
-    """A package whose core imports its adapters, and a contract forbidding it."""
-
-    def write(core_imports_adapters: bool) -> None:
-        package = lint_sandbox / "app"
-        (package / "core").mkdir(parents=True)
-        (package / "adapters").mkdir()
-        for init in (package, package / "core", package / "adapters"):
-            (init / "__init__.py").write_text("", encoding="utf-8")
-        source = "from app.adapters import store\n" if core_imports_adapters else ""
-        (package / "core" / "logic.py").write_text(source, encoding="utf-8")
-        (package / "adapters" / "store.py").write_text("", encoding="utf-8")
-        (lint_sandbox / ".importlinter").write_text(
-            "[importlinter]\nroot_package = app\n\n"
-            "[importlinter:contract:core-is-pure]\nname = core-is-pure\n"
-            "type = forbidden\nsource_modules = app.core\n"
-            "forbidden_modules = app.adapters\n",
-            encoding="utf-8",
-        )
-
-    return write
 
 
 def test_clean_repository_passes(run_lint):
@@ -160,13 +122,31 @@ def test_imports_fails_when_the_contract_is_broken(run_lint, import_contract):
 
 
 def test_coverage_failure_is_reported_with_its_findings(run_lint, lint_sandbox: Path):
-    mdc = lint_sandbox / "rules" / "error-handling.mdc"
+    mdc = lint_sandbox / "rules" / "naming.mdc"
     mdc.write_text(mdc.read_text() + "- enforced-by: no-such-check\n")
 
     exit_code, report = run_lint("--only", "coverage")
 
     assert exit_code == 1
     assert any("unknown-check" in finding for finding in report["coverage"]["findings"])
+
+
+def test_lint_reports_a_missing_source_when_the_prose_folder_is_absent(
+    run_lint, lint_sandbox: Path
+):
+    shutil.rmtree(lint_sandbox / "rules")
+    (lint_sandbox / "lint" / "rules" / "no-linked-placeholder.yml").write_text(
+        "id: no-linked-placeholder\nlanguage: Python\n"
+        "metadata:\n  source: rules/missing.mdc\nrule:\n  kind: pass_statement\n",
+        encoding="utf-8",
+    )
+
+    exit_code, report = run_lint("--only", "coverage")
+
+    assert exit_code == 1
+    assert any(
+        "missing-source" in finding for finding in report["coverage"]["findings"]
+    )
 
 
 def test_base_ref_needs_changed(run_mstack, lint_sandbox: Path):

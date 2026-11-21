@@ -10,7 +10,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 
 | Folder | What it is |
 | --- | --- |
-| `rules/` | Conventions in prose (`.mdc`), the source of truth agents read before writing code. |
+| `rules/` | Guidance in prose (`.mdc`) for decisions automated checks leave open. |
 | `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
 | `agents/` | Subagent definitions. |
@@ -100,7 +100,7 @@ Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: v5.3.0   # pin a full release tag (or a commit sha), never a branch
+    rev: v5.4.0   # pin a full release tag (or a commit sha), never a branch
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
@@ -149,10 +149,10 @@ make demo                 # scans fixtures/invalid/, which must fail
 
 `mstack lint` runs the same steps in any repo, with the ast-grep and import-linter that ship with the CLI.
 
-Each rule ends with a `## Checks` section naming its checks, and each check points back to its rule through `metadata.source`. `make lint-rules` fails when:
+Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `make lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
-- a rule and its checks don't point to each other (`mstack coverage`);
+- a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
 - an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
 
   ```python

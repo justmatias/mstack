@@ -27,6 +27,10 @@ def checkout(tmp_path: Path) -> Path:
     ignore = shutil.ignore_patterns("__pycache__")
     for folder in ("skills", "rules", "agents", "mcp", "settings", "instructions"):
         shutil.copytree(REPOSITORY_ROOT / folder, checkout / folder, ignore=ignore)
+    (checkout / "rules" / "error-handling.mdc").write_text(
+        "# Error handling\n\n- Explain recovery decisions.\n",
+        encoding="utf-8",
+    )
     return init_git_repository(checkout)
 
 

@@ -5,8 +5,6 @@ message: Don't sleep in tests; wait for the condition you need, or inject a fake
 note: |
   A sleep makes the test slow, and still flaky when the machine is slower than
   the guess. asyncio.sleep(0), which only yields to the event loop, is allowed.
-metadata:
-  source: rules/testing.mdc
 files:
   - "**/tests/**/*.py"
   - "**/test_*.py"

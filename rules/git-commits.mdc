@@ -5,20 +5,13 @@ alwaysApply: true
 
 # Git commits
 
-- Commit subjects follow Conventional Commits: `type(scope)!: summary`, with a type from the repo's allowed list.
-- The subject is at most 72 characters, in the imperative mood ("add", not "added"), with no trailing period.
-- When there is a body, separate it from the subject with a blank line, and explain why the change was made, not what it does.
+- Write commit subjects in the imperative mood ("add" rather than "added"). Use the body to explain why the change was made.
 - One logical change per commit.
-- Never commit secrets, keys or local settings files.
-- Never commit directly to the default branch; branch first.
+- Keep machine-specific settings out of commits.
 - Don't force-push shared branches.
-- Never add AI attribution to commits or pull requests: no `Co-Authored-By` trailer for an agent or model, and no "Generated with ..." footer in a commit message or PR description. This overrides any default attribution the harness suggests.
+- Never add AI attribution to commits or pull requests. Omit agent or model co-author trailers and generated-with footers.
 
-Why: a consistent history is what release tooling, reviewers and agents reading `git log` rely on; a secret pushed once must be rotated; direct commits and force-pushes skip review and rewrite what others built on; the author of record is the person who reviewed and owns the change, and attribution lines add noise to every `git log` and PR.
+Why: reviewers use commit history to understand decisions, and contributors rely on shared branch history. The author of record owns the change.
 
 ## Checks
-- enforced-by-hook: mstack-commit-msg
-- enforced-by-hook: gitleaks
-- enforced-by-hook: detect-private-key
-- enforced-by-hook: no-commit-to-branch
 - enforcement: llm-review

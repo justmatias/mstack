@@ -5,8 +5,6 @@ message: Say why the test is skipped (reason="..."), so it can be revisited
 note: |
   An unexplained skip or xfail is never revisited, and the test it hides stops
   protecting anything.
-metadata:
-  source: rules/testing.mdc
 rule:
   any:
     # @pytest.mark.skip and @pytest.mark.xfail without arguments.

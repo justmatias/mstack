@@ -39,7 +39,7 @@ Only for rules that passed step 0. Try them in this order and stop at the first 
 | Fixit (LibCST, Python) | Logic a pattern cannot express, only after the user chose it in step 0 | an `__init__` that only assigns `self.x = x` across a whole class |
 | none: `enforcement: llm-review` | Judgment | descriptive names, single-purpose functions |
 
-A hook goes in `.pre-commit-config.yaml` pinned to a full tag or sha (in the mstack repo, `hookpin` checks the pins); write `- enforced-by-hook: <hook id>` in the Checks section, and skip steps 2 to 6.
+Use the existing hook when it covers the standard. Keep it pinned to a full tag or SHA in `.pre-commit-config.yaml` and skip steps 2 to 6.
 
 If no tool fits, or the check grows past what step 0 allows, the rule is judgment: mark it `enforcement: llm-review` and stop. Do not force a pattern at the cost of false positives; a narrower check shipped as `warning` is better than a broad one that people learn to ignore.
 
@@ -47,7 +47,7 @@ If no tool fits, or the check grows past what step 0 allows, the rule is judgmen
 
 `lint-rules/rules/<id>.yml`, one rule per file, `id` in kebab-case and equal to the file name:
 
-- `id`, `language`, `severity`, `message` (what to use instead), `note` (why), `metadata.source` (the `.mdc` path from the repo root), and `files`/`ignores` only with structural globs (`"**/domain/**"`).
+- `id`, `language`, `severity`, `message` (what to use instead), `note` (why), optional `metadata.source` (the path to related prose from the repo root), and `files`/`ignores` only with structural globs (`"**/domain/**"`).
 - Find node names with `ast-grep run -l <language> -p '<snippet>' --debug-query=ast`. Python facts: a bare `except:` is an `except_clause` with no `value` field; `kind` does not take a regex; a pattern such as `self.$A = $A` matches the `assignment` node, not its `expression_statement`. Bash facts (`language: Bash`): a call is a `command` whose `name` field is the program (`has: {field: name, regex: "^eval$"}`); `$(...)` and backticks are both `command_substitution` (tell them apart with `regex: "^\`"`); a script's top-level commands are direct children of `program`.
 - Quote a YAML string that contains `: ` or starts with a backtick.
 - The pattern never names a domain identifier. Match the construct (`print($$$ARGS)`), not a business class.
@@ -101,7 +101,7 @@ Never ship as `error` a rule that would break `main` on the next CI run.
 
 ## 7. Update the Checks section
 
-Add `- enforced-by: <id>` to the `.mdc` named in `metadata.source`. If the rule changed meaning, update or delete the old YAML instead of adding a second one.
+If the check declares `metadata.source`, add `- enforced-by: <id>` to that `.mdc`. Put advice about fixing the check in its message and rationale in its note. If the rule changed meaning, update or delete the old YAML instead of adding a second one.
 
 ## 8. Verify what you generated
 
@@ -121,7 +121,7 @@ make demo               # only in repos that have fixtures/invalid/
 
 A repo with `make lint-rules` targets may call them instead; they run the same command.
 
-Commit the YAML, its tests and the `.mdc` together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
+Commit the check, its tests and any changed prose together, one commit per rule, with a Conventional Commits message (`feat(rules): add <id> check`).
 
 ## Adopting in a repo with no `lint-rules/`
 

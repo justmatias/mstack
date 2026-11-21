@@ -6,10 +6,9 @@ alwaysApply: false
 
 # Python data models
 
-- Prefer `pydantic.BaseModel` subclasses for data models. Use `@dataclass` when it is actually required (e.g. a hot path where validation cost matters, or a library that expects a dataclass).
-- Do not write classes whose `__init__` only copies its arguments onto `self` (`self.name = name`). Declare the fields on a `BaseModel` (or a `@dataclass` when required) instead.
+- Prefer `pydantic.BaseModel` for data models. Use a dataclass where a library requires one or validation cost matters on a hot path.
 
-Why: Pydantic gives models the same validation, serialization and error messages, and removes constructor boilerplate that drifts out of sync with the fields. Dataclasses remain a valid tool where Pydantic does not fit, so they are not banned.
+Why: Pydantic gives models consistent validation, serialization, and errors.
 
 ## Checks
-- enforced-by: no-manual-init-boilerplate
+- enforcement: llm-review

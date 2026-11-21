@@ -189,31 +189,24 @@ def check_source_issues(
 ) -> list[dict]:
     issues: list[dict] = []
     for check_id, rule in sorted(ast_grep_rules.items()):
-        rule_file = display(rule["path"], root)
-        if not rule["source"]:
-            issues.append({
-                "kind": "orphan",
-                "file": rule_file,
-                "check": check_id,
-                "detail": "the YAML has no metadata.source",
-            })
+        source = rule["source"]
+        if source is None:
             continue
-        source_path = resolve_source(rule["source"], root)
-        if not source_path.is_file():
+        rule_file = display(rule["path"], root)
+        source_path = resolve_source(source, root) if isinstance(source, str) else None
+        if source_path is None or not source_path.is_file():
             issues.append({
                 "kind": "missing-source",
                 "file": rule_file,
                 "check": check_id,
-                "detail": f"metadata.source '{rule['source']}' does not exist",
+                "detail": f"metadata.source {source!r} must point to an existing prose rule",
             })
         elif check_id not in listed_by_mdc.get(source_path.resolve(), set()):
             issues.append({
                 "kind": "unlisted-check",
                 "file": rule_file,
                 "check": check_id,
-                "detail": (
-                    f"'{rule['source']}' does not list 'enforced-by: {check_id}'"
-                ),
+                "detail": (f"{source!r} does not list 'enforced-by: {check_id}'"),
             })
     return issues
 
@@ -238,7 +231,7 @@ def compute_drift(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="mstack coverage",
-        description="Check that every prose rule and every check point to each other.",
+        description="Validate check references in prose and any declared ast-grep source links.",
     )
     parser.add_argument(
         "--rules-dir", type=Path, help="Prose rules folder (default: from config)."

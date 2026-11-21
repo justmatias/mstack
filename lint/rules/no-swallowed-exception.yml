@@ -5,8 +5,6 @@ message: "Handle, log or re-raise the exception instead of `except Exception: pa
 note: |
   A swallowed exception hides the failure until it surfaces far
   from its cause.
-metadata:
-  source: rules/error-handling.mdc
 rule:
   kind: except_clause
   all:

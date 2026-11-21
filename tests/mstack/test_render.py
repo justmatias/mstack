@@ -8,22 +8,10 @@ from tests.conftest import REPOSITORY_ROOT
 RULE_FILES = sorted((REPOSITORY_ROOT / "rules").glob("*.mdc"))
 
 
-def expected_rendering(mdc_text: str) -> str:
-    """The conversion setup-mstack step 3 describes, written independently."""
-    _, frontmatter, body = mdc_text.split("---\n", 2)
-    globs_line = next(
-        (line for line in frontmatter.splitlines() if line.startswith("globs:")),
-        None,
-    )
-    body = body.split("## Checks")[0].strip()
-    if globs_line is None:
-        return f"{body}\n"
-    globs = globs_line.removeprefix("globs:").strip().strip('"')
-    return f"Applies to files matching `{globs}`.\n\n{body}\n"
-
-
 @pytest.mark.parametrize("mdc", RULE_FILES, ids=[path.stem for path in RULE_FILES])
-def test_every_repository_rule_renders_as_the_skill_describes(mdc: Path):
+def test_every_repository_rule_renders_as_the_skill_describes(
+    mdc: Path, expected_rendering
+):
     text = mdc.read_text()
 
     rendered = render_rule(text)

@@ -10,7 +10,7 @@ The paths below are the defaults. A repo can put its rules and checks elsewhere 
 
 | Source | Environment | Notes |
 | --- | --- | --- |
-| `.cursor/rules/**/*.mdc` (the configured `rules_dir`) | Cursor | **Source of truth.** Frontmatter `description`, `globs`, `alwaysApply`. |
+| `.cursor/rules/**/*.mdc` (the configured `rules_dir`) | Cursor | Guidance for review. Frontmatter `description`, `globs`, `alwaysApply`. |
 | `.cursorrules` | Cursor (legacy) | One flat file. Propose moving its rules into `.mdc` files. |
 | `AGENTS.md` | Codex, Cursor, Claude Code via `CLAUDE.md` | Agent instructions. |
 | `CLAUDE.md`, `.claude/rules/*.md` | Claude Code | Claude Code never reads `.mdc` files, so teams often duplicate rules here. |
@@ -29,7 +29,7 @@ git ls-files '.cursor/rules/**' .cursorrules AGENTS.md CLAUDE.md '.claude/rules/
 | Source | What it holds |
 | --- | --- |
 | `lint-rules/sgconfig.yml` (the configured `sgconfig`) | `ruleDirs` and `testConfigs`, relative to the config file. |
-| `lint-rules/rules/*.yml` | One ast-grep rule per file, `metadata.source` pointing to the `.mdc`. |
+| `lint-rules/rules/*.yml` | One ast-grep rule per file, with an optional `metadata.source` link. |
 | `lint-rules/rule-tests/*-test.yml` | `valid` / `invalid` cases. |
 | `.importlinter` | `[importlinter:contract:<id>]` sections. |
 | `# ast-grep-ignore` comments | Exceptions, each under a `# rule-exception:` line. |
