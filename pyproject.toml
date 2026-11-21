@@ -122,7 +122,7 @@ warn_return_any = false
 branch = "main"
 commit_message = "chore(release): release version {version}"
 version_toml = ["pyproject.toml:project.version"]
-build_command = "uv lock --upgrade-package mstack && git add uv.lock"
+build_command = "scripts/update-version-references.sh && uv lock --upgrade-package mstack && git add uv.lock README.md docs/workflow.md"
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
