@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v5.3.0 (2026-11-21)
+
+### Features
+
+- **cleanup**: Prune old mstack backups
+  ([`1fd4c5f`](https://github.com/justmatias/mstack/commit/1fd4c5f7c8662617950aadf9fafdd77837342fea))
+
+
 ## v5.2.0 (2026-11-21)
 
 ### Features
