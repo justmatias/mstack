@@ -42,13 +42,13 @@ jobs:
           feature='^feat(\([^)]*\))?:'
           fix='^(fix|perf)(\([^)]*\))?:'
           if [[ "$PR_TITLE" =~ $breaking ]]; then
-            level=major
+            level="major"
           elif [[ "$PR_TITLE" =~ $feature ]]; then
-            level=minor
+            level="minor"
           elif [[ "$PR_TITLE" =~ $fix ]]; then
-            level=patch
+            level="patch"
           else
-            level=none
+            level="none"
           fi
           echo "level=$level" >> "$GITHUB_OUTPUT"
           echo "PR title '$PR_TITLE' -> bump level: $level"
