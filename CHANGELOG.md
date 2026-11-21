@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v5.4.0 (2026-11-21)
+
+### Bug Fixes
+
+- **rules**: Match Python lint cases more precisely
+  ([`aa649bb`](https://github.com/justmatias/mstack/commit/aa649bbb46b56028e03f59521cfe695e9c76bb16))
+
+### Features
+
+- **rules**: Add engineering principles adapted from pstack
+  ([`a21daf0`](https://github.com/justmatias/mstack/commit/a21daf0da37d12ba92e35c7e9016a63676ac774a))
+
+- **rules**: Add module, fixture, MCP, logging and pin rules with checks
+  ([`cecc084`](https://github.com/justmatias/mstack/commit/cecc084a88286b10d5395d37695aa17b73492f2f))
+
+- **rules**: Let shared checks stand without prose
+  ([`b2a2dd7`](https://github.com/justmatias/mstack/commit/b2a2dd796a8b0b5eae8c9b9a4b0baf0300eba627))
+
+### Refactoring
+
+- **rules**: Drop the logging and MCP server rules
+  ([`dbab6b8`](https://github.com/justmatias/mstack/commit/dbab6b86ff6ada597695cdfc675c44641e3c0541))
+
+### Testing
+
+- **render**: Move the expected-rendering helper into a conftest fixture
+  ([`2c1510d`](https://github.com/justmatias/mstack/commit/2c1510df9d13c2b12998904352362b9880147564))
+
+
 ## v5.3.0 (2026-11-21)
 
 ### Features
