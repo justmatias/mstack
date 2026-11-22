@@ -216,7 +216,9 @@ def test_lint_changes_shared_rule_severity_when_overridden(
 def test_lint_uses_local_rule_when_it_shadows_a_shared_rule(run_mstack, tmp_path: Path):
     local = tmp_path / "lint-rules"
     (local / "rules").mkdir(parents=True)
-    (local / "sgconfig.yml").write_text("ruleDirs: [rules]\n", encoding="utf-8")
+    (local / "sgconfig.yml").write_text(
+        "ruleDirs: [rules]\ntestConfigs: null\n", encoding="utf-8"
+    )
     (local / "rules" / "local.yml").write_text(
         "id: no-bare-except\n"
         "language: Python\n"
@@ -240,6 +242,7 @@ def test_lint_uses_host_packs_when_repo_has_no_config(
     host = tmp_path / ".git" / "mstack"
     host.mkdir()
     (host / "config.toml").write_text('packs = ["python-core"]\n', encoding="utf-8")
+    monkeypatch.delenv("CI", raising=False)
     monkeypatch.setenv("XDG_CONFIG_HOME", str(host.parent))
 
     completed = run_mstack("lint", "--json", working_directory=tmp_path)
@@ -266,3 +269,31 @@ def test_lint_uses_explicit_packs_when_repo_selects_other_packs(
             run_mstack("coverage", "--json", working_directory=tmp_path).stdout
         )["rules"]
     } == {"python-core"}
+
+
+def test_lint_limits_pack_scan_to_root_when_directory_is_not_a_git_repo(
+    run_mstack, tmp_path: Path
+):
+    root = tmp_path / "consumer"
+    root.mkdir()
+    (root / ".mstack.toml").write_text('packs = ["python-core"]\n', encoding="utf-8")
+    shutil.copy(BARE_EXCEPT, tmp_path / "unrelated.py")
+
+    completed = run_mstack("lint", "--only", "scan", "--json", working_directory=root)
+
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(completed.stdout)["scan"]["findings"] == []
+
+
+def test_config_ignores_host_packs_when_running_in_ci(
+    run_mstack, tmp_path: Path, monkeypatch
+):
+    host = tmp_path / "mstack"
+    host.mkdir()
+    (host / "config.toml").write_text('packs = ["python-core"]\n', encoding="utf-8")
+    monkeypatch.setenv("CI", "true")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+
+    completed = run_mstack("config", "--json", working_directory=tmp_path)
+
+    assert json.loads(completed.stdout)["settings"]["packs"]["value"] == []

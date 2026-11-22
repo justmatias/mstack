@@ -174,7 +174,10 @@ def write_pack_files(root: Path, config: ResolvedConfig, data: dict) -> None:
         )
     write_pack_tests(tests_dir, tests, selected)
     data.setdefault("ruleDirs", []).append(str(rules_dir))
-    data.setdefault("testConfigs", []).append({"testDir": str(tests_dir)})
+    data["testConfigs"] = [
+        *(data.get("testConfigs") or []),
+        {"testDir": str(tests_dir)},
+    ]
 
 
 @contextlib.contextmanager
@@ -227,10 +230,17 @@ def scan_finding(line: str) -> dict[str, Any]:
 def scan_targets(run: LintRun) -> list[str]:
     if run.mode == "full":
         excludes = [f"!{pattern}" for pattern in run.config.values.scan.exclude]
-        return [argument for glob in excludes for argument in ("--globs", glob)] + ["."]
+        return [argument for glob in excludes for argument in ("--globs", glob)] + [
+            str(run.config.root) if run.scan_config and not run.config.git_root else "."
+        ]
     return [
         "--error",
-        *[os.path.relpath(path, run.config.root) for path in run.files],
+        *[
+            str(path)
+            if run.scan_config and not run.config.git_root
+            else os.path.relpath(path, run.config.root)
+            for path in run.files
+        ],
     ]
 
 

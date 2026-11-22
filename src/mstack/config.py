@@ -168,6 +168,8 @@ def validate(data: dict[str, Any], origin: str) -> ProjectConfig:
 
 
 def host_packs() -> list[str] | None:
+    if os.environ.get("CI", "").lower() in {"true", "1"}:
+        return None
     directory = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
     path = directory / "mstack" / "config.toml"
     if not path.is_file():
