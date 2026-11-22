@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v5.7.0 (2026-11-22)
+
+### Features
+
+- **rules**: Add sleep, raises and skip guidance to testing
+  ([`3f26c1e`](https://github.com/justmatias/mstack/commit/3f26c1e3f75a23a31222c5d5a881b8b438927976))
+
+- **rules**: Expand commit format and branch guidance
+  ([`6e86513`](https://github.com/justmatias/mstack/commit/6e86513d2493c30aff6e6a03da42623dd1301ae3))
+
+
 ## v5.6.0 (2026-11-22)
 
 ### Documentation
