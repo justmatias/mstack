@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: "Mine the active transcript for coding conventions and durable learnings, and turn each into an automated check, a prose rule for judgment, or a skill edit. Waits for approval before writing anything. Use when the user says reflect, reflect on the rules, turn my corrections into rules, or make this preference a rule."
+description: "Mine the active transcript for coding conventions and durable learnings, and turn each into an automated check, a prose rule for judgment, or a skill edit. Waits for approval before writing anything. Offer a separate mstack contribution for reusable checks and prose rules. Use when the user says reflect, reflect on the rules, turn my corrections into rules, or make this preference a rule."
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -72,7 +72,7 @@ For skill rows, follow the Routing exactly, as in pstack:
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): the parent does it directly.
 - Substantive existing-skill edit, `tune description:` or `new skill via create-skill:`: use the environment's skill-creation workflow (Cursor's `create-skill`; in Claude Code, the `skill-creator` skill if installed) instead of inventing the shape ad hoc.
 
-After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Never open a PR or push.
+After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Keep this action local.
 
 ## 5. Summarize for the user
 
@@ -84,3 +84,11 @@ Short list, no preamble:
 - Backlog filed: `<issue title>`. One line each.
 - Abstracted: what was generalized from the chat.
 - Dropped: one line per rejected finding and its reason (including `domain`).
+
+## 6. Offer an mstack contribution
+
+After the local action is complete or the user chooses to skip it, offer to contribute any Accepted checks or prose rules that apply across repositories. Name the candidates and the proposed destination. Get explicit approval for the selected mstack changes. The user can choose different findings for each destination.
+
+Work in a checkout of `justmatias/mstack` on a contribution branch. Read its `AGENTS.md`, `packs.toml`, and related rules and checks. Reuse or extend existing coverage and skip duplicates. Put shared `.mdc` guidance in `rules/`, ast-grep checks and synthetic cases in `lint/rules/` and `lint/rule-tests/`, and register any new shared IDs in the relevant pack. Follow the [check authoring guide](../sync/references/authoring-a-check.md). Keep project-specific contracts and settings in the source repo.
+
+Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `make lint-rules` and `make lint-rules-changed` in mstack. If the user requests a PR, use `open-pr` for the mstack branch and report the link. Otherwise report the local changes and verification.
