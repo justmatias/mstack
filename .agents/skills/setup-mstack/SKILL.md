@@ -46,7 +46,7 @@ Ask which tools to configure: **Claude Code, Cursor, Codex, or any combination?*
 - **Codex instructions:** Use a non-empty `<codex>/AGENTS.override.md` if present, since Codex gives it precedence. Run `uv run mstack render-rule --combined <mstack>` for the full block. Replace one existing block or append it after the user's text, leaving the surrounding content intact. If the markers are malformed or duplicated, show the proposed repair for approval before editing.
 - **Codex MCP:** Keep the user's other TOML entries. For a local server use `command`, `args` and `env` for literal values. Forward environment variables by name using `env_vars` when the variable keeps its name, or an explicit user-approved launcher when it needs remapping. For an HTTP server use `url`. Check the result with `codex mcp list`.
 
-Each folder's `README.md` explains its format and is never installed. Today `agents/`, `mcp/`, `instructions/` and `settings/` may hold nothing else: then skip them.
+The optional asset formats and install destinations are documented in `docs/setup/agent-assets.md`. Empty asset folders are skipped.
 
 **WSL:** Claude Code inside WSL uses the WSL home, and Cursor on Windows reads the Windows profile (`/mnt/c/Users/<user>/.cursor`). If `mstack platform` cannot find it, ask the user for it and export `MSTACK_WINDOWS_HOME=/mnt/c/Users/<user>` for every `mstack` command.
 
