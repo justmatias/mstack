@@ -48,7 +48,7 @@ Skills live in five groups, which setup flattens on install:
 | Group | Skills |
 | --- | --- |
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
-| `engineering/` | `review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
+| `engineering/` | `mstack-review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
 | `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
 | `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `ketchup`, `grill-me`, `handoff` |
@@ -59,7 +59,7 @@ Skills live in five groups, which setup flattens on install:
 | `reflect` | Turn the corrections and preferences from the current session into rules and checks. |
 | `correct` | Find the mistakes that keep repeating in a repo and make each one impossible. |
 | `integrate` | Bring skills or rules from a GitHub URL into `skills/` or `rules/`, merged into what already exists, with their license, credit and a check for each rule. |
-| `review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
+| `mstack-review` | Review a diff on two axes: the repo's rules (above all the `llm-review` ones no check covers) and the spec it was built from. |
 | `blast-radius` | Find what a change could break outside its diff, and prove the one fact its safety rests on by running real code. |
 | `open-pr` | Open a pull request that is fast to review: problem-first title and body, a visual summary, before and after evidence, and a merge-danger note (one-way or two-way door, blast radius). |
 | `leave-pr-comments` | Leave comments on GitHub that say an agent wrote them on the user's behalf (a note callout naming the model and the user), written conclusion-first, checked for secrets, previewed, and verified after posting. |

@@ -15,7 +15,7 @@ metadata:
 
 Make a change more correct by having an independent reviewer check it in a loop, then answering each finding with the smallest fix that works. Make the fewest changes that satisfy the reviewer: watch for scope creep and push back when a finding asks for more than the intent needs.
 
-This skill fixes code. For a read-only report on two axes (the repo's rules and the spec), use [review](../review/SKILL.md).
+This skill fixes code. For a read-only report on two axes (the repo's rules and the spec), use [mstack-review](../mstack-review/SKILL.md).
 
 ## Budget
 
