@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import sys
 import tomllib
 from pathlib import Path
@@ -18,7 +19,7 @@ PATH_KEYS = {
     "domain_check.exclude",
 }
 
-Source = Literal["default", "file", "flag"]
+Source = Literal["default", "host", "file", "flag"]
 
 
 class ConfigError(Exception):
@@ -59,7 +60,18 @@ class CommitsSettings(StrictModel):
     ]
 
 
+class PackOverrides(StrictModel):
+    disable: list[str] = []
+    severity: dict[str, Literal["error", "warning", "info", "hint"]] = {}
+
+
+class HostConfig(StrictModel):
+    packs: list[str] = []
+
+
 class ProjectConfig(StrictModel):
+    packs: list[str] = []
+    pack_overrides: PackOverrides = PackOverrides()
     rules_dir: Path = Path(".cursor/rules")
     sgconfig: Path = Path("lint-rules/sgconfig.yml")
     importlinter: Path = Path(".importlinter")
@@ -123,7 +135,7 @@ def find_config_file(
 def flatten(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
     flat: dict[str, Any] = {}
     for key, value in data.items():
-        if isinstance(value, dict):
+        if isinstance(value, dict) and f"{prefix}{key}" != "pack_overrides.severity":
             flat.update(flatten(value, f"{prefix}{key}."))
         else:
             flat[f"{prefix}{key}"] = value
@@ -155,10 +167,23 @@ def validate(data: dict[str, Any], origin: str) -> ProjectConfig:
         raise ConfigError(f"{origin}: {error}") from error
 
 
+def host_packs() -> list[str] | None:
+    if os.environ.get("CI", "").lower() in {"true", "1"}:
+        return None
+    directory = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    path = directory / "mstack" / "config.toml"
+    if not path.is_file():
+        return None
+    try:
+        return HostConfig.model_validate(read_toml(path)).packs
+    except ValidationError as error:
+        raise ConfigError(f"{path}: {error}") from error
+
+
 def resolve_config(
     overrides: dict[str, Any] | None = None, start: Path | None = None
 ) -> ResolvedConfig:
-    """Merge built-in defaults, the config file and flags, in that order.
+    """Merge built-in defaults, host packs, the repo config and flags, in that order.
 
     `overrides` maps dotted keys (`rules_dir`, `domain_check.paths`) to flag values;
     None means the flag was not given. Flag paths resolve against the current
@@ -176,6 +201,13 @@ def resolve_config(
     )
     merged = flatten(ProjectConfig().model_dump())
     sources: dict[str, Source] = dict.fromkeys(merged, "default")
+    if (
+        "packs" not in file_values
+        and (overrides or {}).get("packs") is None
+        and (packs := host_packs()) is not None
+    ):
+        merged["packs"] = packs
+        sources["packs"] = "host"
     merged.update(file_values)
     sources.update(dict.fromkeys(file_values, "file"))
     for key in merged:

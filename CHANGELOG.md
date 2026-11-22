@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v5.5.0 (2026-11-22)
+
+### Bug Fixes
+
+- **lint**: Isolate shared pack scans and CI settings
+  ([`690fb9d`](https://github.com/justmatias/mstack/commit/690fb9d068ff735a47099d016823cdbbf0fb611f))
+
+### Continuous Integration
+
+- Run checks on the automation update
+  ([`4737c54`](https://github.com/justmatias/mstack/commit/4737c541e96d4967a7f4474fa320c5f57db6f12c))
+
+### Features
+
+- **lint**: Ship shared rule packs with mstack
+  ([`eac2ec1`](https://github.com/justmatias/mstack/commit/eac2ec1f42ca96083e65e38a43323dd1c9b52698))
+
+
 ## v5.4.0 (2026-11-21)
 
 ### Bug Fixes
