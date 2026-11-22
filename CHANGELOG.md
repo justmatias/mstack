@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v5.6.0 (2026-11-22)
+
+### Documentation
+
+- Consolidate optional agent asset guides ([#61](https://github.com/justmatias/mstack/pull/61),
+  [`fafaf42`](https://github.com/justmatias/mstack/commit/fafaf42a5479b4bf79fe39bf7db1401e05eaa314))
+
+### Features
+
+- **reflect**: Offer shared rules and checks as mstack contributions
+  ([`9f65363`](https://github.com/justmatias/mstack/commit/9f65363b685bdeec6f72b694d3f2804400b0eb58))
+
+### Testing
+
+- Allow absent optional asset folders ([#61](https://github.com/justmatias/mstack/pull/61),
+  [`fafaf42`](https://github.com/justmatias/mstack/commit/fafaf42a5479b4bf79fe39bf7db1401e05eaa314))
+
+
 ## v5.5.0 (2026-11-22)
 
 ### Bug Fixes
