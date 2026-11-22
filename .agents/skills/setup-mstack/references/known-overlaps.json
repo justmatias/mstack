@@ -1,6 +1,18 @@
 {
   "overlaps": [
     {
+      "skill": "research",
+      "other": "source-driven-development",
+      "origin": "addyosmani/agent-skills",
+      "reason": "research incorporates version-specific implementation checks against primary sources from source-driven-development"
+    },
+    {
+      "skill": "review-loop",
+      "other": "doubt-driven-development",
+      "origin": "addyosmani/agent-skills",
+      "reason": "review-loop incorporates fresh-context review of a consequential decision from doubt-driven-development"
+    },
+    {
       "skill": "reflect",
       "other": "reflect",
       "origin": "pstack",
