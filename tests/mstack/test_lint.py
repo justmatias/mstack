@@ -1,7 +1,10 @@
+import json
 import shutil
 import sys
 import sysconfig
 from pathlib import Path
+
+import pytest
 
 from mstack.lint import STEPS, find_tool
 from tests.conftest import REPOSITORY_ROOT
@@ -163,3 +166,103 @@ def test_bundled_ast_grep_is_resolved_first():
         Path(sysconfig.get_path("scripts")),
         Path(sys.executable).parent,
     }
+
+
+@pytest.mark.usefixtures("pack_consumer")
+def test_lint_enforces_selected_pack_when_local_rules_are_absent(
+    run_mstack, tmp_path: Path
+):
+    completed = run_mstack("lint", "--json", working_directory=tmp_path)
+
+    report = json.loads(completed.stdout)
+    assert completed.returncode == 1
+    assert report["test"]["ok"] and report["test"]["skipped"] is None
+    assert report["coverage"]["ok"] and report["coverage"]["skipped"] is None
+    assert [finding["rule"] for finding in report["scan"]["findings"]] == [
+        "no-bare-except"
+    ]
+    assert {path.name for path in tmp_path.iterdir()} == {
+        ".git",
+        ".mstack.toml",
+        "target.py",
+    }
+
+
+def test_lint_omits_shared_rule_when_disabled(
+    run_mstack, tmp_path: Path, pack_consumer
+):
+    pack_consumer('[pack_overrides]\ndisable = ["no-bare-except"]\n')
+
+    completed = run_mstack("lint", working_directory=tmp_path)
+
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_lint_changes_shared_rule_severity_when_overridden(
+    run_mstack, tmp_path: Path, pack_consumer
+):
+    pack_consumer('[pack_overrides]\nseverity = { no-bare-except = "warning" }\n')
+
+    completed = run_mstack("lint", "--json", working_directory=tmp_path)
+
+    assert completed.returncode == 0, completed.stderr
+    findings = json.loads(completed.stdout)["scan"]["findings"]
+    assert [(item["rule"], item["severity"]) for item in findings] == [
+        ("no-bare-except", "warning")
+    ]
+
+
+@pytest.mark.usefixtures("pack_consumer")
+def test_lint_uses_local_rule_when_it_shadows_a_shared_rule(run_mstack, tmp_path: Path):
+    local = tmp_path / "lint-rules"
+    (local / "rules").mkdir(parents=True)
+    (local / "sgconfig.yml").write_text("ruleDirs: [rules]\n", encoding="utf-8")
+    (local / "rules" / "local.yml").write_text(
+        "id: no-bare-except\n"
+        "language: Python\n"
+        "severity: error\n"
+        "message: Local rule\n"
+        "rule: {pattern: never_called()}\n",
+        encoding="utf-8",
+    )
+
+    completed = run_mstack("lint", working_directory=tmp_path)
+
+    assert completed.returncode == 0, completed.stderr
+    assert "local check no-bare-except overrides" in completed.stderr
+
+
+@pytest.mark.usefixtures("pack_consumer")
+def test_lint_uses_host_packs_when_repo_has_no_config(
+    run_mstack, tmp_path: Path, monkeypatch
+):
+    (tmp_path / ".mstack.toml").unlink()
+    host = tmp_path / ".git" / "mstack"
+    host.mkdir()
+    (host / "config.toml").write_text('packs = ["python-core"]\n', encoding="utf-8")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(host.parent))
+
+    completed = run_mstack("lint", "--json", working_directory=tmp_path)
+
+    assert completed.returncode == 1, completed.stderr
+    assert any(
+        finding["rule"] == "no-bare-except"
+        for finding in json.loads(completed.stdout)["scan"]["findings"]
+    )
+
+
+@pytest.mark.usefixtures("pack_consumer")
+def test_lint_uses_explicit_packs_when_repo_selects_other_packs(
+    run_mstack, tmp_path: Path
+):
+    completed = run_mstack(
+        "lint", "--packs", "testing", "--json", working_directory=tmp_path
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert {
+        rule["pack"]
+        for rule in json.loads(
+            run_mstack("coverage", "--json", working_directory=tmp_path).stdout
+        )["rules"]
+    } == {"python-core"}

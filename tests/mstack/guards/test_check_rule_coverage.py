@@ -170,3 +170,38 @@ def test_rule_license_without_adapted_from_fails(run_mstack, rules_sandbox: Path
     credit_rule(rules_sandbox, "license: MIT\n")
 
     assert coverage_issues(run_mstack, rules_sandbox) == (1, [("credit", None)])
+
+
+def test_coverage_reports_pack_prose_when_the_repository_has_no_rule_files(
+    run_mstack, tmp_path: Path
+):
+    (tmp_path / ".mstack.toml").write_text(
+        'packs = ["python-core"]\n', encoding="utf-8"
+    )
+
+    completed = run_mstack("coverage", "--json", working_directory=tmp_path)
+
+    assert completed.returncode == 0, completed.stderr
+    rules = json.loads(completed.stdout)["rules"]
+    assert ("python-core", "rules/python-models.mdc") in {
+        (rule["pack"], Path(rule["mdc"]).as_posix()) for rule in rules
+    }
+
+
+def test_coverage_accepts_a_pack_check_when_local_prose_references_it(
+    run_mstack, tmp_path: Path
+):
+    (tmp_path / ".mstack.toml").write_text(
+        'packs = ["python-core"]\nrules_dir = "rules"\n', encoding="utf-8"
+    )
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    (rules / "exceptions.mdc").write_text(
+        "---\ndescription: Exception handling\n---\n"
+        "## Checks\n- enforced-by: no-bare-except\n",
+        encoding="utf-8",
+    )
+
+    completed = run_mstack("coverage", "--json", working_directory=tmp_path)
+
+    assert completed.returncode == 0, completed.stdout

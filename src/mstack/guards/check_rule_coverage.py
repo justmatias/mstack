@@ -8,8 +8,9 @@ from pathlib import Path
 
 import yaml
 
-from mstack.config import resolve_config
+from mstack.config import ConfigError, ResolvedConfig, resolve_config
 from mstack.guards.credit import credit_problems
+from mstack.packs import Pack, load_packs
 from mstack.render import FrontmatterError, split_frontmatter
 
 logger = logging.getLogger(__name__)
@@ -45,16 +46,24 @@ def parse_checks_section(mdc_path: Path) -> dict | None:
 
 def load_ast_grep_rules(config_path: Path) -> dict[str, dict]:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    paths = [
+        path
+        for directory in config.get("ruleDirs", [])
+        for path in sorted((config_path.parent / directory).glob("*.y*ml"))
+    ]
+    return load_ast_grep_rule_files(paths)
+
+
+def load_ast_grep_rule_files(paths: list[Path]) -> dict[str, dict]:
     rules: dict[str, dict] = {}
-    for rule_directory in config.get("ruleDirs", []):
-        for rule_path in sorted((config_path.parent / rule_directory).glob("*.y*ml")):
-            for document in yaml.safe_load_all(rule_path.read_text(encoding="utf-8")):
-                if document and "id" in document:
-                    rules[document["id"]] = {
-                        "path": rule_path,
-                        "source": (document.get("metadata") or {}).get("source"),
-                        "severity": document.get("severity", "hint"),
-                    }
+    for rule_path in paths:
+        for document in yaml.safe_load_all(rule_path.read_text(encoding="utf-8")):
+            if document and "id" in document:
+                rules[document["id"]] = {
+                    "path": rule_path,
+                    "source": (document.get("metadata") or {}).get("source"),
+                    "severity": document.get("severity", "hint"),
+                }
     return rules
 
 
@@ -132,16 +141,18 @@ def display(path: Path, root: Path) -> str:
 
 
 def prose_rule_issues(
-    rules_dir: Path,
+    prose_paths: list[Path],
     known_checks: set[str],
     root: Path,
-    pre_commit_config: Path,
+    pre_commit_config: Path | None,
 ) -> tuple[list[dict], list[dict], dict[Path, set[str]]]:
-    configured_hooks = load_pre_commit_hooks(pre_commit_config)
+    configured_hooks = (
+        load_pre_commit_hooks(pre_commit_config) if pre_commit_config else None
+    )
     issues: list[dict] = []
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
-    for mdc_path in sorted(rules_dir.rglob("*.mdc")):
+    for mdc_path in sorted(prose_paths):
         section = parse_checks_section(mdc_path)
         mdc = display(mdc_path, root)
         entry = {"mdc": mdc, "checks": [], "hooks": [], "llm_review": False}
@@ -162,11 +173,12 @@ def prose_rule_issues(
         entry["checks"] = sorted(section["enforced_by"])
         entry["hooks"] = sorted(section["hooks"])
         entry["llm_review"] = section["llm_review"]
-        issues.extend(
-            unknown_hook_issues(
-                mdc, section["hooks"], configured_hooks, pre_commit_config.name
+        if pre_commit_config:
+            issues.extend(
+                unknown_hook_issues(
+                    mdc, section["hooks"], configured_hooks, pre_commit_config.name
+                )
             )
-        )
         listed_by_mdc[mdc_path.resolve()] = set(section["enforced_by"])
         issues.extend(
             {
@@ -211,24 +223,56 @@ def check_source_issues(
     return issues
 
 
-def compute_drift(
-    rules_dir: Path,
-    config: Path,
-    importlinter: Path,
-    root: Path,
-    pre_commit_config: Path,
-) -> dict:
-    ast_grep_rules = load_ast_grep_rules(config)
-    contracts = load_import_linter_contracts(importlinter)
-    known_checks = set(ast_grep_rules) | contracts
+def pack_coverage(pack: Pack, checks: dict[str, dict]) -> tuple[list[dict], list[dict]]:
+    root = pack.rules_dir.parent
     rules, issues, listed_by_mdc = prose_rule_issues(
-        rules_dir, known_checks, root, pre_commit_config
+        pack.rules, set(checks), root, None
+    )
+    for rule in rules:
+        rule["pack"] = pack.name
+    issues.extend(check_source_issues(checks, listed_by_mdc, root))
+    return rules, issues
+
+
+def compute_drift(config: ResolvedConfig, root: Path) -> dict:
+    settings = config.values
+    packs = load_packs(settings.packs)
+    if settings.sgconfig.is_file():
+        ast_grep_rules = load_ast_grep_rules(settings.sgconfig)
+    elif packs and config.sources["sgconfig"] == "default":
+        ast_grep_rules = {}
+    else:
+        raise ConfigError(
+            f"no ast-grep config at {settings.sgconfig} (set sgconfig in .mstack.toml)"
+        )
+
+    known_checks = set(ast_grep_rules) | load_import_linter_contracts(
+        settings.importlinter
+    )
+    disabled_checks = set(settings.pack_overrides.disable)
+    pack_rules: list[dict] = []
+    pack_issues: list[dict] = []
+    for pack in packs:
+        checks = load_ast_grep_rule_files(pack.checks)
+        known_checks.update(set(checks) - disabled_checks)
+        rules, issues = pack_coverage(pack, checks)
+        pack_rules.extend(rules)
+        pack_issues.extend(issues)
+
+    rules, issues, listed_by_mdc = prose_rule_issues(
+        list(settings.rules_dir.rglob("*.mdc")),
+        known_checks,
+        root,
+        settings.pre_commit_config,
     )
     issues.extend(check_source_issues(ast_grep_rules, listed_by_mdc, root))
-    return {"ok": not issues, "rules": rules, "issues": issues}
+    issues.extend(pack_issues)
+    return {"ok": not issues, "rules": [*rules, *pack_rules], "issues": issues}
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None, *, resolved: ResolvedConfig | None = None
+) -> int:
     parser = argparse.ArgumentParser(
         prog="mstack coverage",
         description="Validate check references in prose and any declared ast-grep source links.",
@@ -259,20 +303,15 @@ def main(argv: list[str] | None = None) -> int:
         "--json", action="store_true", help="Print the drift report as JSON."
     )
     arguments = parser.parse_args(argv)
-    config = resolve_config({
+    config = resolved or resolve_config({
         "rules_dir": arguments.rules_dir,
         "sgconfig": arguments.config,
         "importlinter": arguments.importlinter,
         "pre_commit_config": arguments.pre_commit_config,
     })
 
-    report = compute_drift(
-        config.values.rules_dir,
-        config.values.sgconfig,
-        config.values.importlinter,
-        arguments.root.expanduser() if arguments.root else config.root,
-        config.values.pre_commit_config,
-    )
+    root = arguments.root.expanduser() if arguments.root else config.root
+    report = compute_drift(config, root)
     if arguments.json:
         sys.stdout.write(json.dumps(report, indent=2) + "\n")
     else:

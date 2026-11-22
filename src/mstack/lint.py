@@ -8,7 +8,8 @@ import shutil
 import subprocess
 import sys
 import sysconfig
-from collections.abc import Callable
+import tempfile
+from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any, Literal
 
@@ -18,6 +19,7 @@ from pydantic import Field
 from mstack.changed_files import ChangedFilesError, changed_files
 from mstack.config import ConfigError, ResolvedConfig, StrictModel, resolve_config
 from mstack.guards import check_domain, check_exceptions, check_rule_coverage
+from mstack.packs import load_packs
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,7 @@ class LintRun(StrictModel):
     mode: Mode = "full"
     files: list[Path] = Field(default_factory=list)
     json_output: bool = False
+    scan_config: Path | None = None
 
 
 def find_tool(name: str) -> str:
@@ -89,10 +92,103 @@ def tool_result(completed: subprocess.CompletedProcess) -> StepResult:
 
 
 def sgconfig_path(run: LintRun) -> Path:
-    path = run.config.values.sgconfig
+    path = run.scan_config or run.config.values.sgconfig
     if not path.is_file():
         raise LintError(f"no ast-grep config at {path} (set sgconfig in .mstack.toml)")
     return path
+
+
+def local_config(config: ResolvedConfig) -> dict:
+    path = config.values.sgconfig
+    if not path.is_file():
+        if config.sources["sgconfig"] != "default":
+            raise LintError(f"no ast-grep config at {path}")
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    for key in ("ruleDirs", "utilDirs"):
+        if key in data:
+            data[key] = [str(path.parent / directory) for directory in data[key]]
+    for entry in data.get("testConfigs") or []:
+        entry["testDir"] = str(path.parent / entry["testDir"])
+    for entry in (data.get("customLanguages") or {}).values():
+        entry["libraryPath"] = str(path.parent / entry["libraryPath"])
+    return data
+
+
+def pack_rules(config: ResolvedConfig) -> tuple[dict, set[Path]]:
+    rules: dict = {}
+    tests: set[Path] = set()
+    for pack in load_packs(config.values.packs):
+        for path in pack.checks:
+            for document in yaml.safe_load_all(path.read_text(encoding="utf-8")):
+                if document:
+                    rules[document["id"]] = document
+        tests.update(pack.tests)
+    return rules, tests
+
+
+def local_rule_ids(data: dict) -> set[str]:
+    return {
+        entry["id"]
+        for directory in data.get("ruleDirs", [])
+        for path in Path(directory).rglob("*.y*ml")
+        for entry in yaml.safe_load_all(path.read_text(encoding="utf-8"))
+        if entry and "id" in entry
+    }
+
+
+def write_pack_tests(directory: Path, tests: set[Path], selected: set[str]) -> None:
+    for index, path in enumerate(sorted(tests)):
+        cases = [
+            case
+            for case in yaml.safe_load_all(path.read_text(encoding="utf-8"))
+            if case and case.get("id") in selected
+        ]
+        if cases:
+            (directory / f"{index}.yml").write_text(
+                yaml.safe_dump_all(cases), encoding="utf-8"
+            )
+
+
+def write_pack_files(root: Path, config: ResolvedConfig, data: dict) -> None:
+    rules, tests = pack_rules(config)
+    overrides = config.values.pack_overrides
+    if unknown := (set(overrides.disable) | overrides.severity.keys()) - rules.keys():
+        raise ConfigError(
+            f"pack_overrides: unknown checks: {', '.join(sorted(unknown))}"
+        )
+    local_ids = local_rule_ids(data)
+    for check_id in sorted(local_ids & rules.keys()):
+        logger.info("lint: local check %s overrides the shared pack check", check_id)
+    selected = rules.keys() - local_ids - set(overrides.disable)
+    rules_dir = root / "rules"
+    tests_dir = root / "tests"
+    rules_dir.mkdir()
+    tests_dir.mkdir()
+    for index, check_id in enumerate(sorted(selected)):
+        document = rules[check_id]
+        if check_id in overrides.severity:
+            document["severity"] = overrides.severity[check_id]
+        (rules_dir / f"{index}.yml").write_text(
+            yaml.safe_dump(document), encoding="utf-8"
+        )
+    write_pack_tests(tests_dir, tests, selected)
+    data.setdefault("ruleDirs", []).append(str(rules_dir))
+    data.setdefault("testConfigs", []).append({"testDir": str(tests_dir)})
+
+
+@contextlib.contextmanager
+def packed_run(run: LintRun, steps: list[str]) -> Generator[LintRun, None, None]:
+    if not run.config.values.packs or not {"scan", "test"}.intersection(steps):
+        yield run
+        return
+    with tempfile.TemporaryDirectory(prefix="mstack-packs-") as directory:
+        root = Path(directory)
+        data = local_config(run.config)
+        write_pack_files(root, run.config, data)
+        path = root / "sgconfig.yml"
+        path.write_text(yaml.safe_dump(data), encoding="utf-8")
+        yield run.model_copy(update={"scan_config": path})
 
 
 def has_rule_tests(sgconfig: Path) -> bool:
@@ -211,9 +307,15 @@ def run_guard(main: Callable[[list[str]], int]) -> StepResult:
 
 def step_coverage(run: LintRun) -> StepResult:
     rules_dir = run.config.values.rules_dir
-    if not rules_dir.is_dir() and not run.config.values.sgconfig.is_file():
+    if (
+        not run.config.values.packs
+        and not rules_dir.is_dir()
+        and not run.config.values.sgconfig.is_file()
+    ):
         return StepResult(ok=True, skipped=f"no rules folder at {rules_dir}")
-    return run_guard(check_rule_coverage.main)
+    return run_guard(
+        lambda arguments: check_rule_coverage.main(arguments, resolved=run.config)
+    )
 
 
 def step_exceptions(_run: LintRun) -> StepResult:
@@ -273,7 +375,7 @@ def selected_files(config: ResolvedConfig, names: list[str]) -> list[Path]:
 
 
 def build_run(arguments: argparse.Namespace) -> LintRun:
-    config = resolve_config()
+    config = resolve_config({"packs": arguments.packs})
     if arguments.files is not None:
         return LintRun(
             config=config,
@@ -356,6 +458,11 @@ def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
         action="store_true",
         help="Print {step: {ok, skipped, findings}} as JSON.",
     )
+    parser.add_argument(
+        "--packs",
+        nargs="*",
+        help="Select packs explicitly, replacing repo or host defaults.",
+    )
     arguments = parser.parse_args(argv)
     if (arguments.base_ref or arguments.staged) and not arguments.changed:
         parser.error("--base-ref and --staged need --changed")
@@ -366,9 +473,11 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parse_arguments(argv)
     try:
         run = build_run(arguments)
-    except (LintError, ChangedFilesError) as error:
+        steps = selected_steps(arguments.only, arguments.skip)
+        with packed_run(run, steps) as prepared:
+            results = run_lint(steps, prepared)
+    except (LintError, ConfigError, ChangedFilesError, yaml.YAMLError) as error:
         logger.error("mstack lint: %s", error)
         return 2
-    results = run_lint(selected_steps(arguments.only, arguments.skip), run)
     report(results, run.json_output)
     return 0 if all(result.ok for result in results.values()) else 1

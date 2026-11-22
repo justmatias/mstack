@@ -153,3 +153,20 @@ def import_contract(lint_sandbox: Path):
         )
 
     return write
+
+
+@pytest.fixture
+def pack_consumer(tmp_path: Path):
+    git(tmp_path, "init", "--quiet")
+    shutil.copy(
+        REPOSITORY_ROOT / "fixtures" / "invalid" / "error-handling" / "bare_except.py",
+        tmp_path / "target.py",
+    )
+
+    def configure(extra: str = "") -> None:
+        (tmp_path / ".mstack.toml").write_text(
+            'packs = ["python-core"]\n' + extra, encoding="utf-8"
+        )
+
+    configure()
+    return configure

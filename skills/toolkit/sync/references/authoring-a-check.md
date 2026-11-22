@@ -8,6 +8,8 @@ The checks run through the `mstack` command on `PATH`: `mstack lint` runs every 
 
 ## 0. Static check or LLM review?
 
+Run `mstack packs list` first. If a bundled check covers the practice, select its pack in `.mstack.toml` and use that check directly.
+
 Decide this before you pick a tool. A static check costs a YAML file, its tests, its false positives and every exception people add to dodge it, so it has to be worth that. A rule with `enforcement: llm-review` costs only its prose: the reviewer reads it on every PR.
 
 Write a **static check** only when every one of these holds:
