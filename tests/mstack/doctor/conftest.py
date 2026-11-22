@@ -26,7 +26,12 @@ def checkout(tmp_path: Path) -> Path:
     checkout = tmp_path / "checkout"
     ignore = shutil.ignore_patterns("__pycache__")
     for folder in ("skills", "rules", "agents", "mcp", "settings", "instructions"):
-        shutil.copytree(REPOSITORY_ROOT / folder, checkout / folder, ignore=ignore)
+        source = REPOSITORY_ROOT / folder
+        destination = checkout / folder
+        if source.is_dir():
+            shutil.copytree(source, destination, ignore=ignore)
+        else:
+            destination.mkdir(parents=True)
     (checkout / "rules" / "error-handling.mdc").write_text(
         "# Error handling\n\n- Explain recovery decisions.\n",
         encoding="utf-8",

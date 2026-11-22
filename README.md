@@ -13,10 +13,10 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `rules/` | Guidance in prose (`.mdc`) for decisions automated checks leave open. |
 | `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
-| `agents/` | Subagent definitions. |
-| `mcp/` | MCP servers, one per file, with `${VAR}` placeholders for secrets. |
-| `instructions/` | Global instructions for every project (`global.md`). |
-| `settings/` | A partial Claude Code `settings.json`: permissions, status line, env. |
+| `agents/` | Optional subagent definitions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `settings/` | Optional Claude Code settings ([format and install behavior](docs/setup/agent-assets.md)). |
 | `src/mstack/` | The `mstack` CLI: `mstack lint` and the guards the skills and `make` targets run. |
 
 ## Getting started
