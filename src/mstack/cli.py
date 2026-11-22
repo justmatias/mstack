@@ -4,7 +4,7 @@ import logging
 import sys
 from collections.abc import Callable
 
-from mstack import cleanup, config, doctor, init, lint, platform, render
+from mstack import cleanup, config, doctor, init, lint, packs, platform, render
 from mstack.guards import (
     check_commit_msg,
     check_domain,
@@ -25,6 +25,7 @@ COMMANDS: dict[str, Callable[[list[str]], int]] = {
     "init": init.main,
     "domain-check": check_domain.main,
     "lint": lint.main,
+    "packs": packs.main,
     "platform": platform.main,
     "render-rule": render.main,
     "skills-check": check_skills.main,

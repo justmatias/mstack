@@ -1,0 +1,25 @@
+[packs.python-core]
+rules = ["naming", "principles", "python-models", "python-modules"]
+checks = [
+    "no-bare-except",
+    "no-isort-off",
+    "no-manual-init-boilerplate",
+    "no-module-docstring",
+    "no-parent-relative-import",
+    "no-swallowed-exception",
+]
+
+[packs.testing]
+rules = ["pytest-fixtures", "testing"]
+checks = [
+    "no-broad-pytest-raises",
+    "no-fixture-in-test-module",
+    "no-skip-without-reason",
+    "no-sleep-in-tests",
+    "no-underscore-fixture-parameter",
+    "test-module-has-only-tests",
+]
+
+[packs.git]
+rules = ["git-commits"]
+checks = []

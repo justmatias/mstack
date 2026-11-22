@@ -13,10 +13,10 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `rules/` | Guidance in prose (`.mdc`) for decisions automated checks leave open. |
 | `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
-| `agents/` | Subagent definitions. |
-| `mcp/` | MCP servers, one per file, with `${VAR}` placeholders for secrets. |
-| `instructions/` | Global instructions for every project (`global.md`). |
-| `settings/` | A partial Claude Code `settings.json`: permissions, status line, env. |
+| `agents/` | Optional subagent definitions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
+| `settings/` | Optional Claude Code settings ([format and install behavior](docs/setup/agent-assets.md)). |
 | `src/mstack/` | The `mstack` CLI: `mstack lint` and the guards the skills and `make` targets run. |
 
 ## Getting started
@@ -95,12 +95,22 @@ Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup
 
 ## Use the checks in another repo
 
-`mstack lint` runs every check in any repo that has the layout (`.mstack.toml`, an ast-grep `sgconfig.yml`, the prose rules). To run them on every commit, add the hooks to that repo's `.pre-commit-config.yaml`. pre-commit installs mstack in its own environment, with ast-grep and import-linter, so the repo needs nothing else:
+Select the bundled check packs in the consumer repo's `.mstack.toml`:
+
+```toml
+packs = ["python-core", "testing"]
+```
+
+Run `mstack packs list` to see what the installed release provides, then run `mstack lint` from the consumer repo. Shared prose, check files and rule tests ship with mstack. Existing project checks can run alongside the packs. A repo can remove a pack or set `disable` and `severity` under `[pack_overrides]` to adjust individual checks.
+
+For local defaults across repos, put the same `packs` list in `~/.config/mstack/config.toml` (or `$XDG_CONFIG_HOME/mstack/config.toml`). A repo list replaces it, including `packs = []`. In CI, select packs in the repo or pass `mstack lint --packs python-core testing`.
+
+Use the same release locally and in CI to run the same checks. Upgrading mstack updates the selected packs. To run the checks on every commit, add the hooks to the repo's `.pre-commit-config.yaml`. Pre-commit installs mstack in its own environment:
 
 ```yaml
 repos:
   - repo: https://github.com/justmatias/mstack
-    rev: v5.4.0   # pin a full release tag (or a commit sha), never a branch
+    rev: vX.Y.Z   # pin a release that includes packs, or a commit SHA
     hooks:
       - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
       - id: mstack-rules       # rule tests and coverage, when rules or checks change
@@ -116,7 +126,7 @@ mstack does not scan for secrets: add the [gitleaks](https://github.com/gitleaks
 
 `mstack-imports` needs the project importable: if its modules import third-party packages, list them under the hook's `additional_dependencies`, or leave the hook out and run `mstack lint --only imports` from the project's environment.
 
-In GitHub Actions, the action in `action.yml` runs the full scan, and on pull requests the changed-files scan where warnings fail too. It needs only `contents: read`, and the checkout must have the full history so the base branch exists:
+Add the mstack action as a step in any GitHub Actions workflow. Here is a standalone workflow example. The action runs the full scan, and on pull requests the changed-files scan where warnings fail too. It needs only `contents: read`, and the checkout must have the full history so the base branch exists:
 
 ```yaml
 name: mstack

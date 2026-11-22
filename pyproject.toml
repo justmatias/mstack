@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "5.4.0"
+version = "5.5.0"
 description = "Logbook of agent skills, rules, checks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }
@@ -31,8 +31,28 @@ dev = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.9,<0.13"]
-build-backend = "uv_build"
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mstack"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"packs.toml" = "mstack/pack_data/packs.toml"
+"rules" = "mstack/pack_data/rules"
+"lint/rules" = "mstack/pack_data/lint/rules"
+"lint/rule-tests" = "mstack/pack_data/lint/rule-tests"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/mstack",
+    "/packs.toml",
+    "/rules",
+    "/lint",
+    "/LICENSE",
+    "/README.md",
+    "/pyproject.toml",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
