@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v6.1.0 (2026-11-23)
+
+### Features
+
+- **hooks**: Run checks while agents edit
+  ([`8598e74`](https://github.com/justmatias/mstack/commit/8598e743e1655343876fd42f466ed6c55b5b208a))
+
+- **hooks**: Support Codex edit and stop hooks
+  ([`052fc9a`](https://github.com/justmatias/mstack/commit/052fc9aed984f851590215cc9e2952524a2b7e68))
+
+
 ## v6.0.0 (2026-11-23)
 
 ### Features
