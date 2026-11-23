@@ -72,7 +72,7 @@ For skill rows, follow the Routing exactly, as in pstack:
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): the parent does it directly.
 - Substantive existing-skill edit, `tune description:` or `new skill via create-skill:`: use the environment's skill-creation workflow (Cursor's `create-skill`; in Claude Code, the `skill-creator` skill if installed) instead of inventing the shape ad hoc.
 
-After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Keep this action local.
+After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Keep changes to the source repository local.
 
 ## 5. Summarize for the user
 
@@ -87,8 +87,8 @@ Short list, no preamble:
 
 ## 6. Offer an mstack contribution
 
-After the local action is complete or the user chooses to skip it, offer to contribute any Accepted checks or prose rules that apply across repositories. Name the candidates and the proposed destination. Get explicit approval for the selected mstack changes. The user can choose different findings for each destination.
+After the local action is complete or the user chooses to skip it, offer to contribute any Accepted checks or prose rules that apply across repositories. Name the candidates and the proposed destination. Get explicit approval to contribute the selected changes to mstack by pull request. The user can choose different findings for each destination or ask to keep the mstack changes local.
 
 Work in a checkout of `justmatias/mstack` on a contribution branch. Read its `AGENTS.md`, `packs.toml`, and related rules and checks. Reuse or extend existing coverage and skip duplicates. Put shared `.mdc` guidance in `rules/`, ast-grep checks and synthetic cases in `lint/rules/` and `lint/rule-tests/`, and register any new shared IDs in the relevant pack. Follow the [check authoring guide](../sync/references/authoring-a-check.md). Keep project-specific contracts and settings in the source repo.
 
-Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `make lint-rules` and `make lint-rules-changed` in mstack. If the user requests a PR, use `open-pr` for the mstack branch and report the link. Otherwise report the local changes and verification.
+Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `make lint-rules` and `make lint-rules-changed` in mstack. For an approved mstack contribution, use `open-pr` to push the branch and open a pull request. Report the PR link and verification. If the user asked to keep the contribution local, report the branch and verification.

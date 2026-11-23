@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v6.2.0 (2026-11-23)
+
+### Features
+
+- **reflect**: Open PRs for approved mstack contributions
+  ([`412c3ae`](https://github.com/justmatias/mstack/commit/412c3aee710387963c980b71bae72522de9a359b))
+
+- **rules**: Clarify which pytest setup belongs in fixtures
+  ([`88bc095`](https://github.com/justmatias/mstack/commit/88bc0956fa8be838970bdf1d43287f240daaaf2f))
+
+- **rules**: Keep class-specific Python helpers on the class
+  ([`5d17060`](https://github.com/justmatias/mstack/commit/5d170603f4ec6322067e25441fd5d677aa0f8c4d))
+
+
 ## v6.1.0 (2026-11-23)
 
 ### Features

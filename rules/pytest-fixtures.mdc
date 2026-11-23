@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Pytest fixtures
 
-- Consolidate repeated setup into a shared fixture.
+- Consolidate repeated setup, including identical object construction and filesystem setup, into shared fixtures. Keep case-specific setup visible in the test or its parameters.
 - Name a value fixture for what it returns. Name an action fixture with a leading underscore and a verb phrase such as `_write_settings_file`. When both are useful, let the value fixture depend on the action fixture.
 - Keep a factory-callable fixture when tests need different arguments. For a single reusable value, return the configured instance.
 - Express fixture dependencies explicitly when setup order matters. If a dependency parameter has no other use, explain the ordering when suppressing an unused-argument diagnostic.
