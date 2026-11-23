@@ -131,3 +131,76 @@ def test_stop_scans_tracked_edit_when_default_base_is_missing(
 
     assert result.returncode == 2
     assert "no-bare-except" in result.stderr
+
+
+def test_post_edit_reports_all_findings_when_codex_applies_a_patch(
+    lint_sandbox, run_hook
+):
+    for filename in ("first.py", "renamed file.py", "context.py"):
+        (lint_sandbox / filename).write_text(BARE_EXCEPT, encoding="utf-8")
+
+    result = run_hook(
+        lint_sandbox,
+        "post-edit",
+        tool_name="apply_patch",
+        tool_input={
+            "command": (
+                "*** Begin Patch\n"
+                "*** Add File: first.py\n"
+                "+try:\n"
+                "+    value = 1\n"
+                "+except:\n"
+                "+    raise\n"
+                "*** Update File: old.py\n"
+                "*** Move to: renamed file.py\n"
+                "@@\n"
+                " *** Add File: context.py\n"
+                "-except ValueError:\n"
+                "+except:\n"
+                "*** End Patch\n"
+            )
+        },
+    )
+
+    assert result.returncode == 2
+    assert "first.py:3: no-bare-except" in result.stderr
+    assert "renamed file.py:3: no-bare-except" in result.stderr
+    assert "context.py" not in result.stderr
+
+
+def test_post_edit_is_silent_when_codex_patch_only_deletes_files(
+    lint_sandbox, run_hook
+):
+    (lint_sandbox / "target.py").write_text(BARE_EXCEPT, encoding="utf-8")
+
+    result = run_hook(
+        lint_sandbox,
+        "post-edit",
+        tool_name="apply_patch",
+        tool_input={
+            "command": "*** Begin Patch\n*** Delete File: target.py\n*** End Patch\n"
+        },
+    )
+
+    assert (result.returncode, result.stdout, result.stderr) == (0, "", "")
+
+
+@pytest.mark.parametrize(
+    "header", ["  *** Add File: target.py", "*** Add File: target.py  "]
+)
+def test_post_edit_reports_finding_when_codex_patch_header_has_padding(
+    lint_sandbox, run_hook, header
+):
+    (lint_sandbox / "target.py").write_text(BARE_EXCEPT, encoding="utf-8")
+    added_lines = "".join(f"+{line}\n" for line in BARE_EXCEPT.splitlines())
+    patch = f"*** Begin Patch\n{header}\n{added_lines}*** End Patch\n"
+
+    result = run_hook(
+        lint_sandbox,
+        "post-edit",
+        tool_name="apply_patch",
+        tool_input={"command": patch},
+    )
+
+    assert result.returncode == 2
+    assert "target.py:3: no-bare-except" in result.stderr

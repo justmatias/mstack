@@ -32,4 +32,4 @@ Setup registers servers with Claude Code, merges them into Cursor's `mcp.json`, 
 
 ## Editor settings
 
-Put a partial settings object in `settings/claude.json`, containing only the keys mstack manages. Put Cursor hook entries in `settings/cursor.json`. Setup deep-merges the fragments into `~/.claude/settings.json` or `~/.cursor/hooks.json`, merging objects by key and arrays by union. User settings outside mstack's keys remain intact. Use `${VAR}` for secrets and avoid machine-specific paths.
+Put a partial settings object in `settings/claude.json`, containing only the keys mstack manages. Put Cursor hook entries in `settings/cursor.json` and Codex hook entries in `settings/codex.json`. Setup deep-merges the fragments into `~/.claude/settings.json`, `~/.cursor/hooks.json` or `$CODEX_HOME/hooks.json`, merging objects by key and arrays by union. User settings outside mstack's keys remain intact. Use `${VAR}` for secrets and avoid machine-specific paths.

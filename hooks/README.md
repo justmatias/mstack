@@ -1,7 +1,8 @@
 # Agent hooks
 
 Setup merges the fragments under [settings/](../settings/) into
-`~/.claude/settings.json` and `~/.cursor/hooks.json` for the selected editors.
+`~/.claude/settings.json`, `~/.cursor/hooks.json` or `$CODEX_HOME/hooks.json`
+for the selected editors.
 Keep `mstack` on the editor's PATH. The hooks run only in projects with
 `.mstack.toml`.
 
@@ -11,6 +12,11 @@ Keep `mstack` on the editor's PATH. The hooks run only in projects with
   findings once per session until they change or a clean stop clears them.
 - Cursor's `afterFileEdit` runs the same file checks. Findings appear in Cursor's
   Hooks output channel. [Cursor hooks reference](https://cursor.com/docs/hooks)
+- Codex's `PostToolUse` checks every file added, updated or moved by
+  `apply_patch`. Codex's `Stop` runs the changed-file scan and coverage check,
+  which also catches changes made through shell commands. Review and trust the
+  installed hooks through `/hooks` in the CLI or Settings → Hooks in the app.
+  [Codex hooks reference](https://learn.chatgpt.com/docs/hooks)
 
 Edit hooks skip files outside `[scan].extensions` or matching `[scan].exclude`.
 Each run has a 10-second budget. Set `[hooks].timeout` in `.mstack.toml` to a
