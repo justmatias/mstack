@@ -12,6 +12,7 @@ checks = [
 [packs.testing]
 rules = ["pytest-fixtures", "testing"]
 checks = [
+    "conftest-has-only-fixtures",
     "no-broad-pytest-raises",
     "no-fixture-in-test-module",
     "no-skip-without-reason",

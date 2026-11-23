@@ -45,6 +45,7 @@ Choose the reviewer from what this machine offers, then let the user pick:
 1. **Discover candidates.**
    - Agent types the harness lists for the `Agent` tool in Claude Code (and `ListAgents` for running sessions), custom agents in `.claude/agents/` and `~/.claude/agents/`, or `Task` subagent types in Cursor. Keep read-only reviewers, or ones whose tools you can restrict to read-only.
    - Other models' CLIs on `PATH` (check with `command -v`, never run them to probe), only when they have a non-interactive, read-only review mode.
+     Close stdin when you run one (`< /dev/null`): some, such as `codex exec`, otherwise wait for input and never reply.
 2. **Ask which to use** with the harness's question tool (`AskUserQuestion` in Claude Code), listing each candidate with one line on what it is, and put your recommendation first: a reviewer from a different model family than the author when one exists, since it catches more than the author's own model; otherwise a fresh-context `general-purpose` subagent (`Agent` in Claude Code, `Task` with `subagent_type: generalPurpose` and `readonly: true` in Cursor). Skip the question when the user already named a reviewer, or when the only candidate is the fresh-context subagent.
 3. **Record it.** Use exactly the chosen reviewer, note its name and version when it reports them, and say in the report when it is the same model family as the author.
 

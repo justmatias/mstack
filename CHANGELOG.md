@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v6.4.0 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: Close stdin when running a reviewer CLI
+  ([`7dd0027`](https://github.com/justmatias/mstack/commit/7dd002720dc12741add7e0bbddb0123a61c87c13))
+
+### Features
+
+- **rules**: Add conftest-has-only-fixtures check
+  ([`7d94462`](https://github.com/justmatias/mstack/commit/7d944622e3424621e218c8f540d1373fffb9f336))
+
+
 ## v6.3.0 (2026-11-23)
 
 ### Bug Fixes
