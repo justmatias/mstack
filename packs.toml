@@ -18,6 +18,7 @@ checks = [
     "no-sleep-in-tests",
     "no-underscore-fixture-parameter",
     "test-module-has-only-tests",
+    "test-name-has-when-condition",
 ]
 
 [packs.git]
