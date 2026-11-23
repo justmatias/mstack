@@ -39,11 +39,12 @@ Ask which tools to configure: **Claude Code, Cursor, Codex, or any combination?*
 | Rules (`rules/<name>.mdc`) | `~/.claude/rules/<name>.md` | pasted into Cursor Settings → Rules → User Rules | a managed block in `<codex>/AGENTS.md` |
 | Global instructions (`instructions/global.md`) | a `<!-- mstack:begin -->` … `<!-- mstack:end -->` block in `~/.claude/CLAUDE.md` | pasted with the rules | included in the rules block |
 | MCP servers (`mcp/<name>.json`) | `claude mcp add-json --scope user <name> '<json>'` | `mcpServers.<name>` in `~/.cursor/mcp.json` | `mcp_servers.<name>` in `<codex>/config.toml` |
-| Settings (`settings/claude.json`) | deep-merged into `~/.claude/settings.json` | none | none |
+| Settings (`settings/claude.json`, `settings/cursor.json`, `settings/codex.json`) | deep-merged into `~/.claude/settings.json` | deep-merged into `~/.cursor/hooks.json` | deep-merged into `<codex>/hooks.json` |
 
 - **Skill sharing:** Install in `~/.claude/skills/` when Claude Code is selected and in `~/.agents/skills/` when Codex is selected. If Cursor shares the home with either, it uses those skills. If all three share the home, Cursor can see both required copies. Install a separate Cursor copy when it shares the home with neither, including when it runs on Windows and the other tools run in WSL.
 - **Agent sharing:** Cursor can share Claude Code's agents if they run in the same home. Codex agents use TOML with `name` and `description` from the Markdown frontmatter and `developer_instructions` from its body. Preserve any upstream credit in TOML comments.
 - **Codex instructions:** Use a non-empty `<codex>/AGENTS.override.md` if present, since Codex gives it precedence. Run `uv run mstack render-rule --combined <mstack>` for the full block. Replace one existing block or append it after the user's text, leaving the surrounding content intact. If the markers are malformed or duplicated, show the proposed repair for approval before editing.
+- **Codex hooks:** If inline `[hooks]` already exists in `<codex>/config.toml`, merge the entries there to keep one hook source for that layer. Ask the user to review and trust the installed hooks in Codex.
 - **Codex MCP:** Keep the user's other TOML entries. For a local server use `command`, `args` and `env` for literal values. Forward environment variables by name using `env_vars` when the variable keeps its name, or an explicit user-approved launcher when it needs remapping. For an HTTP server use `url`. Check the result with `codex mcp list`.
 
 The optional asset formats and install destinations are documented in `docs/setup/agent-assets.md`. Empty asset folders are skipped.
@@ -92,7 +93,7 @@ A short list. Leave out empty lines:
 
 - Added / updated / combined / replaced / kept: the items, by kind.
 - Removed: leftovers and duplicates.
-- Keys written in `settings.json`, `mcp.json` or `config.toml`.
+- Keys written in `settings.json`, `hooks.json`, `mcp.json` or `config.toml`.
 - Environment variables to set on this machine (every `${VAR}` an installed item uses).
 - Cursor rules: printed for pasting, or skipped.
 - Backups: `<folder>/.mstack-backups/<timestamp>/`.

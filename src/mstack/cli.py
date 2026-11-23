@@ -1,39 +1,35 @@
 import argparse
-import importlib.metadata
+import importlib
 import logging
 import sys
-from collections.abc import Callable
-
-from mstack import cleanup, config, doctor, init, lint, packs, platform, render
-from mstack.guards import (
-    check_commit_msg,
-    check_domain,
-    check_exceptions,
-    check_rule_coverage,
-    check_skills,
-)
 
 logger = logging.getLogger(__name__)
 
-COMMANDS: dict[str, Callable[[list[str]], int]] = {
-    "cleanup": cleanup.main,
-    "commit-msg": check_commit_msg.main,
-    "config": config.main,
-    "coverage": check_rule_coverage.main,
-    "doctor": doctor.main,
-    "exceptions": check_exceptions.main,
-    "init": init.main,
-    "domain-check": check_domain.main,
-    "lint": lint.main,
-    "packs": packs.main,
-    "platform": platform.main,
-    "render-rule": render.main,
-    "skills-check": check_skills.main,
+COMMANDS = {
+    "cleanup": "mstack.cleanup",
+    "commit-msg": "mstack.guards.check_commit_msg",
+    "config": "mstack.config",
+    "coverage": "mstack.guards.check_rule_coverage",
+    "doctor": "mstack.doctor",
+    "exceptions": "mstack.guards.check_exceptions",
+    "hook": "mstack.hooks",
+    "init": "mstack.init",
+    "domain-check": "mstack.guards.check_domain",
+    "lint": "mstack.lint",
+    "packs": "mstack.packs",
+    "platform": "mstack.platform",
+    "render-rule": "mstack.render",
+    "skills-check": "mstack.guards.check_skills",
 }
 
 
 def main(argv: list[str] | None = None) -> int:
     arguments = sys.argv[1:] if argv is None else argv
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    if arguments[:1] == ["hook"]:
+        command = importlib.import_module(COMMANDS["hook"])
+        return int(command.main(arguments[1:]))
+    metadata = importlib.import_module("importlib.metadata")
     parser = argparse.ArgumentParser(
         prog="mstack",
         description=(
@@ -45,13 +41,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"mstack {importlib.metadata.version('mstack')}",
+        version=f"mstack {metadata.version('mstack')}",
     )
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = importlib.import_module(COMMANDS[parsed.command])
+    config = importlib.import_module("mstack.config")
     try:
-        return COMMANDS[parsed.command](arguments[1:])
+        return int(command.main(arguments[1:]))
     except config.ConfigError as error:
         logger.error("mstack: %s", error)
         return 2

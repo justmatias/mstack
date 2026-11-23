@@ -16,7 +16,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `agents/` | Optional subagent definitions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
-| `settings/` | Optional Claude Code settings ([format and install behavior](docs/setup/agent-assets.md)). |
+| `settings/` | Hook settings for Claude Code, Cursor and Codex ([format and install behavior](docs/setup/agent-assets.md)). |
 | `src/mstack/` | The `mstack` CLI: `mstack lint` and the guards the skills and `make` targets run. |
 
 ## Getting started
@@ -36,10 +36,12 @@ The setup skill lives in `.agents/skills/setup-mstack/`, the project skills fold
 | You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
 | --- | --- | --- | --- | --- |
 | Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/`, a managed block in `~/.claude/CLAUDE.md` | `claude mcp add-json --scope user` | merged into `~/.claude/settings.json` |
-| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | none |
-| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/config.toml` | none |
+| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | merged into `~/.cursor/hooks.json` |
+| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/config.toml` | merged into `~/.codex/hooks.json` |
 
 When tools share a home, Cursor can use the skills from Claude Code or Codex and the agents from Claude Code. If all three share a home, doctor warns about the two skill copies Cursor can see. On WSL, Cursor reads the Windows profile, so setup gives Cursor its own copies. `mstack platform` prints the tool folders, including the `CODEX_HOME` override for `~/.codex`.
+
+[Agent hooks](hooks/README.md) run checks after edits and at Claude Code and Codex stops, only in projects with `.mstack.toml`.
 
 **2. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
 

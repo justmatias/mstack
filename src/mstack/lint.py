@@ -245,16 +245,20 @@ def scan_targets(run: LintRun) -> list[str]:
 
 
 def step_scan(run: LintRun) -> StepResult:
-    sgconfig = sgconfig_path(run)
     if run.mode != "full" and not run.files:
         return StepResult(ok=True, skipped="no changed files to scan")
+    sgconfig = sgconfig_path(run)
     command = [find_tool("ast-grep"), "scan", "-c", str(sgconfig)]
     if run.json_output:
         command.append("--json=stream")
     completed = run_tool([*command, *scan_targets(run)], run)
     if not run.json_output:
         return StepResult(ok=completed.returncode == 0)
-    findings = [scan_finding(line) for line in completed.stdout.splitlines() if line]
+    findings: list[Any] = [
+        scan_finding(line) for line in completed.stdout.splitlines() if line
+    ]
+    if completed.returncode and not findings:
+        findings = output_lines(completed)
     return StepResult(ok=completed.returncode == 0, findings=findings)
 
 
@@ -328,8 +332,15 @@ def step_coverage(run: LintRun) -> StepResult:
     )
 
 
-def step_exceptions(_run: LintRun) -> StepResult:
-    return run_guard(check_exceptions.main)
+def step_exceptions(run: LintRun) -> StepResult:
+    if run.mode != "files":
+        return run_guard(check_exceptions.main)
+    paths = [
+        str(path) for path in run.files if path.suffix in check_exceptions.SUFFIXES
+    ]
+    if not paths:
+        return StepResult(ok=True, skipped="no selected files support exceptions")
+    return run_guard(lambda _: check_exceptions.main(paths))
 
 
 def step_domain_check(run: LintRun) -> StepResult:

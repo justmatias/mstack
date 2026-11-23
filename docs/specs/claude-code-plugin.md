@@ -1,7 +1,7 @@
 # Claude Code plugin
 
 - **Phase:** future
-- **Depends on:** nothing open. Packages `skills/` and `agents/`, validated by `mstack skills-check`. Better with `agent-hooks`, whose hooks the plugin can ship.
+- **Depends on:** nothing open. Packages `skills/` and `agents/`, validated by `mstack skills-check`. The plugin can ship the Claude Code hooks from `settings/claude.json`.
 
 ## Problem
 
@@ -22,7 +22,7 @@ The repo is also a Claude Code marketplace with one `mstack` plugin. On a Claude
 - **Layout:** the checkout groups skills as `skills/<group>/<name>/`, while every install, and `skills-check`'s link resolution, treat them as flat `<name>/` folders. The plugin must see the flat layout, so links between skills (`../sync/references/`) keep working. Two options, to choose at implementation time:
   1. `plugin.json` lists each skill folder explicitly, if the schema allows custom skill paths and links still resolve between siblings.
   2. A release step builds the plugin into a generated folder with the flat layout, and the marketplace points at it (a release branch or a release asset).
-- Plugin components: every skill except `setup-mstack` (it lives in `.agents/skills/` and is never installed), `agents/`, and, once `agent-hooks` ships, its hooks as `hooks/hooks.json`.
+- Plugin components: every skill except `setup-mstack` (it lives in `.agents/skills/` and is never installed), `agents/`, and the Claude Code hooks from `settings/claude.json` as `hooks/hooks.json`.
 - Plugin skills are namespaced (`mstack:sync`). Update skill text that refers to other skills by bare name only where it matters.
 - **Version:** semantic-release writes the version into `plugin.json` too (`version_variables` or a JSON updater in `[tool.semantic_release]`).
 - **No double install:** a machine uses either the plugin or copied skills. `setup-mstack` asks which one when the user picks Claude Code only, and skips copying skills and agents when the plugin is installed. `doctor` flags copied mstack skills next to the plugin.
