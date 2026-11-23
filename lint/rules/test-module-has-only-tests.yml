@@ -1,7 +1,7 @@
 id: test-module-has-only-tests
 language: Python
 severity: warning
-message: Keep only top-level test_ functions here; move classes and helpers to conftest.py
+message: Keep only top-level test_ functions here; move fixtures to conftest.py and plain helpers to a helpers.py beside it
 note: |
   Plain test functions need no class boilerplate, and setup in conftest.py keeps
   each test reading as "given these objects, assert this".
