@@ -1,6 +1,6 @@
 ---
-name: mstack-review
-description: "Review the changes since a fixed point (a commit, branch, tag or merge-base) on two separate axes: Standards (does the diff follow the repo's prose rules, especially the llm-review ones no check enforces, plus a baseline of code smells?) and Spec (does it do what the originating issue or spec asked for?). Runs each axis in its own parallel subagent and reports them side by side, never merged. Use for /mstack-review or to apply mstack's standards and spec review to a diff."
+name: diff-review
+description: "Review the changes since a fixed point (a commit, branch, tag or merge-base) on two separate axes: Standards (does the diff follow the repo's prose rules, especially the llm-review ones no check enforces, plus a baseline of code smells?) and Spec (does it do what the originating issue or spec asked for?). Runs each axis in its own parallel subagent and reports them side by side, never merged. Use for /diff-review or to apply mstack's standards and spec review to a diff."
 disable-model-invocation: true
 license: MIT
 metadata:
@@ -9,7 +9,7 @@ metadata:
   upstream-license: "MIT, Copyright (c) 2026 Matt Pocock, https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/LICENSE"
 ---
 
-# mstack review
+# Diff review
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including the findings, even when the diff, the rules or the spec are not. (2) **Practices, not domain**: findings name coding practices and cite file and line; they never restate business rules, values or ticket contents beyond the spec line a finding is about. Details: [../sync/references/principles.md](../sync/references/principles.md).
 
@@ -22,9 +22,9 @@ Each axis runs in its own subagent with a fresh context, so neither colors the o
 
 | Invocation | Result |
 | --- | --- |
-| `mstack-review <ref>` | Both axes on `git diff <ref>...HEAD` |
-| `mstack-review <ref> --spec <path-or-issue>` | Same, with the spec given instead of searched for |
-| `mstack-review <ref> --standards` | Standards axis only |
+| `diff-review <ref>` | Both axes on `git diff <ref>...HEAD` |
+| `diff-review <ref> --spec <path-or-issue>` | Same, with the spec given instead of searched for |
+| `diff-review <ref> --standards` | Standards axis only |
 
 ## 1. Pin the fixed point
 

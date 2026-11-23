@@ -18,7 +18,7 @@ metadata:
 
 Make a change more correct by having an independent reviewer check it in a loop, then answering each finding with the smallest fix that works. Make the fewest changes that satisfy the reviewer: watch for scope creep and push back when a finding asks for more than the intent needs.
 
-Use the decision mode below to challenge a proposal or test an assumption while the decision is still open. For a read-only report on two axes (the repo's rules and the spec), use [mstack-review](../mstack-review/SKILL.md).
+Use the decision mode below to challenge a proposal or test an assumption while the decision is still open. For a read-only report on two axes (the repo's rules and the spec), use [diff-review](../diff-review/SKILL.md).
 
 ## Budget
 

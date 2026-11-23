@@ -13,7 +13,7 @@ metadata:
 
 > **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including the writeup and the proof script, even when the code or the discussion is not. (2) **Practices, not domain**: the writeup cites `file:line` and describes how things break; it never copies business rules, values, URLs or data beyond what a risk needs, and the proof script uses generic names. Details: [../sync/references/principles.md](../sync/references/principles.md).
 
-Find what a change breaks somewhere else, before it ships. [`how`](../how/SKILL.md) says what the code does and [`why`](../why/SKILL.md) says why it is shaped that way; this skill says what the change breaks elsewhere. [`mstack-review`](../mstack-review/SKILL.md) checks a diff against the rules and the spec; this one looks past the diff.
+Find what a change breaks somewhere else, before it ships. [`how`](../how/SKILL.md) says what the code does and [`why`](../why/SKILL.md) says why it is shaped that way; this skill says what the change breaks elsewhere. [`diff-review`](../diff-review/SKILL.md) checks a diff against the rules and the spec; this one looks past the diff.
 
 Listing the callers is not the job: grep does that in a second. The job is the breakage grep does not show.
 

@@ -45,7 +45,7 @@ Before changing or removing anything, find out why it is there (Chesterton's fen
 
 Each signal is concrete. A repo rule that endorses the pattern wins; a linter that already enforces it makes it out of scope.
 
-Start from [the mstack review smell baseline](../mstack-review/references/smell-baseline.md) (duplicated code, mysterious names, middle men, speculative generality and the rest): each one is also a simplification opportunity, and its usual fix is the change to make. Then add these signals, which are about how a single function reads:
+Start from [the review smell baseline](../diff-review/references/smell-baseline.md) (duplicated code, mysterious names, middle men, speculative generality and the rest): each one is also a simplification opportunity, and its usual fix is the change to make. Then add these signals, which are about how a single function reads:
 
 | Signal | What to look for | Usual simplification |
 | --- | --- | --- |
