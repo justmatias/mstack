@@ -39,7 +39,7 @@ Ask which tools to configure: **Claude Code, Cursor, Codex, or any combination?*
 | Rules (`rules/<name>.mdc`) | `~/.claude/rules/<name>.md` | pasted into Cursor Settings → Rules → User Rules | a managed block in `<codex>/AGENTS.md` |
 | Global instructions (`instructions/global.md`) | a `<!-- mstack:begin -->` … `<!-- mstack:end -->` block in `~/.claude/CLAUDE.md` | pasted with the rules | included in the rules block |
 | MCP servers (`mcp/<name>.json`) | `claude mcp add-json --scope user <name> '<json>'` | `mcpServers.<name>` in `~/.cursor/mcp.json` | `mcp_servers.<name>` in `<codex>/config.toml` |
-| Settings (`settings/claude.json`) | deep-merged into `~/.claude/settings.json` | none | none |
+| Settings (`settings/claude.json`, `settings/cursor.json`) | deep-merged into `~/.claude/settings.json` | deep-merged into `~/.cursor/hooks.json` | none |
 
 - **Skill sharing:** Install in `~/.claude/skills/` when Claude Code is selected and in `~/.agents/skills/` when Codex is selected. If Cursor shares the home with either, it uses those skills. If all three share the home, Cursor can see both required copies. Install a separate Cursor copy when it shares the home with neither, including when it runs on Windows and the other tools run in WSL.
 - **Agent sharing:** Cursor can share Claude Code's agents if they run in the same home. Codex agents use TOML with `name` and `description` from the Markdown frontmatter and `developer_instructions` from its body. Preserve any upstream credit in TOML comments.

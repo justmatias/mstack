@@ -10,7 +10,6 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [agent-hooks](agent-hooks.md) | Agent hooks that run the checks while the agent edits | |
 | [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | |
 
 ### Future

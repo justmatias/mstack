@@ -1,10 +1,3 @@
-"""The files a change touches, for `mstack lint --changed`.
-
-An explicit base ref (a flag, as in CI) must exist: falling back would silently scan
-nothing. Only the configured default falls back to its local branch (`origin/main`
-to `main`) when there is no remote.
-"""
-
 import subprocess
 from pathlib import Path
 
@@ -13,7 +6,7 @@ class ChangedFilesError(Exception):
     pass
 
 
-def git(root: Path, *arguments: str) -> subprocess.CompletedProcess:
+def git(root: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", *arguments],
         cwd=root,
@@ -58,19 +51,16 @@ def resolve_base_ref(root: Path, explicit: str | None, default: str) -> str | No
     return None
 
 
-def committed_changes(root: Path, base_ref: str | None, explicit: bool) -> list[str]:
-    if base_ref is None:
-        return []
-    merge_base = git(root, "merge-base", base_ref, "HEAD")
-    if merge_base.returncode != 0:
+def diff_base(root: Path, base_ref: str | None, explicit: bool) -> str:
+    if base_ref is not None:
+        merge_base = git(root, "merge-base", base_ref, "HEAD")
+        if merge_base.returncode == 0:
+            return merge_base.stdout.strip()
         if explicit:
             raise ChangedFilesError(
                 f"no merge base between '{base_ref}' and HEAD (shallow clone?)."
             )
-        return []
-    return git_lines(
-        root, "diff", "--name-only", "--diff-filter=ACMR", merge_base.stdout.strip()
-    )
+    return "HEAD" if ref_exists(root, "HEAD") else "--cached"
 
 
 def changed_files(
@@ -84,13 +74,16 @@ def changed_files(
     """Changed files that still exist, as absolute paths, sorted.
 
     Without `staged`: committed changes since the merge base with the base ref,
-    uncommitted changes, and untracked files. With `staged`: only the staged files.
+    uncommitted changes, and untracked files. If the default base has no merge
+    base, compare against HEAD (or include staged files before the first commit).
+    An explicit base must resolve. With `staged`: only the staged files.
     """
     if staged:
         names = git_lines(root, "diff", "--cached", "--name-only", "--diff-filter=ACMR")
     else:
         resolved = resolve_base_ref(root, base_ref, default_base_ref)
-        names = committed_changes(root, resolved, explicit=base_ref is not None)
+        base = diff_base(root, resolved, explicit=base_ref is not None)
+        names = git_lines(root, "diff", "--name-only", "--diff-filter=ACMR", base, "--")
         names += git_lines(root, "ls-files", "--others", "--exclude-standard")
     paths = {root / name for name in names}
     return sorted(

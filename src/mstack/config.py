@@ -6,9 +6,10 @@ import tomllib
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-CONFIG_FILE_NAME = ".mstack.toml"
+from mstack.project_paths import CONFIG_FILE_NAME, find_config_path, find_git_root
+
 # Keys whose values are paths (or lists of paths) relative to the config file.
 PATH_KEYS = {
     "rules_dir",
@@ -69,6 +70,11 @@ class HostConfig(StrictModel):
     packs: list[str] = []
 
 
+class HookSettings(StrictModel):
+    enabled: bool = True
+    timeout: float = Field(default=10.0, gt=0, allow_inf_nan=False)
+
+
 class ProjectConfig(StrictModel):
     packs: list[str] = []
     pack_overrides: PackOverrides = PackOverrides()
@@ -77,6 +83,7 @@ class ProjectConfig(StrictModel):
     importlinter: Path = Path(".importlinter")
     pre_commit_config: Path = Path(".pre-commit-config.yaml")
     scan: ScanSettings = ScanSettings()
+    hooks: HookSettings = HookSettings()
     domain_check: DomainCheckSettings = DomainCheckSettings()
     changed: ChangedSettings = ChangedSettings()
     commits: CommitsSettings = CommitsSettings()
@@ -92,28 +99,6 @@ class ResolvedConfig(StrictModel):
     sources: dict[str, Source]
 
 
-def find_git_root(start: Path) -> Path | None:
-    return next(
-        (
-            directory
-            for directory in (start, *start.parents)
-            if (directory / ".git").exists()
-        ),
-        None,
-    )
-
-
-def candidate_directories(start: Path, git_root: Path | None) -> list[Path]:
-    if git_root is None:
-        return [start]
-    directories = [start]
-    for parent in start.parents:
-        if not parent.is_relative_to(git_root):
-            break
-        directories.append(parent)
-    return directories
-
-
 def read_toml(path: Path) -> dict[str, Any]:
     try:
         return tomllib.loads(path.read_text(encoding="utf-8"))
@@ -124,12 +109,8 @@ def read_toml(path: Path) -> dict[str, Any]:
 def find_config_file(
     start: Path, git_root: Path | None
 ) -> tuple[Path, dict[str, Any]] | None:
-    """Walk up from start to the git root; never read a config above the repo."""
-    for directory in candidate_directories(start, git_root):
-        config_file = directory / CONFIG_FILE_NAME
-        if config_file.is_file():
-            return config_file, read_toml(config_file)
-    return None
+    path = find_config_path(start, git_root)
+    return (path, read_toml(path)) if path else None
 
 
 def flatten(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
