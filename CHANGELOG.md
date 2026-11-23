@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v6.3.0 (2026-11-23)
+
+### Bug Fixes
+
+- **testing**: Align the valid fixture with the test-name rule
+  ([`ceadc39`](https://github.com/justmatias/mstack/commit/ceadc3986088f1984f3e83850aec160e906d529e))
+
+### Features
+
+- **testing**: Check descriptive test names
+  ([`d020c74`](https://github.com/justmatias/mstack/commit/d020c7427f9503cb8fa0f7dbdc584f5345f1fcea))
+
+
 ## v6.2.0 (2026-11-23)
 
 ### Features

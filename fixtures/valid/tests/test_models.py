@@ -16,6 +16,6 @@ def test_total_sums_price_times_quantity_when_order_has_items() -> None:
     assert order_total(order) == pytest.approx(11.0)
 
 
-def test_item_rejects_a_negative_price() -> None:
+def test_item_rejects_price_when_negative() -> None:
     with pytest.raises(pydantic.ValidationError):
         Item(name="pen", unit_price=-1.0, quantity=1)

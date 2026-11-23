@@ -36,6 +36,7 @@ Use the decision mode below to challenge a proposal or test an assumption while 
    - Local: `git merge-base HEAD origin/<default-branch>`. With no remote, use a base the user names, or `HEAD` for uncommitted changes only.
 3. The change is the base against the working tree in those paths, untracked files included. Use one diff command for every round.
 4. Write the intent and what is out of scope in one or two sentences. Run the checks that cover the change, and do not send code this change breaks. Note missing or already failing checks in the brief.
+5. **Trace the stated requirements.** Read the linked issue, spec, or acceptance criteria when the change references one. Give the reviewer the relevant requirements and ask it to check each against the diff. If no written requirements exist, state that in the brief and review the user's stated intent.
 
 ## 2. Start the reviewer
 
