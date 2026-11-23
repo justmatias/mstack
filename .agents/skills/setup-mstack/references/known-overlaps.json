@@ -1,6 +1,18 @@
 {
   "overlaps": [
     {
+      "skill": "research",
+      "other": "source-driven-development",
+      "origin": "addyosmani/agent-skills",
+      "reason": "research incorporates version-specific implementation checks against primary sources from source-driven-development"
+    },
+    {
+      "skill": "review-loop",
+      "other": "doubt-driven-development",
+      "origin": "addyosmani/agent-skills",
+      "reason": "review-loop incorporates fresh-context review of a consequential decision from doubt-driven-development"
+    },
+    {
       "skill": "reflect",
       "other": "reflect",
       "origin": "pstack",
@@ -13,10 +25,10 @@
       "reason": "mstack correct is adapted from pstack correct, under the same name: both find repeated mistakes and make them impossible at the highest level available"
     },
     {
-      "skill": "review",
+      "skill": "diff-review",
       "other": "code-review",
       "origin": "mattpocock/skills",
-      "reason": "mstack review is adapted from mattpocock/skills code-review under another name: both review a diff on a standards axis and a spec axis in parallel subagents and report them separately"
+      "reason": "diff-review is adapted from mattpocock/skills code-review under another name: both review a diff on a standards axis and a spec axis in parallel subagents and report them separately"
     },
     {
       "skill": "declutter",

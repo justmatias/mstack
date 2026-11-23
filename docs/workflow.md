@@ -59,7 +59,7 @@ Run `mstack config` to see the paths the repo uses; every command reads them fro
 flowchart TD
     write["Agent writes code<br/>(reads the rules)"] --> local["mstack lint --changed<br/>pre-commit on staged files"]
     local --> pr["Pull request<br/>CI: full + changed-files scan"]
-    pr --> rev["/review<br/>rules + spec"]
+    pr --> rev["/diff-review<br/>rules + spec"]
     rev --> merge["Merge"]
     write -. "you correct it" .-> refl["/reflect at the end of the session"]
     rev -. "the same finding again" .-> corr["/correct or /sync"]
@@ -71,7 +71,7 @@ flowchart TD
 1. **Write.** The agent follows the rules installed in its user folder, plus the repo's own rules: point to them from `AGENTS.md` (or `CLAUDE.md`), as this repo does, because Claude Code never reads `.mdc` files by itself.
 2. **Check locally.** `mstack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files, and the `mstack-commit-msg` hook, if you add it, checks the message.
 3. **Open the pull request.** CI runs the full scan and the changed-files scan. Commit messages follow Conventional Commits.
-4. **Review.** `/review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
+4. **Review.** `/diff-review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
 5. **Simplify, if needed.** `/declutter` makes working code easier to read without changing what it does, one tested change at a time.
 
 ### When an agent gets something wrong

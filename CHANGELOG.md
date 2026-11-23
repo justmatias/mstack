@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v6.0.0 (2026-11-23)
+
+### Features
+
+- **skills**: Namespace the two-axis review command
+  ([`ff95293`](https://github.com/justmatias/mstack/commit/ff952931953f5e3d2ca88855be70d0fdcc136e38))
+
+- **skills**: Rename review command to diff-review
+  ([`242e3ea`](https://github.com/justmatias/mstack/commit/242e3ea79964e3f72bba7f8c86e2ca267c23cffc))
+
+- **skills**: Verify sources and challenge decisions earlier
+  ([`e007505`](https://github.com/justmatias/mstack/commit/e007505be08f8bfb7c9479cb031c571ed5d4f0a4))
+
+
 ## v5.7.0 (2026-11-22)
 
 ### Features
