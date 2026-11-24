@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v6.6.0 (2026-11-24)
+
+### Features
+
+- **rules**: Name compound keyword conditions
+  ([`a2f86fa`](https://github.com/justmatias/mstack/commit/a2f86fa38a6e589c47ebb0094a535ec1358ba04c))
+
+- **rules**: Prefer named fields for structured returns
+  ([`89fbc69`](https://github.com/justmatias/mstack/commit/89fbc69de0bda79083f3bee024da4ab5a13474ff))
+
+
 ## v6.5.0 (2026-11-24)
 
 ### Bug Fixes
