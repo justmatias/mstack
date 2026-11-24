@@ -1,11 +1,11 @@
 ---
 description: Commits and commit messages
 alwaysApply: true
-license: MIT
+license: Apache-2.0
 metadata:
   adapted-from: "skills/commit-hygiene in Gentleman-Programming/engram (https://github.com/Gentleman-Programming/engram/tree/11521f4f3776db6d94dc17c11731bad35b71c7bc/skills/commit-hygiene). Thanks to Alan Buscaglia for the original."
   upstream-commit: "11521f4f3776db6d94dc17c11731bad35b71c7bc"
-  upstream-license: "MIT, Copyright (c) 2026 Alan Buscaglia, https://github.com/Gentleman-Programming/engram/blob/11521f4f3776db6d94dc17c11731bad35b71c7bc/LICENSE"
+  upstream-license: "Apache-2.0, declared in the skill's frontmatter (the root LICENSE is MIT, Copyright (c) 2026 Alan Buscaglia), https://github.com/Gentleman-Programming/engram/blob/11521f4f3776db6d94dc17c11731bad35b71c7bc/skills/commit-hygiene/SKILL.md"
 ---
 
 # Git commits
@@ -16,7 +16,7 @@ metadata:
 - One logical change per commit.
 - Never commit secrets, keys or local settings files.
 - Never commit directly to the default branch; branch first.
-- Name a branch `type/short-description`: a type from the commit type list, then lowercase words joined by hyphens.
+- Name each branch you create `type/short-description`: a type from the commit type list, then lowercase words joined by hyphens.
 - Don't force-push shared branches.
 - Never add AI attribution to commits or pull requests. Omit agent or model co-author trailers and generated-with footers.
 
