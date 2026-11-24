@@ -23,7 +23,7 @@ You decide how to do the work, with ordinary file tools and the shell the machin
 ## The rules you never break
 
 - **Ask before you write.** Show one plan (step 3), and change nothing until the user approves it.
-- **Back up before you replace or remove.** Move the old item into `<the folder it came from>/.mstack-backups/<UTC timestamp>/`, for example `~/.claude/skills/.mstack-backups/20261120-101500/sync/`. Never as `<name>.bak` next to it: the tools would load the backup too. For a shared file (`settings.json`, `mcp.json`, `CLAUDE.md`), back up the whole file first.
+- **Back up before you replace or remove.** Move the old item into `<the folder it came from>/.mstack-backups/<UTC timestamp>/`, with the timestamp as `YYYYMMDD-HHMMSS` so `mstack cleanup` can prune it, for example `~/.claude/skills/.mstack-backups/20261120-101500/sync/`. A rule is the exception: Claude Code and Cursor load every file under a rules folder, however deep, so back it up beside that folder, into `<the rules folder's parent>/.mstack-backups/<UTC timestamp>/rules/`, for example `~/.claude/.mstack-backups/20261120-101500/rules/naming.md`. Never as `<name>.bak` next to it: the tools would load the backup too. For a shared file (`settings.json`, `mcp.json`, `CLAUDE.md`), back up the whole file first.
 - **Never overwrite the user's own edits silently.** When an installed item differs from mstack's version, find out which side changed and ask (step 4).
 - **Never write a secret.** `${VAR}` placeholders in `mcp/` and `settings/` stay as they are; the user sets the variables on each machine.
 - **Never edit `~/.claude.json` or Cursor's settings database by hand.**
@@ -96,5 +96,5 @@ A short list. Leave out empty lines:
 - Keys written in `settings.json`, `hooks.json`, `mcp.json` or `config.toml`.
 - Environment variables to set on this machine (every `${VAR}` an installed item uses).
 - Cursor rules: printed for pasting, or skipped.
-- Backups: `<folder>/.mstack-backups/<timestamp>/`.
+- Backups: `<folder>/.mstack-backups/<timestamp>/`, and for rules `<the rules folder's parent>/.mstack-backups/<timestamp>/rules/`.
 - Open a new session in the tools you configured. Later, `mstack doctor` shows drift, and `/repair` (`$repair` in Codex) fixes it.

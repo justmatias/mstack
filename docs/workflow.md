@@ -37,7 +37,7 @@ The setup skill (`.agents/skills/setup-mstack/`) runs from the checkout and is n
 1. installs the `mstack` CLI (`uv tool install --editable <checkout>`), which brings its own ast-grep and import-linter;
 2. asks which tools you use, and runs `mstack platform` to find their folders (on WSL, Cursor reads the Windows profile);
 3. compares every skill, rule, agent, MCP server, setting and global instruction with what you already have, and shows one plan;
-4. asks only where your own setup differs, backs up anything it replaces to `<folder>/.mstack-backups/<timestamp>/`, and applies the plan;
+4. asks only where your own setup differs, backs up anything it replaces to `<folder>/.mstack-backups/<timestamp>/` (a rule beside its rules folder, where no tool loads it), and applies the plan;
 5. runs `mstack doctor` until it reports no errors.
 
 Rules reach Claude Code as `~/.claude/rules/<name>.md`, in the form `mstack render-rule` prints. Cursor keeps user rules in its settings, so for Cursor the skill prints them for you to paste.
