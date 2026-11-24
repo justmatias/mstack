@@ -7,6 +7,7 @@ alwaysApply: false
 # Naming
 
 - Use descriptive names. Spell words out instead of abbreviating them.
+- Omit the leading underscore on classes introduced as named result models.
 - A function does one thing. If its name needs "and", split it.
 
 Why: code is read far more often than it is written.
