@@ -68,6 +68,23 @@ def test_cleanup_scans_integration_backups_when_checkout_is_given(tmp_path):
     assert not old_rule.exists()
 
 
+def test_cleanup_scans_rule_backups_beside_rules_folder_when_checkout_is_given(
+    tmp_path,
+):
+    checkout = tmp_path / "checkout"
+    rules_parent = checkout / ".cursor"
+    (rules_parent / "rules").mkdir(parents=True)
+    old_rule = create_backup_batch(rules_parent, OLD)
+    create_backup_batch(rules_parent, NEWEST)
+    (checkout / ".mstack.toml").write_text(
+        'rules_dir = ".cursor/rules"\n', encoding="utf-8"
+    )
+
+    assert main(["--apply", "--checkout", str(checkout)], now=NOW) == 0
+
+    assert not old_rule.exists()
+
+
 @pytest.mark.skipif(
     sys.platform == "win32", reason="creating symlinks can require privileges"
 )
