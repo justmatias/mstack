@@ -31,7 +31,7 @@ cd mstack
 claude "set up mstack"
 ```
 
-The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`.
+The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`, and a rule beside its rules folder, where no tool loads it.
 
 | You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
 | --- | --- | --- | --- | --- |

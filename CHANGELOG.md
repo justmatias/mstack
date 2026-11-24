@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v6.7.1 (2026-11-24)
+
+### Bug Fixes
+
+- **cleanup**: Scan rule backups beside the checkout's rules folder
+  ([`4b387ae`](https://github.com/justmatias/mstack/commit/4b387ae2ce53706d72926c03cb32a1be97050ffb))
+
+- **skills**: Back up rules beside the rules folder, not inside it
+  ([`62c5b40`](https://github.com/justmatias/mstack/commit/62c5b404e4aec9ef18dce888074c70b3c1e7bdff))
+
+### Refactoring
+
+- **tests**: Give cleanup tests their own package
+  ([`4174b4e`](https://github.com/justmatias/mstack/commit/4174b4edb4f86b7380406fd582d09b0bce0e70fa))
+
+
 ## v6.7.0 (2026-11-24)
 
 ### Bug Fixes

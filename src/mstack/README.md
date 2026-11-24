@@ -40,8 +40,8 @@ Running `mstack cleanup` lists timestamped batches under known user and uv tool
 `.mstack-backups` directories, with their sizes in bytes. It keeps the newest
 batch in each directory and only lists other batches older than 30 days.
 Run `mstack cleanup --apply` to recalculate the list and delete those batches.
-Add `--checkout DIR` to include that project's configured rules folder,
-`skills/`, and the immediate skill groups.
+Add `--checkout DIR` to include that project's configured rules folder and
+its parent, `skills/`, and the immediate skill groups.
 
 ### `mstack lint`
 

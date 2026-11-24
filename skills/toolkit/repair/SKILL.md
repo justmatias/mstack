@@ -49,7 +49,7 @@ For each skill, rule or agent doctor named, compare mstack's version with the in
 
 Always:
 
-- **Back up first**, into `<folder>/.mstack-backups/<UTC timestamp>/<name>` inside the folder the item came from, never as `<name>.bak` next to it.
+- **Back up first**, into `<folder>/.mstack-backups/<UTC timestamp>/<name>` inside the folder the item came from, with the timestamp as `YYYYMMDD-HHMMSS`, never as `<name>.bak` next to it. A rule goes beside its rules folder instead, into `<the rules folder's parent>/.mstack-backups/<UTC timestamp>/rules/<name>`: the tools load every file under a rules folder, backups included.
 - Install rules with `mstack render-rule`, never by hand, or doctor reports them as drift again.
 - Use the setup skill's folder choices for the selected tools.
 
@@ -72,4 +72,4 @@ A short list. Leave out empty lines:
 - Fixed: each result and what closed it (for example "`drift skill sync`: updated, backed up").
 - Left on purpose: each remaining warning and why.
 - Needs the user: what only they can do (install a tool, export `MSTACK_WINDOWS_HOME`, open a new session so the tools load the new skills).
-- Backups: `<folder>/.mstack-backups/<timestamp>/`.
+- Backups: `<folder>/.mstack-backups/<timestamp>/`, and for rules `<the rules folder's parent>/.mstack-backups/<timestamp>/rules/`.

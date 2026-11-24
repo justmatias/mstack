@@ -1,5 +1,3 @@
-"""Preview or prune old mstack backup batches."""
-
 import argparse
 import logging
 import shutil
@@ -41,8 +39,9 @@ def user_folders() -> Iterator[Path]:
 
 def checkout_folders(checkout: Path) -> Iterator[Path]:
     rules = resolve_config(start=checkout).values.rules_dir
-    if rules.resolve().is_relative_to(checkout):
-        yield rules
+    for folder in (rules, rules.parent):
+        if folder.resolve().is_relative_to(checkout):
+            yield folder
     skills = checkout / "skills"
     if plain_directory(skills):
         yield skills
