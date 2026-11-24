@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v6.5.0 (2026-11-24)
+
+### Features
+
+- **rules**: Clarify naming for result models
+  ([`240f4f6`](https://github.com/justmatias/mstack/commit/240f4f62e1c2d214e9c37d16f6ca7430080f6f66))
+
+
 ## v6.4.0 (2026-11-23)
 
 ### Bug Fixes
