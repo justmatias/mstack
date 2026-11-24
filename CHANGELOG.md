@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v6.7.0 (2026-11-24)
+
+### Bug Fixes
+
+- **rules**: Credit the skill's own Apache-2.0 license
+  ([`c6450e8`](https://github.com/justmatias/mstack/commit/c6450e863e53a9b9498810bdd02d5cb988def7d7))
+
+### Features
+
+- **rules**: Name branches type/short-description
+  ([`91bd250`](https://github.com/justmatias/mstack/commit/91bd250f16e2e4600113ce389a4accc8920038fa))
+
+
 ## v6.6.0 (2026-11-24)
 
 ### Features
