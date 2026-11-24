@@ -4,10 +4,20 @@
 
 ## v6.5.0 (2026-11-24)
 
+### Bug Fixes
+
+- **skills**: Close stdin when running a reviewer CLI
+  ([#68](https://github.com/justmatias/mstack/pull/68),
+  [`362ed27`](https://github.com/justmatias/mstack/commit/362ed274159fc08d063cb6efd219963e065ac0ec))
+
 ### Features
 
-- **rules**: Clarify naming for result models
-  ([`240f4f6`](https://github.com/justmatias/mstack/commit/240f4f62e1c2d214e9c37d16f6ca7430080f6f66))
+- **rules**: Add conftest-has-only-fixtures check
+  ([#68](https://github.com/justmatias/mstack/pull/68),
+  [`362ed27`](https://github.com/justmatias/mstack/commit/362ed274159fc08d063cb6efd219963e065ac0ec))
+
+- **rules**: Name functions with a verb phrase
+  ([`4135aa5`](https://github.com/justmatias/mstack/commit/4135aa5e47f91f912392af38b61083dcddb3395c))
 
 
 ## v6.4.0 (2026-11-23)
