@@ -8,7 +8,7 @@ The checks run through the `rulepack` command on `PATH`: `rulepack lint` runs ev
 
 ## 0. Static check or LLM review?
 
-Run `rulepack packs list` first (a git source missing from `rulepack.lock` needs `rulepack packs lock` before it lists). If a pack from a declared source covers the practice, select it in `.rulepack.toml`, lock a new git source, and name its check in the rule's `enforced-by:`; copying it into the repo makes a second copy that drifts.
+Run `rulepack packs list` first (a git source missing from `rulepack.lock` needs `rulepack packs lock` before it lists; it writes the lock, so ask the user first). If a pack from a declared source covers the practice, select it in `.rulepack.toml`, lock a new git source, and name its check in the rule's `enforced-by:`; copying it into the repo makes a second copy that drifts.
 
 Decide this before you pick a tool. A static check costs a YAML file, its tests, its false positives and every exception people add to dodge it, so it has to be worth that. A rule with `enforcement: llm-review` costs only its prose: the reviewer reads it on every PR.
 
