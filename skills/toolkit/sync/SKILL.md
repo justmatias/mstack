@@ -11,7 +11,7 @@ Keep `.cursor/rules/` focused on judgment guidance. Enforce checkable standards 
 
 The paths here are the defaults; a repo may move them in `.rulepack.toml`. Run `rulepack config` to see the configured `rules_dir` and `sgconfig` (default `lint-rules/sgconfig.yml`), and use those.
 
-References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
+References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). The guards run as `rulepack <command>` (see the authoring reference).
 
 ## Modes
 

@@ -2,7 +2,6 @@ import importlib.metadata
 import shutil
 import subprocess
 import tomllib
-from pathlib import Path
 
 from mstack.doctor.model import Context, Result, install_fix
 
@@ -55,13 +54,13 @@ def path_result(context: Context) -> Result:
 
 def rulepack_pin(context: Context) -> str:
     """The rulepack tag that `[tool.mstack] rulepack` in the checkout pins."""
-    pyproject = (context.checkout or Path()) / "pyproject.toml"
-    if pyproject.is_file():
-        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-        pin = data.get("tool", {}).get("mstack", {}).get("rulepack")
-        if isinstance(pin, str):
-            return pin
-    return "<tag>"
+    pyproject = context.checkout / "pyproject.toml" if context.checkout else None
+    try:
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8")) if pyproject else {}
+    except (OSError, tomllib.TOMLDecodeError):
+        data = {}
+    pin = data.get("tool", {}).get("mstack", {}).get("rulepack")
+    return pin if isinstance(pin, str) else "<tag>"
 
 
 def rulepack_result(context: Context) -> Result:

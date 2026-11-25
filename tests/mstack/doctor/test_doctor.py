@@ -351,3 +351,31 @@ def test_platform_check_warns_when_wsl_has_no_windows_profile(context):
 
 def test_platform_check_is_silent_when_not_on_wsl(context):
     assert not check_platform(context(tool="cursor"))
+
+
+def test_drift_reports_an_error_when_settings_still_run_mstack_hook(
+    context, home: Path
+):
+    settings = home / ".claude" / "settings.json"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    settings.write_text(
+        '{"hooks": {"Stop": [{"hooks": [{"command": "mstack hook stop"}]}]}}',
+        encoding="utf-8",
+    )
+
+    results = check_drift(context())
+
+    assert statuses(results)[("drift", "settings settings.json")] == "error"
+
+
+def test_drift_passes_settings_when_they_run_rulepack_hook(context, home: Path):
+    settings = home / ".claude" / "settings.json"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    settings.write_text(
+        '{"hooks": {"Stop": [{"hooks": [{"command": "rulepack hook stop"}]}]}}',
+        encoding="utf-8",
+    )
+
+    results = check_drift(context())
+
+    assert ("drift", "settings settings.json") not in statuses(results)

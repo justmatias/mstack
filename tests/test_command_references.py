@@ -6,8 +6,8 @@ import pytest
 from tests.conftest import REPOSITORY_ROOT
 
 MOVED_COMMAND = re.compile(
-    r"\bmstack (lint|coverage|domain-check|exceptions|commit-msg|hook|init|config"
-    r"|packs)\b"
+    r"(\bmstack|\$\(MSTACK\)) (lint|coverage|domain-check|exceptions|commit-msg"
+    r"|hook|init|config|packs)\b"
 )
 FOLDERS = ("skills", "settings", "docs", ".agents")
 FILES = sorted(

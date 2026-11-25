@@ -1,10 +1,4 @@
-"""Installed copies that no longer match the checkout.
-
-Doctor does not know why a copy differs: the user may have edited it, or the
-checkout may have moved on. The repair skill reads the diff and the checkout's
-history to tell which, and asks before touching the user's edits.
-"""
-
+import re
 from pathlib import Path
 
 from mstack.doctor.model import REPAIR_FIX, Context, Result
@@ -20,8 +14,12 @@ from mstack.doctor.targets import (
     skill_sources,
     uses_claude,
     uses_codex,
+    uses_cursor,
 )
 from mstack.render import FrontmatterError, render_combined_rules, render_rule
+
+# mstack v6 settings ran the agent hooks as `mstack hook`, which moved to rulepack.
+LEGACY_HOOK = re.compile(r"\bmstack hook (post-edit|stop)\b")
 
 
 def drifted(kind: str, name: str, installed: Path) -> Result:
@@ -104,12 +102,44 @@ def codex_rule_drift(context: Context, checkout: Path) -> list[Result]:
     return [drifted("rule", "codex", path)] if installed != expected else []
 
 
+def settings_files(context: Context) -> list[Path]:
+    files = []
+    if uses_claude(context.tool):
+        files.append(context.home / ".claude" / "settings.json")
+    if uses_cursor(context.tool):
+        files.append(context.cursor / ".cursor" / "hooks.json")
+    if uses_codex(context.tool):
+        files.append(context.codex / "hooks.json")
+    return files
+
+
+def settings_drift(context: Context) -> list[Result]:
+    return [
+        Result(
+            group="drift",
+            check=f"settings {path.name}",
+            status="error",
+            detail=f"{path} runs `mstack hook`, which is now `rulepack hook`",
+            fix=REPAIR_FIX,
+        )
+        for path in settings_files(context)
+        if path.is_file() and LEGACY_HOOK.search(path.read_text(encoding="utf-8"))
+    ]
+
+
 def check_drift(context: Context) -> list[Result]:
+    """Installed copies that no longer match the checkout.
+
+    Doctor does not know why a copy differs: the user may have edited it, or the
+    checkout may have moved on. The repair skill reads the diff and the checkout's
+    history to tell which, and asks before touching the user's edits.
+    """
     checkout = context.checkout
     if checkout is None or not checkout.is_dir():
         return []
     results = (
-        skill_drift(context, checkout)
+        settings_drift(context)
+        + skill_drift(context, checkout)
         + rule_drift(context, checkout)
         + codex_rule_drift(context, checkout)
         + agent_drift(context, checkout)

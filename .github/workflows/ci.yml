@@ -115,7 +115,7 @@ jobs:
       - name: Run pip-audit on the locked dependencies
         run: |
           requirements="$RUNNER_TEMP/requirements-audit.txt"
-          uv export --frozen --all-groups --no-emit-project --format requirements-txt -o "$requirements"
+          uv export --frozen --all-groups --no-emit-project --no-emit-package rulepack --format requirements-txt -o "$requirements"
           uvx pip-audit -r "$requirements" --disable-pip --require-hashes
 
   versioning:

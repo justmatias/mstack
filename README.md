@@ -101,7 +101,7 @@ Linting moved to [rulepack](https://github.com/justmatias/rulepack): `rulepack l
 
 **Migrating from mstack `v6.x`:**
 
-- **A repo that doesn't select packs:** rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+- **A repo that doesn't select packs:** rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
 - **A repo that selects packs** (`packs = [...]` in `.mstack.toml`): stay on mstack `v6.x` in pre-commit and CI until rulepack's pack sources ship.
 
 ## Working on mstack
