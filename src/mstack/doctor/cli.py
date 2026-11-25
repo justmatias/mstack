@@ -59,7 +59,9 @@ def rulepack_pin(context: Context) -> str:
         data = tomllib.loads(pyproject.read_text(encoding="utf-8")) if pyproject else {}
     except (OSError, tomllib.TOMLDecodeError):
         data = {}
-    pin = data.get("tool", {}).get("mstack", {}).get("rulepack")
+    tool = data.get("tool")
+    settings = tool.get("mstack") if isinstance(tool, dict) else None
+    pin = settings.get("rulepack") if isinstance(settings, dict) else None
     return pin if isinstance(pin, str) else "<tag>"
 
 

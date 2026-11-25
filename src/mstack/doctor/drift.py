@@ -109,7 +109,8 @@ def settings_files(context: Context) -> list[Path]:
     if uses_cursor(context.tool):
         files.append(context.cursor / ".cursor" / "hooks.json")
     if uses_codex(context.tool):
-        files.append(context.codex / "hooks.json")
+        # Setup merges Codex hooks into an inline [hooks] table when one exists.
+        files += [context.codex / "hooks.json", context.codex / "config.toml"]
     return files
 
 

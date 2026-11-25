@@ -379,3 +379,18 @@ def test_drift_passes_settings_when_they_run_rulepack_hook(context, home: Path):
     results = check_drift(context())
 
     assert ("drift", "settings settings.json") not in statuses(results)
+
+
+def test_drift_reports_an_error_when_codex_config_still_runs_mstack_hook(
+    context, home: Path
+):
+    config = home / ".codex" / "config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    config.write_text(
+        '[[hooks.Stop]]\nhooks = [{ command = "mstack hook stop" }]\n',
+        encoding="utf-8",
+    )
+
+    results = check_drift(context(tool="codex"))
+
+    assert statuses(results)[("drift", "settings config.toml")] == "error"
