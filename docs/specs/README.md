@@ -10,7 +10,7 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | |
+| [mstack-uses-rulepack](mstack-uses-rulepack.md) | Delete all enforcement code, keep content and the install tooling, and lint with `rulepack`; in parallel with rulepack's [migrate-from-mstack](https://github.com/justmatias/rulepack/blob/main/docs/specs/migrate-from-mstack.md) | |
 
 ### Future
 
