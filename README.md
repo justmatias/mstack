@@ -111,8 +111,13 @@ Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.
 
 **Migrating from mstack `v6.x`:**
 
-- **A repo that doesn't select packs:** rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
-- **A repo that selects packs** (`packs = [...]` in `.mstack.toml`): rename the file as above, change each bare pack name to `mstack/<name>`, add the `[sources.mstack]` block above, and run `rulepack packs lock`. The `git` pack had no checks and is gone.
+Every repo:
+
+- Rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+A repo that also selected packs (`packs = [...]`):
+
+- Change `python-core` and `testing` to `mstack/python-core` and `mstack/testing`, and drop `git`, which had no checks and is gone.
+- Add the `[sources.mstack]` block above, run `rulepack packs lock`, and commit `rulepack.lock`.
 
 ## Working on mstack
 
