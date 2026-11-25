@@ -97,12 +97,22 @@ Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup
 
 ## Use the checks in another repo
 
-Linting moved to [rulepack](https://github.com/justmatias/rulepack): `rulepack lint`, its pre-commit hooks and its GitHub Action run a repo's own checks, configured in `.rulepack.toml`. Its README documents them. mstack's checks can't be selected as packs until rulepack loads packs from sources ([pack-sources](https://github.com/justmatias/rulepack/blob/main/docs/specs/pack-sources.md)).
+Linting moved to [rulepack](https://github.com/justmatias/rulepack): `rulepack lint`, its pre-commit hooks and its GitHub Action run a repo's own checks, configured in `.rulepack.toml`. Its README documents them. To run mstack's checks, declare this repo as a source, pinned to a release tag, select its packs, and lock it:
+
+```toml
+packs = ["mstack/python-core", "mstack/testing"]
+
+[sources.mstack]
+git = "https://github.com/justmatias/mstack"
+ref = "vX.Y.Z"
+```
+
+Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.toml) lists each pack's checks.
 
 **Migrating from mstack `v6.x`:**
 
 - **A repo that doesn't select packs:** rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
-- **A repo that selects packs** (`packs = [...]` in `.mstack.toml`): stay on mstack `v6.x` in pre-commit and CI until rulepack's pack sources ship.
+- **A repo that selects packs** (`packs = [...]` in `.mstack.toml`): rename the file as above, change each bare pack name to `mstack/<name>`, add the `[sources.mstack]` block above, and run `rulepack packs lock`. The `git` pack had no checks and is gone.
 
 ## Working on mstack
 

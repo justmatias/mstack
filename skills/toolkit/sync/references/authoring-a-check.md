@@ -8,6 +8,8 @@ The checks run through the `rulepack` command on `PATH`: `rulepack lint` runs ev
 
 ## 0. Static check or LLM review?
 
+Run `rulepack packs list` first. If a pack from a declared source covers the practice, select it in `.rulepack.toml` and use that check directly; copying it into the repo makes a second copy that drifts.
+
 Decide this before you pick a tool. A static check costs a YAML file, its tests, its false positives and every exception people add to dodge it, so it has to be worth that. A rule with `enforcement: llm-review` costs only its prose: the reviewer reads it on every PR.
 
 Write a **static check** only when every one of these holds:

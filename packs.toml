@@ -1,0 +1,24 @@
+# Packs that other repos select from this repo with rulepack, as "mstack/<pack>".
+# Each pack lists checks in lint/rules/; their tests are in lint/rule-tests/.
+
+[packs.python-core]
+checks = [
+    "no-bare-except",
+    "no-isort-off",
+    "no-manual-init-boilerplate",
+    "no-module-docstring",
+    "no-parent-relative-import",
+    "no-swallowed-exception",
+]
+
+[packs.testing]
+checks = [
+    "conftest-has-only-fixtures",
+    "no-broad-pytest-raises",
+    "no-fixture-in-test-module",
+    "no-skip-without-reason",
+    "no-sleep-in-tests",
+    "no-underscore-fixture-parameter",
+    "test-module-has-only-tests",
+    "test-name-has-when-condition",
+]
