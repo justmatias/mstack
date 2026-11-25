@@ -10,7 +10,9 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [shared-rule-packs](shared-rule-packs.md) | Repos consume mstack's checks instead of copying the YAML | |
+| [pack-sources](pack-sources.md) | Load packs from any git repo or folder, pinned by a lockfile; the wheel ships no content | |
+| [rulepack-extraction](rulepack-extraction.md) | Move the linter into its own tool, [rulepack](https://github.com/justmatias/rulepack), with its history | pack-sources, rulepack's [bootstrap](https://github.com/justmatias/rulepack/blob/main/docs/specs/bootstrap.md) |
+| [mstack-uses-rulepack](mstack-uses-rulepack.md) | mstack keeps doctor and the stack tooling, deletes its linter copy, and runs `rulepack` everywhere | rulepack-extraction |
 
 ### Future
 
