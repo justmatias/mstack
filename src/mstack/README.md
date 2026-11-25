@@ -1,19 +1,12 @@
 # mstack (package)
 
-The `mstack` command: `mstack lint` and the guards that `make lint-rules` and the skills run. ast-grep and import-linter are runtime dependencies, so the installed CLI brings its own. Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
+The `mstack` command installs and checks mstack's content on this machine: `cleanup`, `doctor`, `platform`, `render-rule` and `skills-check`. The checks themselves run through [rulepack](https://github.com/justmatias/rulepack). Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
 
 | Command | Module | What it does |
 | --- | --- | --- |
-| `mstack config` | `config.py` | Prints the resolved project config and where each value comes from (`default`, `file` or `flag`). `--json` prints it as JSON. |
-| `mstack lint` | `lint.py`, `changed_files.py` | Runs every check in order (see below). |
-| `mstack commit-msg <file>` | `guards/check_commit_msg.py` | The commit message in the file (as a `commit-msg` hook passes it) has a Conventional Commits subject `type(scope)!: summary` with a type from `[commits].types`, at most 72 characters and no trailing period, and a blank line before the body. Comment lines and everything below git's scissors line are ignored; `Merge ...`, `Revert "..."`, `fixup!`, `squash!` and `amend!` messages pass. Each error names the rule it breaks and prints a corrected example. |
-| `mstack init` | `init.py`, `templates/` | Scaffolds the rules-as-checks layout in a repo (see below). |
 | `mstack doctor [--tool TOOLS] [--checkout DIR] [--online] [--json]` | `doctor/` | Checks that this machine is set up (see below). |
 | `mstack cleanup [--apply] [--checkout DIR]` | `cleanup.py` | Previews old backup batches and their sizes. `--apply` deletes eligible batches. |
 | `mstack platform [--json]` | `platform.py` | Prints the detected platform (`linux`, `macos`, `windows` or `wsl`) and each tool's user folder. On WSL, Cursor's is the Windows profile's `.cursor`, found with `cmd.exe` and `wslpath`; `MSTACK_WINDOWS_HOME` overrides it and `MSTACK_PLATFORM` overrides the detection. `mstack doctor` uses the same folders, so on WSL with both tools skills and agents get a copy in each home. |
-| `mstack coverage` | `guards/check_rule_coverage.py` | Every `.mdc` rule has a `## Checks` section, every check it lists exists (`enforced-by:` an ast-grep rule or import-linter contract; `enforced-by-hook:` a hook id in `.pre-commit-config.yaml`, else `unknown-hook`), and an ast-grep rule that declares `metadata.source` points to an `.mdc` that lists it. Checks can stand alone. An `.mdc` with an upstream credit in its frontmatter must have it complete (`credit`, the same keys as a skill's). `--json` lists each rule's `checks` and `hooks`. |
-| `mstack exceptions` | `guards/check_exceptions.py` | Every `# ast-grep-ignore` names its rules and carries a `# rule-exception:` with a reason, an expiry date that has not passed, and an approver. |
-| `mstack domain-check` | `guards/check_domain.py` | Rules and checks contain no identifiers from the analyzed repo, and no URLs, hosts, IP addresses or emails. It does not look for secrets: use gitleaks. `guards/generic_names.txt` lists names and public hosts it never reports. Known gap: single-word function names (`refund()`, `reconcile()`) are not collected, to avoid false positives on generic verbs. |
 | `mstack render-rule <file.mdc>` | `render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`, and the upstream credit, if any, as its last lines). |
 | `mstack render-rule --combined <checkout>` | `render.py` | Print the managed Codex instructions block with the rendered rules and optional `instructions/global.md`. |
 | `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
@@ -40,44 +33,8 @@ Running `mstack cleanup` lists timestamped batches under known user and uv tool
 `.mstack-backups` directories, with their sizes in bytes. It keeps the newest
 batch in each directory and only lists other batches older than 30 days.
 Run `mstack cleanup --apply` to recalculate the list and delete those batches.
-Add `--checkout DIR` to include that project's configured rules folder and
+Add `--checkout DIR` to include that checkout's `rules/` folder and
 its parent, `skills/`, and the immediate skill groups.
-
-### `mstack lint`
-
-```text
-mstack lint [--changed [--base-ref REF] [--staged]] [--files FILE ...]
-            [--only STEP ...] [--skip STEP ...] [--json]
-```
-
-| Step | Runs | Skipped when |
-| --- | --- | --- |
-| `test` | `ast-grep test -c <sgconfig> --skip-snapshot-tests` | the sgconfig's `testConfigs` hold no test files |
-| `scan` | `ast-grep scan -c <sgconfig>`, skipping the `[scan].exclude` globs | `--changed` or `--files` selected no file |
-| `imports` | `lint-imports` | there is no `.importlinter` (the configured `importlinter`) |
-| `coverage` | `mstack coverage` | there is no rules folder |
-| `exceptions` | `mstack exceptions` | never |
-| `domain-check` | `mstack domain-check` over `[domain_check].paths` | none of the paths exist |
-
-- **Modes.** By default the scan covers the whole repo and warnings don't fail. `--changed` scans only the files changed against `[changed].base_ref` (`--base-ref` overrides it, `--staged` uses the staged files), and passes `--error`, so warnings fail on new or touched code. `--files` scans exactly the given files with `--error` (for pre-commit). Both keep only files with a `[scan].extensions` suffix that are not excluded.
-- **Changed files.** Committed changes since the merge base, uncommitted changes and untracked files; deleted files are left out. An explicit `--base-ref` that doesn't exist fails (in CI, check out with `fetch-depth: 0`); the configured default falls back to its local branch (`origin/main` to `main`).
-- **All steps run**, even after a failure, and the exit code is 1 if any failed (2 for a usage or git error). `--json` prints `{step: {ok, skipped, findings}}` to stdout: scan findings carry `file`, `line`, `rule`, `severity` and `message`; the other steps list their error messages.
-- **Tools.** ast-grep and lint-imports are taken from the environment mstack runs in (next to its Python) before `PATH`, so the bundled versions win. For `imports`, a repo whose `uv.lock` lists import-linter runs its own (`uv run --frozen lint-imports`), because the contracts need the project importable; otherwise the bundled one runs with the repo root and `src/` on `PYTHONPATH`. The log says which one ran.
-- The guards run in process, through their `main()` functions.
-
-### `mstack init`
-
-```text
-mstack init [--rules-dir DIR] [--checks-dir DIR]
-            [--pre-commit] [--ci github] [--makefile] [--dry-run] [--yes]
-```
-
-- Always: `.mstack.toml` with the chosen folders (defaults `.cursor/rules` and `lint-rules`), `<checks-dir>/sgconfig.yml`, empty `rules/` and `rule-tests/` (with a `.gitkeep`), and `<rules-dir>/` when missing.
-- `--pre-commit`: adds the mstack hooks to `.pre-commit-config.yaml`, pinned to the running version's tag, at the end of `repos:` (the rest of the file is untouched). Creates the file when missing.
-- `--ci github`: `.github/workflows/mstack.yml`, which runs the mstack action at the running version's tag.
-- `--makefile`: the `lint-rules` and `lint-rules-changed` targets, each only when the Makefile doesn't define it yet.
-
-It prints every file as `create`, `append` or `exists, skipped` and asks before writing, unless `--yes`; `--dry-run` only prints. It never overwrites a file and appends only missing entries, so a second run changes nothing. If the repo already has a `.mstack.toml` or a `lint-rules/sgconfig.yml`, the layout is left as it is and only missing optional pieces are added. After writing it runs `mstack lint` once; an empty layout passes. The templates are in `templates/` and ship in the wheel.
 
 ### `mstack doctor`
 
@@ -86,7 +43,7 @@ Reports the fix for each problem. `--tool` takes a comma-separated list of `clau
 | Group | Checks | Status when it fails |
 | --- | --- | --- |
 | `tools` | `uv` and `git` on `PATH`; `gh` (used by `correct` and `integrate`) | error; warn for `gh` |
-| `cli` | `mstack` on `PATH` reports this version (`mstack --version`); the bundled ast-grep runs | error |
+| `cli` | `mstack` on `PATH` reports this version (`mstack --version`); `rulepack` is on `PATH` and runs. The fix installs the tag in `[tool.mstack] rulepack` | error |
 | `source` | the checkout exists and is a git repo; uncommitted changes | error; warn |
 | `skills` | expected folders contain every mstack skill and pass `skills-check --profile generic`. Codex uses `~/.agents/skills/`. Cursor warns when a skill appears in multiple user skill folders it loads | error; warn for duplicates |
 | `rules` | Claude Code rules exist without frontmatter. The active Codex global instructions file has exactly one managed block | error |
@@ -97,35 +54,3 @@ Reports the fix for each problem. `--tool` takes a comma-separated list of `clau
 Each check is a function from a `Context` to a list of results, registered in `doctor/__init__.py`'s `CHECKS`. Without `--online`, doctor uses no network.
 
 Data output (JSON, inventories) goes to stdout; messages go to stderr through `logging`.
-
-## Configuration
-
-Every command reads one optional file that describes the repo's layout, so no command needs path flags:
-
-- `.mstack.toml`, found by walking up from the current directory to the git root (never above it).
-- Precedence: a command-line flag, then the file, then the built-in defaults below. A repo without the file gets the defaults.
-- Paths in the file are relative to the file's folder; paths in flags are relative to the current directory.
-- Unknown keys are an error, so a typo fails loudly instead of being ignored.
-
-```toml
-rules_dir = ".cursor/rules"          # prose rules (*.mdc)
-sgconfig = "lint-rules/sgconfig.yml" # ast-grep config
-importlinter = ".importlinter"       # optional; skipped when missing
-pre_commit_config = ".pre-commit-config.yaml" # hook ids that enforced-by-hook may name
-
-[scan]
-exclude = []                         # globs the scan skips; mstack exceptions skips them too
-extensions = [".py"]                 # what mstack lint --changed and --files scan
-
-[domain_check]
-paths = ["lint-rules", ".cursor/rules"] # what mstack domain-check checks when given no paths
-exclude = []                         # tooling folders that are not analyzed code
-
-[changed]
-base_ref = "origin/main"
-
-[commits]
-types = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "style", "test"]
-```
-
-`mstack domain-check --repo` defaults to the git root. Run `mstack config` to see the resolved values; this repo's own `.mstack.toml` is an example.

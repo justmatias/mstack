@@ -1,13 +1,15 @@
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from mstack.doctor.model import Context
 from mstack.doctor.targets import skill_sources
+from mstack.render import main as render_main
 from mstack.render import render_rule
 from tests.conftest import REPOSITORY_ROOT
-from tests.mstack.conftest import init_git_repository
+from tests.mstack.helpers import git, init_git_repository
 
 
 @pytest.fixture
@@ -60,3 +62,33 @@ def context(home: Path, checkout: Path):
         return Context(**values)
 
     return build
+
+
+@pytest.fixture
+def codex_install(capsys, home, checkout, monkeypatch):
+    folder = home / "codex-profile"
+    folder.mkdir()
+    monkeypatch.setenv("CODEX_HOME", str(folder))
+    for name, source in skill_sources(checkout).items():
+        shutil.copytree(source, home / ".agents" / "skills" / name)
+    (checkout / "instructions" / "global.md").write_text(
+        "Global guidance.\n", encoding="utf-8"
+    )
+    assert render_main(["--combined", str(checkout)]) == 0
+    block = capsys.readouterr().out
+    (folder / "AGENTS.md").write_text(
+        f"Personal guidance.\n\n{block}", encoding="utf-8"
+    )
+    return folder
+
+
+@pytest.fixture
+def origin_with_tag(checkout: Path, tmp_path: Path):
+    def tag(version: str) -> None:
+        origin = tmp_path / "origin.git"
+        subprocess.run(["git", "init", "--quiet", "--bare", str(origin)], check=True)
+        git(checkout, "remote", "add", "origin", str(origin))
+        git(checkout, "tag", version)
+        git(checkout, "push", "--quiet", "origin", "--tags")
+
+    return tag

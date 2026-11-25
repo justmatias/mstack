@@ -1,6 +1,6 @@
 {
   "version": 1,
   "hooks": {
-    "afterFileEdit": [{ "command": "mstack hook post-edit" }]
+    "afterFileEdit": [{ "command": "rulepack hook post-edit" }]
   }
 }

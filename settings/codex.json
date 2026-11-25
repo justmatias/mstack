@@ -3,12 +3,12 @@
     "PostToolUse": [
       {
         "matcher": "^apply_patch$",
-        "hooks": [{ "type": "command", "command": "mstack hook post-edit" }]
+        "hooks": [{ "type": "command", "command": "rulepack hook post-edit" }]
       }
     ],
     "Stop": [
       {
-        "hooks": [{ "type": "command", "command": "mstack hook stop" }]
+        "hooks": [{ "type": "command", "command": "rulepack hook stop" }]
       }
     ]
   }

@@ -11,7 +11,7 @@ flowchart LR
     rule["Prose rule<br/>rules_dir/*.mdc"] -- "## Checks" --> check["Check<br/>ast-grep, import-linter,<br/>a pre-commit hook"]
     rule -- "enforcement: llm-review" --> review["review skill"]
     check -. "optional metadata.source" .-> rule
-    check --> lint["mstack lint<br/>pre-commit, CI"]
+    check --> lint["rulepack lint<br/>pre-commit, CI"]
     correction["You correct an agent"] --> reflect["reflect / correct"]
     reflect --> rule
     reflect --> check
@@ -19,8 +19,8 @@ flowchart LR
 
 - An `.mdc` file gives agents guidance for decisions that automated checks leave open.
 - Each rule ends with a `## Checks` section that names how it is enforced: `enforced-by: <id>` (an ast-grep rule or an import-linter contract), `enforced-by-hook: <id>` (a pre-commit hook such as gitleaks), or `enforcement: llm-review` (a judgment call that only a reviewer can check).
-- A check can stand on its own. If an ast-grep check declares `metadata.source`, `mstack coverage` verifies the prose file exists and lists the check.
-- `mstack lint` runs everything: the checks' own tests, the scan, import-linter and the guards. The same command runs locally, in pre-commit and in CI.
+- A check can stand on its own. If an ast-grep check declares `metadata.source`, `rulepack coverage` verifies the prose file exists and lists the check.
+- `rulepack lint` runs everything: the checks' own tests, the scan, import-linter and the guards. The same command runs locally, in pre-commit and in CI.
 
 ## 1. Set up a machine (once per machine)
 
@@ -34,7 +34,7 @@ claude "set up mstack"          # Cursor, opencode: /setup-mstack; Codex: $setup
 
 The setup skill (`.agents/skills/setup-mstack/`) runs from the checkout and is never installed. It:
 
-1. installs the `mstack` CLI (`uv tool install --editable <checkout>`), which brings its own ast-grep and import-linter;
+1. installs the `mstack` CLI (`uv tool install --editable <checkout>`) and `rulepack` at the pinned tag, which brings its own ast-grep and import-linter;
 2. asks which tools you use, and runs `mstack platform` to find their folders (on WSL, Cursor reads the Windows profile);
 3. compares every skill, rule, agent, MCP server, setting and global instruction with what you already have, and shows one plan;
 4. asks only where your own setup differs, backs up anything it replaces to `<folder>/.mstack-backups/<timestamp>/` (a rule beside its rules folder, where no tool loads it), and applies the plan;
@@ -46,18 +46,18 @@ Rules reach Claude Code as `~/.claude/rules/<name>.md`, in the form `mstack rend
 
 ## 2. Adopt rules as checks in a repo (once per repo)
 
-1. **Scaffold the layout.** `mstack init --dry-run` shows the plan; add `--pre-commit`, `--ci github` and `--makefile` for the optional pieces. It writes `.mstack.toml`, an ast-grep `sgconfig.yml` with empty `rules/` and `rule-tests/`, and the rules folder (default `.cursor/rules/`). It never overwrites a file.
+1. **Scaffold the layout.** `rulepack init --dry-run` shows the plan; add `--pre-commit`, `--ci github` and `--makefile` for the optional pieces. It writes `.rulepack.toml`, an ast-grep `sgconfig.yml` with empty `rules/` and `rule-tests/`, and the rules folder (default `.cursor/rules/`). It never overwrites a file.
 2. **Turn the existing rules into checks.** Run `/sync`. It reads the repo's rules (`.cursor/rules/`, `AGENTS.md`, `CLAUDE.md`, copilot instructions), splits them into atomic statements, and sorts each one into **pattern** (ast-grep), **architecture** (import-linter) or **judgment** (`llm-review`). For each checkable rule it writes the check, its tests and a synthetic copy of a real past mistake that the check must catch. Nothing is written before you approve the plan.
 3. **Pick the severity.** A new check with no existing violations ships as `error`. A check that existing code still breaks ships as `warning`: the full scan tolerates the old instances, while the changed-files scan fails on new or touched code.
-4. **Wire it in.** With `--pre-commit`, every commit scans the staged files; with `--ci github`, every push to `main` runs the full scan, and every pull request runs both the full and the changed-files scan. Any other CI can run `uvx --from git+https://github.com/justmatias/mstack@<tag> mstack lint`.
+4. **Wire it in.** With `--pre-commit`, every commit scans the staged files; with `--ci github`, every push to `main` runs the full scan, and every pull request runs both the full and the changed-files scan. Any other CI can run `uvx --from git+https://github.com/justmatias/rulepack@<tag> rulepack lint`.
 
-Run `mstack config` to see the paths the repo uses; every command reads them from `.mstack.toml`.
+Run `rulepack config` to see the paths the repo uses; every command reads them from `.rulepack.toml`.
 
 ## 3. The daily loop
 
 ```mermaid
 flowchart TD
-    write["Agent writes code<br/>(reads the rules)"] --> local["mstack lint --changed<br/>pre-commit on staged files"]
+    write["Agent writes code<br/>(reads the rules)"] --> local["rulepack lint --changed<br/>pre-commit on staged files"]
     local --> pr["Pull request<br/>CI: full + changed-files scan"]
     pr --> rev["/diff-review<br/>rules + spec"]
     rev --> merge["Merge"]
@@ -69,7 +69,7 @@ flowchart TD
 ```
 
 1. **Write.** The agent follows the rules installed in its user folder, plus the repo's own rules: point to them from `AGENTS.md` (or `CLAUDE.md`), as this repo does, because Claude Code never reads `.mdc` files by itself.
-2. **Check locally.** `mstack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files, and the `mstack-commit-msg` hook, if you add it, checks the message.
+2. **Check locally.** `rulepack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files, and the `rulepack-commit-msg` hook, if you add it, checks the message.
 3. **Open the pull request.** CI runs the full scan and the changed-files scan. Commit messages follow Conventional Commits.
 4. **Review.** `/diff-review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
 5. **Simplify, if needed.** `/declutter` makes working code easier to read without changing what it does, one tested change at a time.
@@ -92,12 +92,12 @@ When a check is wrong for one line, suppress it on that line only, with a reason
 # ast-grep-ignore: no-manual-init-boilerplate
 ```
 
-`mstack exceptions` fails when the reason, the expiry or the approver is missing, or the date has passed. Many exceptions to one rule mean the rule is wrong; `/correct` looks for that.
+`rulepack exceptions` fails when the reason, the expiry or the approver is missing, or the date has passed. Many exceptions to one rule mean the rule is wrong; `/correct` looks for that.
 
 ### Two principles every skill follows
 
 - **English only:** everything generated is in English, even when the source is not.
-- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. `mstack domain-check` flags anything that looks like the analyzed repo's identifiers, and any URL, host or email. Secrets are gitleaks' job: add its pre-commit hook.
+- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. `rulepack domain-check` flags anything that looks like the analyzed repo's identifiers, and any URL, host or email. Secrets are gitleaks' job: add its pre-commit hook.
 
 ## 4. Keep machines up to date
 

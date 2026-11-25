@@ -1,9 +1,12 @@
 import importlib.metadata
 import shutil
 import subprocess
+import tomllib
+from pathlib import Path
 
 from mstack.doctor.model import Context, Result, install_fix
-from mstack.lint import LintError, find_tool
+
+RULEPACK_REPOSITORY = "https://github.com/justmatias/rulepack"
 
 
 def run_version(command: list[str]) -> str | None:
@@ -50,30 +53,41 @@ def path_result(context: Context) -> Result:
     )
 
 
-def ast_grep_result(context: Context) -> Result:
-    try:
-        path = find_tool("ast-grep")
-    except LintError as error:
+def rulepack_pin(context: Context) -> str:
+    """The rulepack tag that `[tool.mstack] rulepack` in the checkout pins."""
+    pyproject = (context.checkout or Path()) / "pyproject.toml"
+    if pyproject.is_file():
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        pin = data.get("tool", {}).get("mstack", {}).get("rulepack")
+        if isinstance(pin, str):
+            return pin
+    return "<tag>"
+
+
+def rulepack_result(context: Context) -> Result:
+    fix = f"uv tool install git+{RULEPACK_REPOSITORY}@{rulepack_pin(context)}"
+    found = shutil.which("rulepack")
+    if not found:
         return Result(
             group="cli",
-            check="ast-grep",
+            check="rulepack",
             status="error",
-            detail=str(error),
-            fix=install_fix(context),
+            detail="'rulepack' is not on PATH; the agent hooks and the skills run it",
+            fix=fix,
         )
-    version = run_version([path])
+    version = run_version([found])
     if version is None:
         return Result(
             group="cli",
-            check="ast-grep",
+            check="rulepack",
             status="error",
-            detail=f"{path} does not run",
-            fix=install_fix(context),
+            detail=f"{found} does not run",
+            fix=fix,
         )
     return Result(
-        group="cli", check="ast-grep", status="ok", detail=f"{path} ({version})"
+        group="cli", check="rulepack", status="ok", detail=f"{found} ({version})"
     )
 
 
 def check_cli(context: Context) -> list[Result]:
-    return [path_result(context), ast_grep_result(context)]
+    return [path_result(context), rulepack_result(context)]

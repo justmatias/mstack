@@ -10,7 +10,6 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 | Spec | Summary | Depends on |
 | --- | --- | --- |
-| [mstack-uses-rulepack](mstack-uses-rulepack.md) | Delete all enforcement code, keep content and the install tooling, and lint with `rulepack`; in parallel with rulepack's [migrate-from-mstack](https://github.com/justmatias/rulepack/blob/main/docs/specs/migrate-from-mstack.md) | |
 
 ### Future
 
@@ -22,7 +21,7 @@ The goal behind all of them: set up the stack once per machine (personal laptop,
 
 ## Writing a spec
 
-The "Depends on" column lists only specs that are still open: everything else they build on (`mstack lint`, `doctor`, `skills-check`, the `agents/`, `mcp/`, `settings/` and `instructions/` folders) already exists.
+The "Depends on" column lists only specs that are still open: everything else they build on (`rulepack lint`, `doctor`, `skills-check`, the `agents/`, `mcp/`, `settings/` and `instructions/` folders) already exists.
 
 Every spec follows the same sections, so it can be implemented without reading the others:
 

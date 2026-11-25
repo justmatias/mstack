@@ -52,12 +52,11 @@ def test_cleanup_keeps_batches_when_they_are_at_most_thirty_days_old(tmp_path):
 def test_cleanup_scans_integration_backups_when_checkout_is_given(tmp_path):
     checkout = tmp_path / "checkout"
     skill_backups = checkout / "skills" / "toolkit"
-    rule_backups = checkout / "policy"
+    rule_backups = checkout / "rules"
     old_skill = create_backup_batch(skill_backups, OLD)
     old_rule = create_backup_batch(rule_backups, OLD)
     create_backup_batch(skill_backups, NEWEST)
     create_backup_batch(rule_backups, NEWEST)
-    (checkout / ".mstack.toml").write_text('rules_dir = "policy"\n', encoding="utf-8")
 
     assert main(["--apply"], now=NOW) == 0
     assert old_skill.is_dir()
@@ -72,13 +71,9 @@ def test_cleanup_scans_rule_backups_beside_rules_folder_when_checkout_is_given(
     tmp_path,
 ):
     checkout = tmp_path / "checkout"
-    rules_parent = checkout / ".cursor"
-    (rules_parent / "rules").mkdir(parents=True)
-    old_rule = create_backup_batch(rules_parent, OLD)
-    create_backup_batch(rules_parent, NEWEST)
-    (checkout / ".mstack.toml").write_text(
-        'rules_dir = ".cursor/rules"\n', encoding="utf-8"
-    )
+    (checkout / "rules").mkdir(parents=True)
+    old_rule = create_backup_batch(checkout, OLD)
+    create_backup_batch(checkout, NEWEST)
 
     assert main(["--apply", "--checkout", str(checkout)], now=NOW) == 0
 

@@ -23,7 +23,8 @@ Group the results by `group` and `check`, and pick the fix from this table. A re
 | Group / check | Fix | Ask first? |
 | --- | --- | --- |
 | `tools` / `uv`, `git`, `gh` | Install it from the link in `fix`, with the package manager the machine already uses (`brew`, `apt`, `winget`) | Yes: it installs software |
-| `cli` / `mstack`, `ast-grep` | `uv tool install --editable <mstack> --reinstall` (it also brings `ast-grep`). If another `mstack` comes first on `PATH`, say which one and where | Yes, once |
+| `cli` / `mstack` | `uv tool install --editable <mstack> --reinstall`. If another `mstack` comes first on `PATH`, say which one and where | Yes, once |
+| `cli` / `rulepack` | Run the `fix` doctor printed: `uv tool install git+https://github.com/justmatias/rulepack@<tag>`, with the tag from `[tool.mstack] rulepack` in `<mstack>/pyproject.toml` | Yes, once |
 | `source` / `checkout` (not found) | The same reinstall, from the checkout the user points you to. Ask where it is | Yes |
 | `source` / `checkout` (not a git repository) | Report it; do not run `git init` | No fix |
 | `source` / `uncommitted` | The user's work in progress. Report it; never commit, stash or discard it | No fix |

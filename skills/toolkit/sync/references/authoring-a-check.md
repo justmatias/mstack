@@ -4,11 +4,9 @@
 
 The recipe for turning one checkable prose rule into a check. `sync`, `reflect` and `correct` all follow it.
 
-The checks run through the `mstack` command on `PATH`: `mstack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `domain-check` guards), and `mstack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `mstack` is not found, ask the user to install it from their mstack checkout with `uv tool install --editable <checkout>`; do not look for the scripts on disk. The commands read the repo's paths from `.mstack.toml` when it exists; run `mstack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
+The checks run through the `rulepack` command on `PATH`: `rulepack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `domain-check` guards), and `rulepack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `rulepack` is not found, ask the user to rerun the mstack setup, which installs it; do not look for the scripts on disk. The commands read the repo's paths from `.rulepack.toml` when it exists; run `rulepack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 0. Static check or LLM review?
-
-Run `mstack packs list` first. If a bundled check covers the practice, select its pack in `.mstack.toml` and use that check directly.
 
 Decide this before you pick a tool. A static check costs a YAML file, its tests, its false positives and every exception people add to dodge it, so it has to be worth that. A rule with `enforcement: llm-review` costs only its prose: the reviewer reads it on every PR.
 
@@ -81,7 +79,7 @@ For an import-linter contract, the "test" is proving the contract breaks: copy t
 ## 4. Run the tests
 
 ```bash
-mstack lint --only test
+rulepack lint --only test
 ```
 
 It runs `ast-grep test --skip-snapshot-tests` with the configured sgconfig (default `lint-rules/sgconfig.yml`). Iterate until it passes. `--skip-snapshot-tests` still fails when a valid case matches or an invalid case does not; it only skips label snapshots.
@@ -89,7 +87,7 @@ It runs `ast-grep test --skip-snapshot-tests` with the configured sgconfig (defa
 ## 5. Measure existing violations
 
 ```bash
-mstack lint --only scan --json
+rulepack lint --only scan --json
 ```
 
 The scan skips the `[scan].exclude` globs. Count the findings whose `rule` is `<id>` and look at each one: is it a real violation or a false positive? Fix false positives in the rule (back to step 2).
@@ -97,7 +95,7 @@ The scan skips the `[scan].exclude` globs. Count the findings whose `rule` is `<
 ## 6. Pick the severity
 
 - `error` if there are 0 violations, or you fix all of them in the same change.
-- Otherwise `warning`, plus a migration issue. `mstack lint --changed` (and `make lint-rules-changed`) passes `--error` to ast-grep, so a `warning` rule still fails on new or touched code; only the old instances are tolerated.
+- Otherwise `warning`, plus a migration issue. `rulepack lint --changed` (and `make lint-rules-changed`) passes `--error` to ast-grep, so a `warning` rule still fails on new or touched code; only the old instances are tolerated.
 
 Never ship as `error` a rule that would break `main` on the next CI run.
 
@@ -108,16 +106,16 @@ If the check declares `metadata.source`, add `- enforced-by: <id>` to that `.mdc
 ## 8. Verify what you generated
 
 ```bash
-mstack domain-check <every file you generated> --repo .
+rulepack domain-check <every file you generated> --repo .
 ```
 
-`--repo` defaults to the git root, and `[domain_check].exclude` in `.mstack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `mstack domain-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+`--repo` defaults to the git root, and `[domain_check].exclude` in `.rulepack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `rulepack domain-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
 
 ## 9. Run the single command
 
 ```bash
-mstack lint
-mstack lint --changed   # only the changed files, warnings included
+rulepack lint
+rulepack lint --changed   # only the changed files, warnings included
 make demo               # only in repos that have fixtures/invalid/
 ```
 
@@ -127,4 +125,4 @@ Commit the check, its tests and any changed prose together, one commit per rule,
 
 ## Adopting in a repo with no `lint-rules/`
 
-Before the first check, scaffold the layout with `mstack init`. Run `mstack init --dry-run` first (add `--pre-commit`, `--ci github` or `--makefile` for the optional pieces, and `--rules-dir` or `--checks-dir` when the repo keeps them elsewhere), show the user its plan, and run it with `--yes` only after they approve. It writes `.mstack.toml`, `lint-rules/sgconfig.yml` with empty `rules/` and `rule-tests/`, and the rules folder; it never overwrites a file, and an empty layout passes `mstack lint`.
+Before the first check, scaffold the layout with `rulepack init`. Run `rulepack init --dry-run` first (add `--pre-commit`, `--ci github` or `--makefile` for the optional pieces, and `--rules-dir` or `--checks-dir` when the repo keeps them elsewhere), show the user its plan, and run it with `--yes` only after they approve. It writes `.rulepack.toml`, `lint-rules/sgconfig.yml` with empty `rules/` and `rule-tests/`, and the rules folder; it never overwrites a file, and an empty layout passes `rulepack lint`.

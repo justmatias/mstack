@@ -17,15 +17,15 @@ The operator keeps correcting agents in this repo for the same mistakes. Change 
 
 Assume every contributor is an agent that sees only the files it opened, copies the nearest example, and takes the shortest path that compiles. Design the repo so a change that looks right from one file is right for the whole repo.
 
-Shared references: [rule format](../sync/references/rule-format.md), [authoring a check](../sync/references/authoring-a-check.md), [discovery](../sync/references/discovery.md). The guards run as `mstack <command>` (see the authoring reference).
+Shared references: [rule format](../sync/references/rule-format.md), [authoring a check](../sync/references/authoring-a-check.md), [discovery](../sync/references/discovery.md). The guards run as `rulepack <command>` (see the authoring reference).
 
 ## Find the mistake classes
 
 First, read recent commits, reverts, review comments, agent instruction files, and comments that explain workarounds. Also read:
 
 - **PR review comments:** `gh pr list --state merged --limit 50 --json number,title` and `gh api repos/{owner}/{repo}/pulls/<number>/comments --jq '.[].body'`.
-- **Existing exceptions:** `mstack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
-- **Accumulated warnings:** `mstack lint --only scan --json`, whose `scan.findings` list every finding with its `rule` and `severity`, counted per rule id.
+- **Existing exceptions:** `rulepack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
+- **Accumulated warnings:** `rulepack lint --only scan --json`, whose `scan.findings` list every finding with its `rule` and `severity`, counted per rule id.
 - **Optionally, recent agent transcripts** for this workspace only (see discovery).
 - **Search helpers:** `git log --oneline -n 200`, `git log --grep='revert\|fix' -i`, `git log -S '<construct>'`, `rg -n 'workaround|HACK|XXX|do not|don.t use'`.
 
@@ -36,7 +36,7 @@ Group the mistakes into classes. A class counts once it has happened twice.
 ## Fix each class at the highest level that works
 
 1. **Eliminate it with architecture.** Give each piece of state one owner and each task one supported way. Hide internals so the wrong import fails (an import-linter contract in `.importlinter`). Replace hand-synced lists with one source of truth. Delete old ways and dead code an agent would copy.
-2. **Enforce it with types and lints so the bad state can't be written**, but only when the class passes the static-check criteria in step 0 of [authoring-a-check.md](../sync/references/authoring-a-check.md): a concrete construct, decidable from the file alone, expressible as one simple rule. If it fails them, go to level 4; if it is borderline, ask the user before writing anything. Otherwise, if bad code still compiles, add a check whose error names the file, type, or function to use instead: ast-grep for patterns, import-linter for module dependencies, Fixit when logic is needed. Always follow [authoring-a-check.md](../sync/references/authoring-a-check.md). If the pattern is already common, fail only when a change adds more: ship it as `warning` (the full `mstack lint` scan tolerates it, `mstack lint --changed` fails on new or touched code) and open a migration issue.
+2. **Enforce it with types and lints so the bad state can't be written**, but only when the class passes the static-check criteria in step 0 of [authoring-a-check.md](../sync/references/authoring-a-check.md): a concrete construct, decidable from the file alone, expressible as one simple rule. If it fails them, go to level 4; if it is borderline, ask the user before writing anything. Otherwise, if bad code still compiles, add a check whose error names the file, type, or function to use instead: ast-grep for patterns, import-linter for module dependencies, Fixit when logic is needed. Always follow [authoring-a-check.md](../sync/references/authoring-a-check.md). If the pattern is already common, fail only when a change adds more: ship it as `warning` (the full `rulepack lint` scan tolerates it, `rulepack lint --changed` fails on new or touched code) and open a migration issue.
 3. **Test the behavior.** Fix or delete any test that still passes when the behavior it checks breaks, or that fails when only the internals change.
 4. **Write docs or agent rules last, for judgment calls and for classes too costly to check statically.** Nothing fails when an agent skips them: mark them `enforcement: llm-review`, and the PR reviewer comments on them.
 
@@ -44,9 +44,9 @@ Keep the fix and its rationale with the enforcement. When a check covers a prose
 
 ## Fix and prove
 
-Then fix the most frequent classes now, one commit each, most frequent first, with Conventional Commits messages (`feat(rules): add <id> check`). Prove each new check fails on a real past mistake: read it with `git show <sha>`, rewrite it as a synthetic snippet with generic names (`Foo`, `Item`, `do_work`) that keeps its structure, and make it an `invalid` case. Cite the sha in your reply, never in the test. Run the same command locally and in CI (`mstack lint`). Exceptions go on the offending line with a reason, an expiry date, and a human's approval, in the `rule-exception` format from the rule-format reference. Never invent the approval.
+Then fix the most frequent classes now, one commit each, most frequent first, with Conventional Commits messages (`feat(rules): add <id> check`). Prove each new check fails on a real past mistake: read it with `git show <sha>`, rewrite it as a synthetic snippet with generic names (`Foo`, `Item`, `do_work`) that keeps its structure, and make it an `invalid` case. Cite the sha in your reply, never in the test. Run the same command locally and in CI (`rulepack lint`). Exceptions go on the offending line with a reason, an expiry date, and a human's approval, in the `rule-exception` format from the rule-format reference. Never invent the approval.
 
-Run `mstack domain-check` over every generated file before committing, and reread everything for English.
+Run `rulepack domain-check` over every generated file before committing, and reread everything for English.
 
 ## Repeats
 

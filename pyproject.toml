@@ -8,11 +8,7 @@ authors = [
   { name = "Matias Gimenez", email = "matiasgimenez.dev@gmail.com" },
 ]
 requires-python = ">=3.12"
-# ast-grep and import-linter ship with the CLI, so `mstack lint` works in any repo.
-# ast-grep is pinned to a minor range: a new minor can change what a rule matches.
 dependencies = [
-    "ast-grep-cli>=0.51,<0.52",
-    "import-linter>=2.17,<3",
     "pydantic>=2",
     "pyyaml>=6",
 ]
@@ -24,9 +20,12 @@ mstack = "mstack.cli:main"
 repository = "https://github.com/justmatias/mstack"
 
 [dependency-groups]
+# rulepack lints this repo and brings ast-grep for the checks' tests. mstack's
+# code never imports it.
 dev = [
     "pre-commit>=4",
     "pytest",
+    "rulepack @ git+https://github.com/justmatias/rulepack@b48c6c08ce8f0522634227b52ed6da3dd2d8db25",
     "types-pyyaml",
 ]
 
@@ -37,16 +36,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/mstack"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"packs.toml" = "mstack/pack_data/packs.toml"
-"rules" = "mstack/pack_data/rules"
-"lint/rules" = "mstack/pack_data/lint/rules"
-"lint/rule-tests" = "mstack/pack_data/lint/rule-tests"
-
 [tool.hatch.build.targets.sdist]
 include = [
     "/src/mstack",
-    "/packs.toml",
     "/rules",
     "/lint",
     "/LICENSE",
@@ -56,11 +48,12 @@ include = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Slow tests install mstack from scratch (pre-commit try-repo); CI runs them with -m slow.
-markers = ["slow: installs packages; run with -m slow"]
-addopts = "-m 'not slow'"
 # fixtures/ holds sample tests for the rule checks (some break them on purpose).
 norecursedirs = ["fixtures"]
+
+# The rulepack version that setup-mstack installs and doctor names in its fix.
+[tool.mstack]
+rulepack = "v0.1.0"
 
 ##################################
 # ruff configuration             #
@@ -142,7 +135,6 @@ warn_return_any = false
 branch = "main"
 commit_message = "chore(release): release version {version}"
 version_toml = ["pyproject.toml:project.version"]
-version_variables = ["README.md:rev:tf"]
 build_command = "uv lock --upgrade-package mstack && git add uv.lock"
 
 [tool.semantic_release.branches.main]

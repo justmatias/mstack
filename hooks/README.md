@@ -3,8 +3,8 @@
 Setup merges the fragments under [settings/](../settings/) into
 `~/.claude/settings.json`, `~/.cursor/hooks.json` or `$CODEX_HOME/hooks.json`
 for the selected editors.
-Keep `mstack` on the editor's PATH. The hooks run only in projects with
-`.mstack.toml`.
+Keep `rulepack` on the editor's PATH. The hooks run only in projects with
+`.rulepack.toml`.
 
 - Claude Code's `PostToolUse` runs the scan and exception checks on each file
   written by `Edit` or `Write`. Claude receives the findings immediately.
@@ -19,12 +19,12 @@ Keep `mstack` on the editor's PATH. The hooks run only in projects with
   [Codex hooks reference](https://learn.chatgpt.com/docs/hooks)
 
 Edit hooks skip files outside `[scan].extensions` or matching `[scan].exclude`.
-Each run has a 10-second budget. Set `[hooks].timeout` in `.mstack.toml` to a
+Each run has a 10-second budget. Set `[hooks].timeout` in `.rulepack.toml` to a
 positive number of seconds to override it. A timeout logs a warning and lets
 the agent continue.
 
 To disable one hook globally, remove its command entry from the editor's settings.
-To disable mstack's hooks for a project, add this to its `.mstack.toml`.
+To disable the hooks for a project, add this to its `.rulepack.toml`.
 
 ```toml
 [hooks]

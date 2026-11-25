@@ -1,7 +1,6 @@
 import shutil
 
-from mstack.config import StrictModel
-from mstack.doctor.model import Context, Result
+from mstack.doctor.model import Context, Result, StrictModel
 
 
 class ExternalTool(StrictModel):

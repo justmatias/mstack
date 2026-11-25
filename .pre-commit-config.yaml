@@ -44,7 +44,7 @@ repos:
         args: ['-r', '-lll']
         exclude: ^fixtures/invalid/
 
-  # Lints the workflows, and the inputs they pass to local actions such as action.yml.
+  # Lints the workflows.
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
     hooks:
@@ -88,8 +88,8 @@ repos:
         pass_filenames: false
         always_run: true
 
-      - id: mstack-commit-msg
-        name: mstack commit-msg (Conventional Commits)
-        entry: uv run mstack commit-msg
+      - id: rulepack-commit-msg
+        name: rulepack commit-msg (Conventional Commits)
+        entry: uv run rulepack commit-msg
         language: system
         stages: [commit-msg]

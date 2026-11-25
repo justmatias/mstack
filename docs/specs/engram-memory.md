@@ -24,7 +24,7 @@ A machine that uses more than one agent can opt into Engram as a shared memory, 
 
 | Kind of knowledge | Lives in | Enforced |
 | --- | --- | --- |
-| A convention that can be checked | rule + check | yes, by `mstack lint` |
+| A convention that can be checked | rule + check | yes, by `rulepack lint` |
 | A convention that needs judgment | rule with `llm-review` | in review |
 | A workflow | skill | when invoked |
 | A project fact, decision or gotcha | memory (built-in or Engram) | no, retrieved on demand |
