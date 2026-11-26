@@ -8,6 +8,7 @@ COMMANDS = {
     "doctor": "mstack.doctor",
     "platform": "mstack.platform",
     "render-rule": "mstack.render",
+    "rule-tests-check": "mstack.guards.check_rule_tests",
     "skills-check": "mstack.guards.check_skills",
 }
 

@@ -1,6 +1,6 @@
 # mstack (package)
 
-The `mstack` command installs and checks mstack's content on this machine: `cleanup`, `doctor`, `platform`, `render-rule` and `skills-check`. The checks themselves run through [rulepack](https://github.com/justmatias/rulepack). Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
+The `mstack` command installs and checks mstack's content on this machine: `cleanup`, `doctor`, `platform`, `render-rule`, `rule-tests-check` and `skills-check`. The checks themselves run through [rulepack](https://github.com/justmatias/rulepack). Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
 
 | Command | Module | What it does |
 | --- | --- | --- |
@@ -9,6 +9,7 @@ The `mstack` command installs and checks mstack's content on this machine: `clea
 | `mstack platform [--json]` | `platform.py` | Prints the detected platform (`linux`, `macos`, `windows` or `wsl`) and each tool's user folder. On WSL, Cursor's is the Windows profile's `.cursor`, found with `cmd.exe` and `wslpath`; `MSTACK_WINDOWS_HOME` overrides it and `MSTACK_PLATFORM` overrides the detection. `mstack doctor` uses the same folders, so on WSL with both tools skills and agents get a copy in each home. |
 | `mstack render-rule <file.mdc>` | `render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`, and the upstream credit, if any, as its last lines). |
 | `mstack render-rule --combined <checkout>` | `render.py` | Print the managed Codex instructions block with the rendered rules and optional `instructions/global.md`. |
+| `mstack rule-tests-check [--sgconfig FILE] [--json]` | `guards/check_rule_tests.py` | Every ast-grep rule under the sgconfig's `ruleDirs` (default `lint/sgconfig.yml`, nested folders included) has a rule test under `testConfigs` with at least one `valid` and one `invalid` case, every rule test names a rule, and no rule id repeats. Exits 2 when the sgconfig or a rule file cannot be read. |
 | `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
 
 `mstack skills-check [DIR ...] [--profile mstack|generic] [--json]` takes folders of skills, or a single skill folder. Relative links resolve as if the skills were installed side by side, so a link to a sibling skill (`../<name>/...`) works whichever group the checkout keeps it in, and a link out of the skills folder fails.
