@@ -2,6 +2,59 @@
 
 <!-- version list -->
 
+## v7.0.0 (2026-11-26)
+
+### Bug Fixes
+
+- **doctor**: Find v6 hooks in Codex's config.toml too
+  ([`07c054f`](https://github.com/justmatias/mstack/commit/07c054f569d60f304888f97c70f351efb10e2ca4))
+
+- **doctor**: Make the rulepack and stale-hook checks reliable
+  ([`22dc055`](https://github.com/justmatias/mstack/commit/22dc0552bb34c62b6b2ee9be112d0cba26ef7442))
+
+- **doctor**: Report settings that still run mstack hook
+  ([`adda1ac`](https://github.com/justmatias/mstack/commit/adda1aca31d8deb9221f37af2385879b91fcc21a))
+
+### Chores
+
+- Remove leftovers of the moved enforcement code
+  ([`7d0f5a8`](https://github.com/justmatias/mstack/commit/7d0f5a8fcbd7fc3843b16403068b12e8b3463680))
+
+### Documentation
+
+- **specs**: Hand all enforcement to rulepack in one cutover
+  ([#74](https://github.com/justmatias/mstack/pull/74),
+  [`cd1dddb`](https://github.com/justmatias/mstack/commit/cd1dddb7c85707c488a75717b5c4622536540abd))
+
+- **specs**: Plan handing all enforcement to rulepack
+  ([#74](https://github.com/justmatias/mstack/pull/74),
+  [`cd1dddb`](https://github.com/justmatias/mstack/commit/cd1dddb7c85707c488a75717b5c4622536540abd))
+
+- **specs**: Plan moving the linter into rulepack
+  ([#74](https://github.com/justmatias/mstack/pull/74),
+  [`cd1dddb`](https://github.com/justmatias/mstack/commit/cd1dddb7c85707c488a75717b5c4622536540abd))
+
+- **specs**: Remove the shipped shared-rule-packs spec
+  ([#74](https://github.com/justmatias/mstack/pull/74),
+  [`cd1dddb`](https://github.com/justmatias/mstack/commit/cd1dddb7c85707c488a75717b5c4622536540abd))
+
+### Features
+
+- Hand all enforcement to rulepack
+  ([`5d505c3`](https://github.com/justmatias/mstack/commit/5d505c37f3b6148527323f1ccf31874e1e5f3e7f))
+
+### Testing
+
+- Scan readmes, hooks and CI for moved mstack commands
+  ([`9e56ad3`](https://github.com/justmatias/mstack/commit/9e56ad339099524c35827d6aec5d72e3a668bbec))
+
+### Breaking Changes
+
+- Mstack lint, coverage, domain-check, exceptions, commit-msg, hook, init, config and packs are
+  gone, along with action.yml, .pre-commit-hooks.yaml and the bundled packs. Use rulepack; repos
+  that select packs stay on mstack v6.x.
+
+
 ## v6.7.1 (2026-11-24)
 
 ### Bug Fixes

@@ -2,11 +2,16 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Literal
 
-from mstack.config import StrictModel
+from pydantic import BaseModel, ConfigDict
+
 from mstack.platform import Platform, codex_folder
 
 Status = Literal["ok", "warn", "error"]
 REPAIR_FIX = "ask your agent to run the repair skill (/repair in Claude Code)"
+
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 class Context(StrictModel):

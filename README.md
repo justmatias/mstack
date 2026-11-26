@@ -17,7 +17,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `settings/` | Hook settings for Claude Code, Cursor and Codex ([format and install behavior](docs/setup/agent-assets.md)). |
-| `src/mstack/` | The `mstack` CLI: `mstack lint` and the guards the skills and `make` targets run. |
+| `src/mstack/` | The `mstack` CLI, which installs this content and checks the machine: `doctor`, `platform`, `cleanup`, `render-rule` and `skills-check`. The checks run through [rulepack](https://github.com/justmatias/rulepack), which setup installs next to it. |
 
 ## Getting started
 
@@ -31,7 +31,7 @@ cd mstack
 claude "set up mstack"
 ```
 
-The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` CLI, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`, and a rule beside its rules folder, where no tool loads it.
+The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` and `rulepack` CLIs, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`, and a rule beside its rules folder, where no tool loads it.
 
 | You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
 | --- | --- | --- | --- | --- |
@@ -41,9 +41,9 @@ The setup skill lives in `.agents/skills/setup-mstack/`, the project skills fold
 
 When tools share a home, Cursor can use the skills from Claude Code or Codex and the agents from Claude Code. If all three share a home, doctor warns about the two skill copies Cursor can see. On WSL, Cursor reads the Windows profile, so setup gives Cursor its own copies. `mstack platform` prints the tool folders, including the `CODEX_HOME` override for `~/.codex`.
 
-[Agent hooks](hooks/README.md) run checks after edits and at Claude Code and Codex stops, only in projects with `.mstack.toml`.
+[Agent hooks](hooks/README.md) run checks after edits and at Claude Code and Codex stops, only in projects with `.rulepack.toml`. They run `rulepack hook`.
 
-**2. Use the skills in your projects.** In a repo that has no checks yet, start with `mstack init` (`--dry-run` shows the plan): it scaffolds `.mstack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
+**2. Use the skills in your projects.** In a repo that has no checks yet, start with `rulepack init` (`--dry-run` shows the plan): it scaffolds `.rulepack.toml`, an ast-grep `sgconfig.yml` and the rules folder, and with `--pre-commit`, `--ci github` or `--makefile` the hooks, the workflow and the Makefile targets below.
 
 Skills live in five groups, which setup flattens on install:
 
@@ -97,55 +97,12 @@ Use `mstack cleanup` to preview old backups and their sizes, and `mstack cleanup
 
 ## Use the checks in another repo
 
-Select the bundled check packs in the consumer repo's `.mstack.toml`:
+Linting moved to [rulepack](https://github.com/justmatias/rulepack): `rulepack lint`, its pre-commit hooks and its GitHub Action run a repo's own checks, configured in `.rulepack.toml`. Its README documents them. mstack's checks can't be selected as packs until rulepack loads packs from sources ([pack-sources](https://github.com/justmatias/rulepack/blob/main/docs/specs/pack-sources.md)).
 
-```toml
-packs = ["python-core", "testing"]
-```
+**Migrating from mstack `v6.x`:**
 
-Run `mstack packs list` to see what the installed release provides, then run `mstack lint` from the consumer repo. Shared prose, check files and rule tests ship with mstack. Existing project checks can run alongside the packs. A repo can remove a pack or set `disable` and `severity` under `[pack_overrides]` to adjust individual checks.
-
-For local defaults across repos, put the same `packs` list in `~/.config/mstack/config.toml` (or `$XDG_CONFIG_HOME/mstack/config.toml`). A repo list replaces it, including `packs = []`. In CI, select packs in the repo or pass `mstack lint --packs python-core testing`.
-
-Use the same release locally and in CI to run the same checks. Upgrading mstack updates the selected packs. To run the checks on every commit, add the hooks to the repo's `.pre-commit-config.yaml`. Pre-commit installs mstack in its own environment:
-
-```yaml
-repos:
-  - repo: https://github.com/justmatias/mstack
-    rev: vX.Y.Z   # pin a release that includes packs, or a commit SHA
-    hooks:
-      - id: mstack-lint        # ast-grep scan of the staged files; warnings fail too
-      - id: mstack-rules       # rule tests and coverage, when rules or checks change
-      - id: mstack-exceptions  # every ast-grep-ignore has a rule-exception
-      - id: mstack-domain-check  # rules and checks hold no repo details
-      - id: mstack-imports     # .importlinter contracts
-      - id: mstack-commit-msg  # Conventional Commits messages (commit-msg stage)
-```
-
-mstack does not scan for secrets: add the [gitleaks](https://github.com/gitleaks/gitleaks) hook for that, pinned to a release tag.
-
-`mstack-commit-msg` runs at the `commit-msg` stage: add `default_install_hook_types: [pre-commit, commit-msg]` at the top of the file so `pre-commit install` installs it too.
-
-`mstack-imports` needs the project importable: if its modules import third-party packages, list them under the hook's `additional_dependencies`, or leave the hook out and run `mstack lint --only imports` from the project's environment.
-
-Add the mstack action as a step in any GitHub Actions workflow. Here is a standalone workflow example. The action runs the full scan, and on pull requests the changed-files scan where warnings fail too. It needs only `contents: read`, and the checkout must have the full history so the base branch exists:
-
-```yaml
-name: mstack
-on: [push, pull_request]
-permissions:
-  contents: read
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: justmatias/mstack@vX.Y.Z   # a full tag or sha; the @v<major> tag follows the major's fixes
-```
-
-Inputs: `mode` (`full`, `changed` or `both`; default `both` on pull requests, `full` otherwise), `base-ref` (default `origin/<base branch>`), `mstack-version` (default the action's own ref, so CLI and action match), `python-version` and `working-directory`. Every release moves the `v<major>` tag. On other CI providers, run the same two commands: `uvx --from git+https://github.com/justmatias/mstack@<tag> mstack lint`, and on merge requests the same with `--changed --base-ref origin/<base branch>`.
+- **A repo that doesn't select packs:** rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+- **A repo that selects packs** (`packs = [...]` in `.mstack.toml`): stay on mstack `v6.x` in pre-commit and CI until rulepack's pack sources ship.
 
 ## Working on mstack
 
@@ -153,27 +110,27 @@ Inputs: `mode` (`full`, `changed` or `both`; default `both` on pull requests, `f
 make setup                # dev dependencies
 uv run pre-commit install   # installs the pre-commit and the commit-msg hooks
 make lint                 # every pre-commit hook on every file
-make lint-rules           # mstack lint: check tests, full scan and guards
-make lint-rules-changed   # mstack lint --changed: the scan covers only changed files and warnings fail
+make lint-rules           # rulepack lint: check tests, full scan and guards
+make lint-rules-changed   # rulepack lint --changed: the scan covers only changed files and warnings fail
 make test                 # pytest
 make demo                 # scans fixtures/invalid/, which must fail
 ```
 
-`mstack lint` runs the same steps in any repo, with the ast-grep and import-linter that ship with the CLI.
+The `rulepack` that lints this repo is a dev dependency, pinned in `pyproject.toml`. It brings ast-grep and import-linter.
 
 Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `make lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
-- a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
-- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
+- a prose rule lacks a valid Checks section or a declared source link is invalid (`rulepack coverage`);
+- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`rulepack exceptions`):
 
   ```python
   # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
   # ast-grep-ignore: no-manual-init-boilerplate
   ```
 
-- rules or checks contain repo identifiers, URLs, hosts or emails (`mstack domain-check`); secrets are gitleaks' job;
-- a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
+- rules or checks contain repo identifiers, URLs, hosts or emails (`rulepack domain-check`); secrets are gitleaks' job;
+- a commit message doesn't follow Conventional Commits (`rulepack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
@@ -182,6 +139,6 @@ Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation 
 
 ## CI and releases
 
-`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the action in `action.yml` on this repo, the tests and `mstack lint` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the tests and `rulepack lint` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
-On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch), and moves the `v<major>` tag to it.
+On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).

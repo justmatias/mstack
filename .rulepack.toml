@@ -1,5 +1,5 @@
-# Where this repo keeps its rules and checks. Every `mstack` command reads this file;
-# flags still override it. Run `mstack config` to see the resolved values.
+# Where this repo keeps its rules and checks. Every `rulepack` command reads this file;
+# flags still override it. Run `rulepack config` to see the resolved values.
 rules_dir = "rules"
 sgconfig = "lint/sgconfig.yml"
 

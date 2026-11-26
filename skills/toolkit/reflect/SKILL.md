@@ -54,13 +54,13 @@ Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog
 2. **Write prose for judgment**: the bullet, its `Why:` line, and `## Checks`, following [rule-format.md](../sync/references/rule-format.md).
 3. **Enforce checkable standards.** Use an existing linter when it covers the standard. For other pattern and architecture rows that passed step 0, follow [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
-5. **Verify** with `mstack domain-check` over the prepared files, and reread them for English.
+5. **Verify** with `rulepack domain-check` over the prepared files, and reread them for English.
 
 Only what no available tool can check, or what needs a large architecture change, stays in Backlog.
 
 ## 4. Approve, then apply
 
-Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's `rules_dir` and sgconfig folder (`mstack config` prints them; the defaults are `.cursor/rules/` and `lint-rules/`).
+Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's `rules_dir` and sgconfig folder (`rulepack config` prints them; the defaults are `.cursor/rules/` and `lint-rules/`).
 
 Rules and skills change what every future agent does. Do not auto-apply.
 
@@ -72,7 +72,7 @@ For skill rows, follow the Routing exactly, as in pstack:
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): the parent does it directly.
 - Substantive existing-skill edit, `tune description:` or `new skill via create-skill:`: use the environment's skill-creation workflow (Cursor's `create-skill`; in Claude Code, the `skill-creator` skill if installed) instead of inventing the shape ad hoc.
 
-After applying, run `mstack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Keep changes to the source repository local.
+After applying, run `rulepack lint`. One commit per rule, Conventional Commits (`feat(rules): add <id> check`). Keep changes to the source repository local.
 
 ## 5. Summarize for the user
 
@@ -89,6 +89,6 @@ Short list, no preamble:
 
 After the local action is complete or the user chooses to skip it, offer to contribute any Accepted checks or prose rules that apply across repositories. Name the candidates and the proposed destination. Get explicit approval to contribute the selected changes to mstack by pull request. The user can choose different findings for each destination or ask to keep the mstack changes local.
 
-Work in a checkout of `justmatias/mstack` on a contribution branch. Read its `AGENTS.md`, `packs.toml`, and related rules and checks. Reuse or extend existing coverage and skip duplicates. Put shared `.mdc` guidance in `rules/`, ast-grep checks and synthetic cases in `lint/rules/` and `lint/rule-tests/`, and register any new shared IDs in the relevant pack. Follow the [check authoring guide](../sync/references/authoring-a-check.md). Keep project-specific contracts and settings in the source repo.
+Work in a checkout of `justmatias/mstack` on a contribution branch. Read its `AGENTS.md` and related rules and checks. Reuse or extend existing coverage and skip duplicates. Put shared `.mdc` guidance in `rules/`, ast-grep checks and synthetic cases in `lint/rules/` and `lint/rule-tests/`. Follow the [check authoring guide](../sync/references/authoring-a-check.md). Keep project-specific contracts and settings in the source repo.
 
 Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `make lint-rules` and `make lint-rules-changed` in mstack. For an approved mstack contribution, use `open-pr` to push the branch and open a pull request. Report the PR link and verification. If the user asked to keep the contribution local, report the branch and verification.

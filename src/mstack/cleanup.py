@@ -7,7 +7,6 @@ from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from mstack.config import resolve_config
 from mstack.platform import codex_folder, run_quiet, tool_homes
 
 logger = logging.getLogger(__name__)
@@ -38,10 +37,8 @@ def user_folders() -> Iterator[Path]:
 
 
 def checkout_folders(checkout: Path) -> Iterator[Path]:
-    rules = resolve_config(start=checkout).values.rules_dir
-    for folder in (rules, rules.parent):
-        if folder.resolve().is_relative_to(checkout):
-            yield folder
+    yield checkout / "rules"
+    yield checkout
     skills = checkout / "skills"
     if plain_directory(skills):
         yield skills

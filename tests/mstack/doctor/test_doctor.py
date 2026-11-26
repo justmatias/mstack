@@ -1,14 +1,11 @@
-import json
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
 import mstack.doctor
-from mstack.doctor import main
-from mstack.doctor.cli import check_cli
+from mstack.doctor.cli import RULEPACK_SETUP_FIX, check_cli
 from mstack.doctor.drift import check_drift
 from mstack.doctor.platform import check_platform
 from mstack.doctor.rules import check_rules
@@ -16,18 +13,18 @@ from mstack.doctor.skills import check_skills_installed
 from mstack.doctor.targets import skill_sources
 from mstack.doctor.tools import check_tools
 from mstack.doctor.version import check_version
-from mstack.render import main as render_main
-from tests.mstack.conftest import git
+from tests.mstack.doctor.helpers import (
+    append_line,
+    collect_drift_rows,
+    collect_statuses,
+    run_doctor,
+)
 
 
-def statuses(results) -> dict[tuple[str, str], str]:
-    return {(result.group, result.check): result.status for result in results}
-
-
-def test_nothing_installed_reports_missing_skills_and_rules(context):
+def test_doctor_reports_missing_skills_and_rules_when_nothing_is_installed(context):
     results = check_skills_installed(context()) + check_rules(context())
 
-    assert statuses(results) == {
+    assert collect_statuses(results) == {
         ("skills", "installed"): "error",
         ("rules", "installed"): "error",
     }
@@ -35,13 +32,15 @@ def test_nothing_installed_reports_missing_skills_and_rules(context):
 
 
 @pytest.mark.usefixtures("installed_home")
-def test_installed_skills_and_rules_pass(context):
+def test_doctor_passes_when_skills_and_rules_are_installed(context):
     results = check_skills_installed(context()) + check_rules(context())
 
-    assert set(statuses(results).values()) == {"ok"}
+    assert set(collect_statuses(results).values()) == {"ok"}
 
 
-def test_duplicate_skill_in_both_tools_warns(context, installed_home: Path):
+def test_doctor_warns_when_both_tools_have_the_same_skill(
+    context, installed_home: Path
+):
     shutil.copytree(
         installed_home / ".claude" / "skills" / "sync",
         installed_home / ".cursor" / "skills" / "sync",
@@ -49,46 +48,40 @@ def test_duplicate_skill_in_both_tools_warns(context, installed_home: Path):
 
     results = check_skills_installed(context(tool="both"))
 
-    assert statuses(results)[("skills", "duplicates")] == "warn"
+    assert collect_statuses(results)[("skills", "duplicates")] == "warn"
 
 
-def test_broken_skill_is_an_error(context, installed_home: Path):
+def test_doctor_reports_an_error_when_a_skill_is_broken(context, installed_home: Path):
     skill = installed_home / ".claude" / "skills" / "sync" / "SKILL.md"
     text = skill.read_text(encoding="utf-8")
     skill.write_text(text.replace("name: sync", "name: other"), encoding="utf-8")
 
     results = check_skills_installed(context())
 
-    assert statuses(results)[("skills", "valid")] == "error"
+    assert collect_statuses(results)[("skills", "valid")] == "error"
 
 
-def test_rule_with_frontmatter_is_an_error(context, installed_home: Path):
+def test_doctor_reports_an_error_when_a_rule_keeps_its_frontmatter(
+    context, installed_home: Path
+):
     rule = installed_home / ".claude" / "rules" / "error-handling.md"
     text = rule.read_text(encoding="utf-8")
     rule.write_text("---\nalwaysApply: true\n---\n" + text, encoding="utf-8")
 
     results = check_rules(context())
 
-    assert statuses(results) == {("rules", "frontmatter"): "error"}
+    assert collect_statuses(results) == {("rules", "frontmatter"): "error"}
 
 
-def test_cursor_only_skips_claude_rules(context):
+def test_doctor_skips_claude_rules_when_only_cursor_is_used(context):
     assert not check_rules(context(tool="cursor"))
     detail = check_skills_installed(context(tool="cursor"))[0].detail
     assert str(Path(".cursor") / "skills") in detail
 
 
-def append_line(path: Path) -> None:
-    path.write_text(path.read_text(encoding="utf-8") + "\nEdited.\n", encoding="utf-8")
-
-
-def drift_rows(results) -> list[tuple[str, str]]:
-    return [(result.check, result.status) for result in results]
-
-
 @pytest.mark.usefixtures("installed_home")
 def test_drift_passes_when_every_copy_matches_the_checkout(context):
-    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
+    assert collect_drift_rows(check_drift(context())) == [("checkout", "ok")]
 
 
 @pytest.mark.usefixtures("installed_home")
@@ -97,7 +90,7 @@ def test_drift_warns_when_the_installed_skill_was_edited(context, home: Path):
 
     results = check_drift(context())
 
-    assert drift_rows(results) == [("skill sync", "warn")]
+    assert collect_drift_rows(results) == [("skill sync", "warn")]
     assert results[0].fix
 
 
@@ -107,7 +100,7 @@ def test_drift_warns_when_the_checkout_skill_changed(context, checkout: Path):
         "New.\n", encoding="utf-8"
     )
 
-    assert drift_rows(check_drift(context())) == [("skill sync", "warn")]
+    assert collect_drift_rows(check_drift(context())) == [("skill sync", "warn")]
 
 
 @pytest.mark.usefixtures("installed_home")
@@ -116,17 +109,17 @@ def test_drift_warns_when_the_installed_rule_differs_from_the_rendered_one(
 ):
     append_line(home / ".claude" / "rules" / "naming.md")
 
-    assert drift_rows(check_drift(context())) == [("rule naming", "warn")]
+    assert collect_drift_rows(check_drift(context())) == [("rule naming", "warn")]
 
 
 @pytest.mark.usefixtures("installed_home")
-def test_drift_ignores_backups_and_caches_inside_a_skill(context, home: Path):
+def test_drift_ignores_files_when_they_are_backups_or_caches(context, home: Path):
     skill = home / ".claude" / "skills" / "sync"
     (skill / "__pycache__").mkdir()
     (skill / "__pycache__" / "module.pyc").write_bytes(b"cache")
     (skill / ".DS_Store").write_bytes(b"finder")
 
-    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
+    assert collect_drift_rows(check_drift(context())) == [("checkout", "ok")]
 
 
 @pytest.mark.usefixtures("installed_home")
@@ -139,36 +132,40 @@ def test_drift_warns_when_the_installed_agent_differs(
     installed.parent.mkdir(parents=True)
     installed.write_text(agent + "Edited.\n", encoding="utf-8")
 
-    assert drift_rows(check_drift(context())) == [("agent helper", "warn")]
+    assert collect_drift_rows(check_drift(context())) == [("agent helper", "warn")]
 
 
-def test_drift_skips_items_that_are_not_installed(context):
-    assert drift_rows(check_drift(context())) == [("checkout", "ok")]
+def test_drift_skips_items_when_they_are_not_installed(context):
+    assert collect_drift_rows(check_drift(context())) == [("checkout", "ok")]
 
 
-def test_missing_tools(context, monkeypatch: pytest.MonkeyPatch):
+def test_tools_check_reports_each_tool_when_it_is_missing(
+    context, monkeypatch: pytest.MonkeyPatch
+):
     monkeypatch.setattr("mstack.doctor.tools.shutil.which", lambda name: None)
 
     results = check_tools(context())
 
-    assert statuses(results) == {
+    assert collect_statuses(results) == {
         ("tools", "uv"): "error",
         ("tools", "git"): "error",
         ("tools", "gh"): "warn",
     }
 
 
-def test_mstack_missing_from_path(context, monkeypatch: pytest.MonkeyPatch):
+def test_cli_check_fails_when_mstack_is_missing_from_path(
+    context, monkeypatch: pytest.MonkeyPatch
+):
     monkeypatch.setattr("mstack.doctor.cli.shutil.which", lambda name: None)
 
     results = check_cli(context())
 
-    assert statuses(results)[("cli", "mstack")] == "error"
+    assert collect_statuses(results)[("cli", "mstack")] == "error"
     assert (results[0].fix or "").startswith("uv tool install --editable")
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="runs a POSIX shell script")
-def test_mstack_on_path_with_another_version(
+def test_cli_check_fails_when_mstack_on_path_has_another_version(
     context, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     other = tmp_path / "bin" / "mstack"
@@ -179,31 +176,48 @@ def test_mstack_on_path_with_another_version(
 
     results = check_cli(context())
 
-    assert statuses(results) == {("cli", "mstack"): "error", ("cli", "ast-grep"): "ok"}
+    assert collect_statuses(results) == {
+        ("cli", "mstack"): "error",
+        ("cli", "rulepack"): "ok",
+    }
     assert "0.0.1" in results[0].detail
 
 
-def run_doctor(capsys, *arguments: str) -> tuple[int, dict]:
-    exit_code = main(["--json", *arguments])
-    return exit_code, json.loads(capsys.readouterr().out)
+@pytest.mark.usefixtures("_hide_rulepack_from_path")
+def test_rulepack_check_fails_when_rulepack_is_missing(context):
+    results = check_cli(context())
+
+    assert collect_statuses(results)[("cli", "rulepack")] == "error"
 
 
-@pytest.fixture
-def codex_install(capsys, home, checkout, monkeypatch):
-    folder = home / "codex-profile"
-    folder.mkdir()
-    monkeypatch.setenv("CODEX_HOME", str(folder))
-    for name, source in skill_sources(checkout).items():
-        shutil.copytree(source, home / ".agents" / "skills" / name)
-    (checkout / "instructions" / "global.md").write_text(
-        "Global guidance.\n", encoding="utf-8"
+@pytest.mark.usefixtures("_hide_rulepack_from_path")
+def test_rulepack_check_installs_the_pinned_tag_when_the_checkout_pins_one(
+    context, checkout: Path
+):
+    (checkout / "pyproject.toml").write_text(
+        '[tool.mstack]\nrulepack = "v9.9.9"\n', encoding="utf-8"
     )
-    assert render_main(["--combined", str(checkout)]) == 0
-    block = capsys.readouterr().out
-    (folder / "AGENTS.md").write_text(
-        f"Personal guidance.\n\n{block}", encoding="utf-8"
+
+    rulepack = next(
+        result for result in check_cli(context()) if result.check == "rulepack"
     )
-    return folder
+
+    assert rulepack.fix == (
+        "uv tool install --force git+https://github.com/justmatias/rulepack@v9.9.9"
+    )
+
+
+@pytest.mark.usefixtures("_hide_rulepack_from_path")
+def test_rulepack_check_points_to_setup_when_the_checkout_pins_no_tag(
+    context, checkout: Path
+):
+    (checkout / "pyproject.toml").write_text("[tool.mstack]\n", encoding="utf-8")
+
+    rulepack = next(
+        result for result in check_cli(context()) if result.check == "rulepack"
+    )
+
+    assert rulepack.fix == RULEPACK_SETUP_FIX
 
 
 def test_codex_doctor_passes_when_the_shared_skills_and_block_match(
@@ -232,7 +246,7 @@ def test_codex_rules_reports_a_missing_block_when_an_override_takes_precedence(
 
     results = check_rules(context(tool="codex"))
 
-    assert statuses(results) == {("rules", "codex"): "error"}
+    assert collect_statuses(results) == {("rules", "codex"): "error"}
     assert str(override) in results[0].detail
 
 
@@ -243,7 +257,9 @@ def test_codex_rule_drift_warns_when_the_managed_block_differs(codex_install, co
         text.replace("Global guidance.", "Edited guidance."), encoding="utf-8"
     )
 
-    assert drift_rows(check_drift(context(tool="codex"))) == [("rule codex", "warn")]
+    assert collect_drift_rows(check_drift(context(tool="codex"))) == [
+        ("rule codex", "warn")
+    ]
 
 
 @pytest.mark.usefixtures("codex_install")
@@ -259,7 +275,7 @@ def test_cursor_shares_the_codex_skills_when_home_matches(context):
 def test_cursor_warns_when_required_claude_and_codex_copies_overlap(context):
     results = check_skills_installed(context(tool="claude,cursor,codex"))
 
-    assert statuses(results)[("skills", "duplicates")] == "warn"
+    assert collect_statuses(results)[("skills", "duplicates")] == "warn"
 
 
 @pytest.mark.usefixtures("codex_install")
@@ -287,7 +303,7 @@ def test_json_report_and_exit_code_when_nothing_is_installed(capsys, checkout: P
 
 
 @pytest.mark.usefixtures("installed_home")
-def test_exit_code_is_zero_after_setup(capsys, checkout: Path, monkeypatch):
+def test_doctor_exits_zero_when_setup_is_complete(capsys, checkout: Path, monkeypatch):
     # The CLI on PATH depends on the machine running the tests; it is tested above.
     monkeypatch.setattr(
         mstack.doctor,
@@ -301,7 +317,9 @@ def test_exit_code_is_zero_after_setup(capsys, checkout: Path, monkeypatch):
     assert report["ok"] is True
 
 
-def test_default_tool_follows_the_existing_folders(capsys, checkout: Path, home: Path):
+def test_doctor_picks_the_tool_when_only_its_folders_exist(
+    capsys, checkout: Path, home: Path
+):
     (home / ".cursor").mkdir()
 
     _, report = run_doctor(capsys, "--checkout", str(checkout))
@@ -309,36 +327,28 @@ def test_default_tool_follows_the_existing_folders(capsys, checkout: Path, home:
     assert report["tool"] == "cursor"
 
 
-@pytest.fixture
-def origin_with_tag(checkout: Path, tmp_path: Path):
-    def tag(version: str) -> None:
-        origin = tmp_path / "origin.git"
-        subprocess.run(["git", "init", "--quiet", "--bare", str(origin)], check=True)
-        git(checkout, "remote", "add", "origin", str(origin))
-        git(checkout, "tag", version)
-        git(checkout, "push", "--quiet", "origin", "--tags")
-
-    return tag
-
-
-def test_online_reports_a_newer_release(context, origin_with_tag):
+def test_version_check_warns_when_a_newer_release_exists(context, origin_with_tag):
     origin_with_tag("v999.0.0")
 
     results = check_version(context(online=True))
 
-    assert statuses(results) == {("version", "latest"): "warn"}
+    assert collect_statuses(results) == {("version", "latest"): "warn"}
     assert "v999.0.0" in results[0].detail
 
 
-def test_online_passes_on_the_latest_release(context, origin_with_tag):
+def test_version_check_passes_when_checkout_is_on_the_latest_release(
+    context, origin_with_tag
+):
     origin_with_tag("v0.0.1")
 
-    assert statuses(check_version(context(online=True))) == {
+    assert collect_statuses(check_version(context(online=True))) == {
         ("version", "latest"): "ok"
     }
 
 
-def test_no_network_without_online(context, monkeypatch: pytest.MonkeyPatch):
+def test_version_check_uses_no_network_when_online_is_not_set(
+    context, monkeypatch: pytest.MonkeyPatch
+):
     def fail(*_arguments, **_keywords):
         raise AssertionError("doctor used git ls-remote without --online")
 
@@ -348,7 +358,7 @@ def test_no_network_without_online(context, monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.mark.usefixtures("installed_home")
-def test_wsl_with_both_tools_checks_each_tools_skills(context, tmp_path):
+def test_doctor_checks_each_tools_skills_when_wsl_has_both_tools(context, tmp_path):
     windows = tmp_path / "windows"
 
     results = check_skills_installed(
@@ -360,11 +370,51 @@ def test_wsl_with_both_tools_checks_each_tools_skills(context, tmp_path):
     assert str(windows / ".cursor" / "skills") in installed[1].detail
 
 
-def test_wsl_without_windows_profile_warns(context):
+def test_platform_check_warns_when_wsl_has_no_windows_profile(context):
     results = check_platform(context(tool="cursor", platform="wsl"))
 
-    assert statuses(results) == {("platform", "wsl-cursor"): "warn"}
+    assert collect_statuses(results) == {("platform", "wsl-cursor"): "warn"}
 
 
-def test_platform_check_is_silent_outside_wsl(context):
+def test_platform_check_is_silent_when_not_on_wsl(context):
     assert not check_platform(context(tool="cursor"))
+
+
+def test_drift_reports_an_error_when_settings_still_run_mstack_hook(
+    context, write_settings_file
+):
+    write_settings_file(".claude/settings.json", "mstack hook stop")
+
+    results = check_drift(context())
+
+    assert collect_statuses(results)[("drift", "settings settings.json")] == "error"
+
+
+def test_drift_reports_stale_hook_settings_when_there_is_no_checkout(
+    context, write_settings_file
+):
+    write_settings_file(".claude/settings.json", "mstack hook stop")
+
+    results = check_drift(context(checkout=None))
+
+    assert collect_statuses(results) == {("drift", "settings settings.json"): "error"}
+
+
+def test_drift_passes_settings_when_they_run_rulepack_hook(
+    context, write_settings_file
+):
+    write_settings_file(".claude/settings.json", "rulepack hook stop")
+
+    results = check_drift(context())
+
+    assert ("drift", "settings settings.json") not in collect_statuses(results)
+
+
+def test_drift_reports_an_error_when_codex_config_still_runs_mstack_hook(
+    context, write_settings_file
+):
+    write_settings_file(".codex/config.toml", "mstack hook stop")
+
+    results = check_drift(context(tool="codex"))
+
+    assert collect_statuses(results)[("drift", "settings config.toml")] == "error"

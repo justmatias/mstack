@@ -1,9 +1,16 @@
 import importlib.metadata
 import shutil
 import subprocess
+import tomllib
+from pathlib import Path
 
 from mstack.doctor.model import Context, Result, install_fix
-from mstack.lint import LintError, find_tool
+
+RULEPACK_REPOSITORY = "https://github.com/justmatias/rulepack"
+RULEPACK_SETUP_FIX = (
+    "rerun the mstack setup (.agents/skills/setup-mstack/SKILL.md), "
+    "which installs rulepack at the tag the checkout pins"
+)
 
 
 def run_version(command: list[str]) -> str | None:
@@ -22,7 +29,7 @@ def run_version(command: list[str]) -> str | None:
     return (completed.stdout or completed.stderr).strip()
 
 
-def path_result(context: Context) -> Result:
+def check_mstack_on_path(context: Context) -> Result:
     running = importlib.metadata.version("mstack")
     found = shutil.which("mstack")
     if not found:
@@ -50,30 +57,51 @@ def path_result(context: Context) -> Result:
     )
 
 
-def ast_grep_result(context: Context) -> Result:
+def read_rulepack_pin(checkout: Path | None) -> str | None:
+    """The tag `[tool.mstack] rulepack` pins, or None when the checkout has none."""
+    if checkout is None:
+        return None
     try:
-        path = find_tool("ast-grep")
-    except LintError as error:
+        pyproject = tomllib.loads(
+            (checkout / "pyproject.toml").read_text(encoding="utf-8")
+        )
+        pin = pyproject["tool"]["mstack"]["rulepack"]
+    except (OSError, tomllib.TOMLDecodeError, KeyError, TypeError):
+        return None
+    return pin if isinstance(pin, str) else None
+
+
+def build_rulepack_fix(checkout: Path | None) -> str:
+    pin = read_rulepack_pin(checkout)
+    if pin is None:
+        return RULEPACK_SETUP_FIX
+    return f"uv tool install --force git+{RULEPACK_REPOSITORY}@{pin}"
+
+
+def check_rulepack_on_path(context: Context) -> Result:
+    fix = build_rulepack_fix(context.checkout)
+    found = shutil.which("rulepack")
+    if not found:
         return Result(
             group="cli",
-            check="ast-grep",
+            check="rulepack",
             status="error",
-            detail=str(error),
-            fix=install_fix(context),
+            detail="'rulepack' is not on PATH; the agent hooks and the skills run it",
+            fix=fix,
         )
-    version = run_version([path])
+    version = run_version([found])
     if version is None:
         return Result(
             group="cli",
-            check="ast-grep",
+            check="rulepack",
             status="error",
-            detail=f"{path} does not run",
-            fix=install_fix(context),
+            detail=f"{found} does not run",
+            fix=fix,
         )
     return Result(
-        group="cli", check="ast-grep", status="ok", detail=f"{path} ({version})"
+        group="cli", check="rulepack", status="ok", detail=f"{found} ({version})"
     )
 
 
 def check_cli(context: Context) -> list[Result]:
-    return [path_result(context), ast_grep_result(context)]
+    return [check_mstack_on_path(context), check_rulepack_on_path(context)]

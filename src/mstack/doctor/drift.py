@@ -1,10 +1,4 @@
-"""Installed copies that no longer match the checkout.
-
-Doctor does not know why a copy differs: the user may have edited it, or the
-checkout may have moved on. The repair skill reads the diff and the checkout's
-history to tell which, and asks before touching the user's edits.
-"""
-
+import re
 from pathlib import Path
 
 from mstack.doctor.model import REPAIR_FIX, Context, Result
@@ -20,8 +14,12 @@ from mstack.doctor.targets import (
     skill_sources,
     uses_claude,
     uses_codex,
+    uses_cursor,
 )
 from mstack.render import FrontmatterError, render_combined_rules, render_rule
+
+# mstack v6 settings ran the agent hooks as `mstack hook`, which moved to rulepack.
+LEGACY_HOOK = re.compile(r"\bmstack hook (post-edit|stop)\b")
 
 
 def drifted(kind: str, name: str, installed: Path) -> Result:
@@ -34,7 +32,7 @@ def drifted(kind: str, name: str, installed: Path) -> Result:
     )
 
 
-def skill_drift(context: Context, checkout: Path) -> list[Result]:
+def find_skill_drift(context: Context, checkout: Path) -> list[Result]:
     results = []
     for folder in skill_folders(context.tool, context.home, context.cursor):
         for name, source in skill_sources(checkout).items():
@@ -44,7 +42,7 @@ def skill_drift(context: Context, checkout: Path) -> list[Result]:
     return results
 
 
-def agent_drift(context: Context, checkout: Path) -> list[Result]:
+def find_agent_drift(context: Context, checkout: Path) -> list[Result]:
     results = []
     for folder in copied_folders(context.tool, context.home, context.cursor, "agents"):
         for name in agent_names(checkout):
@@ -55,7 +53,7 @@ def agent_drift(context: Context, checkout: Path) -> list[Result]:
     return results
 
 
-def rule_drift(context: Context, checkout: Path) -> list[Result]:
+def find_rule_drift(context: Context, checkout: Path) -> list[Result]:
     if not uses_claude(context.tool):
         return []
     results = []
@@ -83,7 +81,7 @@ def rule_drift(context: Context, checkout: Path) -> list[Result]:
     return results
 
 
-def codex_rule_drift(context: Context, checkout: Path) -> list[Result]:
+def find_codex_rule_drift(context: Context, checkout: Path) -> list[Result]:
     if not uses_codex(context.tool):
         return []
     path = codex_instructions(context.codex)
@@ -104,15 +102,51 @@ def codex_rule_drift(context: Context, checkout: Path) -> list[Result]:
     return [drifted("rule", "codex", path)] if installed != expected else []
 
 
+def list_settings_files(context: Context) -> list[Path]:
+    files = []
+    if uses_claude(context.tool):
+        files.append(context.home / ".claude" / "settings.json")
+    if uses_cursor(context.tool):
+        files.append(context.cursor / ".cursor" / "hooks.json")
+    if uses_codex(context.tool):
+        # Setup merges Codex hooks into an inline [hooks] table when one exists.
+        files += [context.codex / "hooks.json", context.codex / "config.toml"]
+    return files
+
+
+def find_legacy_hook_settings(context: Context) -> list[Result]:
+    return [
+        Result(
+            group="drift",
+            check=f"settings {path.name}",
+            status="error",
+            detail=f"{path} runs `mstack hook`, which is now `rulepack hook`",
+            fix=REPAIR_FIX,
+        )
+        for path in list_settings_files(context)
+        if path.is_file() and LEGACY_HOOK.search(path.read_text(encoding="utf-8"))
+    ]
+
+
 def check_drift(context: Context) -> list[Result]:
+    """Installed files that setup or /repair must rewrite.
+
+    Settings that still run the v6 hook command fail on every agent edit, so they
+    are reported even without a checkout. Other copies are compared with the
+    checkout. Doctor does not know why a copy differs: the user may have edited
+    it, or the checkout may have moved on. The repair skill reads the diff and the
+    checkout's history to tell which, and asks before touching the user's edits.
+    """
+    legacy_hook_settings = find_legacy_hook_settings(context)
     checkout = context.checkout
     if checkout is None or not checkout.is_dir():
-        return []
+        return legacy_hook_settings
     results = (
-        skill_drift(context, checkout)
-        + rule_drift(context, checkout)
-        + codex_rule_drift(context, checkout)
-        + agent_drift(context, checkout)
+        legacy_hook_settings
+        + find_skill_drift(context, checkout)
+        + find_rule_drift(context, checkout)
+        + find_codex_rule_drift(context, checkout)
+        + find_agent_drift(context, checkout)
     )
     if results:
         return results
