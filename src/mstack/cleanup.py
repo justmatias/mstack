@@ -37,8 +37,7 @@ def user_folders() -> Iterator[Path]:
 
 
 def checkout_folders(checkout: Path) -> Iterator[Path]:
-    rules = checkout / "rules"
-    yield rules
+    yield checkout / "rules"
     yield checkout
     skills = checkout / "skills"
     if plain_directory(skills):

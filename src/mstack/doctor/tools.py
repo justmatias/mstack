@@ -12,12 +12,12 @@ class ExternalTool(StrictModel):
 TOOLS = {
     "uv": ExternalTool(
         required=True,
-        used_by="mstack and the checks",
+        used_by="mstack and rulepack",
         link="https://docs.astral.sh/uv/",
     ),
     "git": ExternalTool(
         required=True,
-        used_by="mstack and the checks",
+        used_by="mstack and rulepack",
         link="https://git-scm.com/downloads",
     ),
     "gh": ExternalTool(

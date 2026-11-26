@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 import pytest
 import yaml
@@ -10,9 +9,9 @@ from tests.helpers import run_command
 
 @pytest.fixture
 def run_mstack():
-    def run(command: str, *arguments: str, working_directory: Path = REPOSITORY_ROOT):
+    def run(command: str, *arguments: str):
         return run_command(
-            [sys.executable, "-m", "mstack", command, *arguments], working_directory
+            [sys.executable, "-m", "mstack", command, *arguments], REPOSITORY_ROOT
         )
 
     return run

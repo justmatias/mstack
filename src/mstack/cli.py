@@ -3,8 +3,6 @@ import importlib
 import logging
 import sys
 
-logger = logging.getLogger(__name__)
-
 COMMANDS = {
     "cleanup": "mstack.cleanup",
     "doctor": "mstack.doctor",

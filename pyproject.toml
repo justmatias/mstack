@@ -39,8 +39,6 @@ packages = ["src/mstack"]
 [tool.hatch.build.targets.sdist]
 include = [
     "/src/mstack",
-    "/rules",
-    "/lint",
     "/LICENSE",
     "/README.md",
     "/pyproject.toml",
