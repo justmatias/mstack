@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v7.2.0 (2026-11-26)
+
+### Features
+
+- **rules**: Parametrize fixtures instead of tests
+  ([`71113fa`](https://github.com/justmatias/mstack/commit/71113fadce369b5c86fdb94ebd2731c9a64f7d32))
+
+
 ## v7.1.0 (2026-11-26)
 
 ### Documentation
