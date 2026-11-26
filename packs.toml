@@ -16,6 +16,7 @@ checks = [
     "conftest-has-only-fixtures",
     "no-broad-pytest-raises",
     "no-fixture-in-test-module",
+    "no-parametrized-test",
     "no-skip-without-reason",
     "no-sleep-in-tests",
     "no-underscore-fixture-parameter",
