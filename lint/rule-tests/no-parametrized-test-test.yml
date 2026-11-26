@@ -1,0 +1,37 @@
+id: no-parametrized-test
+valid:
+  - |
+    @pytest.fixture(params=["a", "b"], ids=["first", "second"])
+    def item(request):
+        return request.param
+
+    def test_item_is_named_when_built(item):
+        assert build(item).name
+  # Near misses: another mark, pytest.param inside fixture params, and parametrize
+  # called on metafunc in a pytest hook.
+  - |
+    @pytest.mark.slow
+    def test_install_succeeds_when_offline():
+        install()
+  - |
+    @pytest.fixture(params=[pytest.param("a", id="first")])
+    def item(request):
+        return request.param
+  - |
+    def pytest_generate_tests(metafunc):
+        metafunc.parametrize("item", ["a", "b"])
+invalid:
+  - |
+    @pytest.mark.parametrize("path", FILES, ids=lambda path: path.name)
+    def test_file_is_valid_when_scanned(path):
+        assert scan(path) == []
+  - |
+    @pytest.mark.parametrize(("system", "expected"), [("a", "b")])
+    def test_detects_system_when_named(system, expected):
+        assert detect(system) == expected
+  - |
+    from pytest import mark
+
+    @mark.parametrize("item", ["a", "b"])
+    def test_item_is_named_when_built(item):
+        assert build(item).name

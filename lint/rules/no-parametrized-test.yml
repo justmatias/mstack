@@ -1,0 +1,15 @@
+id: no-parametrized-test
+language: Python
+severity: warning
+message: Parametrize a fixture with @pytest.fixture(params=...) and take it in the test
+note: |
+  A parametrized fixture keeps a test's signature to fixtures only, and every test
+  that takes the fixture runs each case without repeating the case list.
+metadata:
+  source: rules/pytest-fixtures.mdc
+rule:
+  kind: decorator
+  any:
+    - pattern: "@pytest.mark.parametrize($$$)"
+    - pattern: "@mark.parametrize($$$)"
+    - pattern: "@parametrize($$$)"
