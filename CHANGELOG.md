@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v7.4.0 (2026-11-26)
+
+### Features
+
+- **guards**: Fail when a check in lint/ has no rule test
+  ([`29f302e`](https://github.com/justmatias/mstack/commit/29f302e446884420c735f49efbc818c62405ab7c))
+
+
 ## v7.3.0 (2026-11-26)
 
 ### Features
