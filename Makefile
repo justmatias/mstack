@@ -38,9 +38,11 @@ guards:
 	$(RULEPACK) lint --only imports coverage exceptions domain-check
 	@$(MAKE) --no-print-directory repo-guards
 
-# Guards for what only this repo has: agent config folders and skills.
+# Guards for what only this repo has: agent config folders, skills, and a rule test
+# for every check in lint/.
 repo-guards:
 	$(MSTACK) skills-check skills .agents/skills
+	$(MSTACK) rule-tests-check --sgconfig $(SGCONFIG)
 	$(if $(AGENT_CONFIG_FILES),$(RULEPACK) domain-check $(AGENT_CONFIG_FILES))
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.

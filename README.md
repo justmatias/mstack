@@ -17,7 +17,7 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `settings/` | Hook settings for Claude Code, Cursor and Codex ([format and install behavior](docs/setup/agent-assets.md)). |
-| `src/mstack/` | The `mstack` CLI, which installs this content and checks the machine: `doctor`, `platform`, `cleanup`, `render-rule` and `skills-check`. The checks run through [rulepack](https://github.com/justmatias/rulepack), which setup installs next to it. |
+| `src/mstack/` | The `mstack` CLI, which installs this content and checks the machine: `doctor`, `platform`, `cleanup`, `render-rule`, `skills-check` and `rule-tests-check`. The checks run through [rulepack](https://github.com/justmatias/rulepack), which setup installs next to it. |
 
 ## Getting started
 
@@ -146,7 +146,8 @@ Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check 
 
 - rules or checks contain repo identifiers, URLs, hosts or emails (`rulepack domain-check`); secrets are gitleaks' job;
 - a commit message doesn't follow Conventional Commits (`rulepack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
-- a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`).
+- a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`);
+- a check in `lint/rules/` has no rule test with both `valid` and `invalid` cases, a rule test names no check, or two checks share an id (`mstack rule-tests-check`). `ast-grep test` alone passes when a check has no test.
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
