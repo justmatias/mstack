@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v7.1.0 (2026-11-26)
+
+### Documentation
+
+- Ask before locking a source, and never lock in sync --check
+  ([`ac07d29`](https://github.com/justmatias/mstack/commit/ac07d29fdb837342206fca3d9f2318922f81e77e))
+
+- Cover locking and selecting packs in sync and the migration
+  ([`b9794a4`](https://github.com/justmatias/mstack/commit/b9794a403974ad569327db40d288141bb4ed0fae))
+
+### Features
+
+- Publish the checks as packs for rulepack
+  ([`dca97fd`](https://github.com/justmatias/mstack/commit/dca97fda2ab6d00fceee7ee913d02f094cafdb8c))
+
+
 ## v7.0.0 (2026-11-26)
 
 ### Bug Fixes
