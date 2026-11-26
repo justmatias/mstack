@@ -9,11 +9,12 @@ alwaysApply: false
 - Consolidate repeated setup, including identical object construction and filesystem setup, into shared fixtures. Keep case-specific setup visible in the test or in its fixture's `params`.
 - Parametrize a fixture (`@pytest.fixture(params=...)`), not the test (`@pytest.mark.parametrize`), and let the test take each case as that fixture's value.
 - Name a value fixture for what it returns. Name an action fixture with a leading underscore and a verb phrase such as `_write_settings_file`. When both are useful, let the value fixture depend on the action fixture.
+- Apply an action fixture with `@pytest.mark.usefixtures` when the test needs only its side effect, so the test's parameters list only the values it reads.
 - Keep a factory-callable fixture when tests need different arguments. For a single reusable value, return the configured instance.
 - Keep `conftest.py` for fixtures and pytest hooks. Put plain helper functions in a `helpers.py` next to it, and import them from there.
 - Express fixture dependencies explicitly when setup order matters. If a dependency parameter has no other use, explain the ordering when suppressing an unused-argument diagnostic.
 
-Why: explicit dependencies keep setup order readable. Names tell the reader whether a fixture returns a value or performs an action, and a separate helpers module keeps conftest.py readable as a list of fixtures. A parametrized fixture keeps test signatures to fixtures only, and every test that takes it runs each case.
+Why: explicit dependencies keep setup order readable. Names tell the reader whether a fixture returns a value or performs an action, `usefixtures` keeps setup that runs for its effect out of the signature, and a separate helpers module keeps conftest.py readable as a list of fixtures. A parametrized fixture keeps test signatures to fixtures only, and every test that takes it runs each case.
 
 ## Checks
 - enforced-by: conftest-has-only-fixtures
