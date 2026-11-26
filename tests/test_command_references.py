@@ -9,13 +9,16 @@ MOVED_COMMAND = re.compile(
     r"(\bmstack|\$\(MSTACK\)) (lint|coverage|domain-check|exceptions|commit-msg"
     r"|hook|init|config|packs)\b"
 )
-FOLDERS = ("skills", "settings", "docs", ".agents")
+FOLDERS = ("skills", "settings", "docs", ".agents", ".github", "hooks")
 FILES = sorted(
     path
     for folder in FOLDERS
     for path in (REPOSITORY_ROOT / folder).rglob("*")
     if path.is_file() and "__pycache__" not in path.parts
-) + [REPOSITORY_ROOT / "Makefile"]
+) + [
+    REPOSITORY_ROOT / name
+    for name in ("Makefile", "README.md", "AGENTS.md", "src/mstack/README.md")
+]
 
 
 @pytest.mark.parametrize(
