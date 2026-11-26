@@ -92,3 +92,30 @@ def origin_with_tag(checkout: Path, tmp_path: Path):
         git(checkout, "push", "--quiet", "origin", "--tags")
 
     return tag
+
+
+@pytest.fixture
+def write_settings_file(home: Path):
+    """Writes agent settings under the home whose one hook runs `command`."""
+
+    def write(relative_path: str, command: str) -> Path:
+        path = home / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix == ".toml":
+            content = f'[[hooks.Stop]]\nhooks = [{{ command = "{command}" }}]\n'
+        else:
+            content = (
+                f'{{"hooks": {{"Stop": [{{"hooks": [{{"command": "{command}"}}]}}]}}}}'
+            )
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    return write
+
+
+@pytest.fixture
+def _hide_rulepack_from_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "mstack.doctor.cli.shutil.which",
+        lambda name: None if name == "rulepack" else name,
+    )

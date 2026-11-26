@@ -2,10 +2,15 @@ import importlib.metadata
 import shutil
 import subprocess
 import tomllib
+from pathlib import Path
 
 from mstack.doctor.model import Context, Result, install_fix
 
 RULEPACK_REPOSITORY = "https://github.com/justmatias/rulepack"
+RULEPACK_SETUP_FIX = (
+    "rerun the mstack setup (.agents/skills/setup-mstack/SKILL.md), "
+    "which installs rulepack at the tag the checkout pins"
+)
 
 
 def run_version(command: list[str]) -> str | None:
@@ -24,7 +29,7 @@ def run_version(command: list[str]) -> str | None:
     return (completed.stdout or completed.stderr).strip()
 
 
-def path_result(context: Context) -> Result:
+def check_mstack_on_path(context: Context) -> Result:
     running = importlib.metadata.version("mstack")
     found = shutil.which("mstack")
     if not found:
@@ -52,21 +57,29 @@ def path_result(context: Context) -> Result:
     )
 
 
-def rulepack_pin(context: Context) -> str:
-    """The rulepack tag that `[tool.mstack] rulepack` in the checkout pins."""
-    pyproject = context.checkout / "pyproject.toml" if context.checkout else None
+def read_rulepack_pin(checkout: Path | None) -> str | None:
+    """The tag `[tool.mstack] rulepack` pins, or None when the checkout has none."""
+    if checkout is None:
+        return None
     try:
-        data = tomllib.loads(pyproject.read_text(encoding="utf-8")) if pyproject else {}
-    except (OSError, tomllib.TOMLDecodeError):
-        data = {}
-    tool = data.get("tool")
-    settings = tool.get("mstack") if isinstance(tool, dict) else None
-    pin = settings.get("rulepack") if isinstance(settings, dict) else None
-    return pin if isinstance(pin, str) else "<tag>"
+        pyproject = tomllib.loads(
+            (checkout / "pyproject.toml").read_text(encoding="utf-8")
+        )
+        pin = pyproject["tool"]["mstack"]["rulepack"]
+    except (OSError, tomllib.TOMLDecodeError, KeyError, TypeError):
+        return None
+    return pin if isinstance(pin, str) else None
 
 
-def rulepack_result(context: Context) -> Result:
-    fix = f"uv tool install git+{RULEPACK_REPOSITORY}@{rulepack_pin(context)}"
+def build_rulepack_fix(checkout: Path | None) -> str:
+    pin = read_rulepack_pin(checkout)
+    if pin is None:
+        return RULEPACK_SETUP_FIX
+    return f"uv tool install --force git+{RULEPACK_REPOSITORY}@{pin}"
+
+
+def check_rulepack_on_path(context: Context) -> Result:
+    fix = build_rulepack_fix(context.checkout)
     found = shutil.which("rulepack")
     if not found:
         return Result(
@@ -91,4 +104,4 @@ def rulepack_result(context: Context) -> Result:
 
 
 def check_cli(context: Context) -> list[Result]:
-    return [path_result(context), rulepack_result(context)]
+    return [check_mstack_on_path(context), check_rulepack_on_path(context)]
