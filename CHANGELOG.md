@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v7.3.0 (2026-11-26)
+
+### Features
+
+- **rules**: Apply side-effect fixtures with usefixtures
+  ([`4ebdcb8`](https://github.com/justmatias/mstack/commit/4ebdcb8b20bb1426970ab42a7a3823e9216b597b))
+
+
 ## v7.2.0 (2026-11-26)
 
 ### Features
