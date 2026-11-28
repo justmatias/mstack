@@ -2,6 +2,53 @@
 
 <!-- version list -->
 
+## v8.0.0 (2026-11-28)
+
+### Build System
+
+- Replace the Makefile with poethepoet tasks
+  ([`0a028ba`](https://github.com/justmatias/mstack/commit/0a028baa2085d8ff12aa87c8cabe051fb87c259c))
+
+- **make**: Drop the demo target
+  ([`388c31f`](https://github.com/justmatias/mstack/commit/388c31fa84e6d7a0f0883a0f72b9d43b8046de4c))
+
+- **make**: Drop the unused guards target and a stale comment
+  ([`1b901e8`](https://github.com/justmatias/mstack/commit/1b901e88cb075adebc5c146cb1c5f0dd1e2fe85d))
+
+### Chores
+
+- **deps**: Bump pyyaml to 6.0.4 and types-pyyaml
+  ([#82](https://github.com/justmatias/mstack/pull/82),
+  [`c7e422d`](https://github.com/justmatias/mstack/commit/c7e422d9e6a72012bbf4a8e7baabd12f698d9759))
+
+### Documentation
+
+- **guards**: Fix the v0.7.0 migration steps for consumer repos
+  ([`063ae69`](https://github.com/justmatias/mstack/commit/063ae695994c81861604e256b022f1cf9e4dd2e1))
+
+- **guards**: Keep the CLI commands in one table
+  ([`560842a`](https://github.com/justmatias/mstack/commit/560842abc87533ab362f9e19241afb9dcbb1f232))
+
+- **guards**: Say which command runs the guards in the workflow
+  ([`bd5170f`](https://github.com/justmatias/mstack/commit/bd5170fdea0f1e5511add7a8e60fde81544136b1))
+
+### Features
+
+- **guards**: Move four guards from rulepack into mstack
+  ([`00297e9`](https://github.com/justmatias/mstack/commit/00297e918a359ccc7d04fdbc17855d6d5248a712))
+
+### Refactoring
+
+- **guards**: Drop .mstack.toml and read only .rulepack.toml
+  ([`77a578f`](https://github.com/justmatias/mstack/commit/77a578f9fb6aaef0c851a2b1ab0e078876fb5555))
+
+- **guards**: Drop duplicate helpers and dead branches in the port
+  ([`143e226`](https://github.com/justmatias/mstack/commit/143e22665900c3964898eeb1c6cbbac57458deb8))
+
+- **guards**: Keep only the coverage guard from rulepack
+  ([`583f7bf`](https://github.com/justmatias/mstack/commit/583f7bfc06a7af5f485939ed86a6cd1244cd266a))
+
+
 ## v7.4.0 (2026-11-26)
 
 ### Features
