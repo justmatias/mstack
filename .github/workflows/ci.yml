@@ -35,28 +35,28 @@ jobs:
       - name: Run pre-commit on all files
         env:
           SKIP: lint-rules,no-commit-to-branch
-        run: make lint
+        run: uv run poe lint
 
       - name: Scan the whole repo with the rules
-        run: make lint-rules
+        run: uv run poe lint-rules
 
       # The full scan above does not fail on warning-level rules (old instances
       # are tolerated). On a pull request, every rule, warnings included, must
       # pass on the files the PR changes. fetch-depth: 0 above makes
-      # origin/<base branch> available; the target fails if it is missing.
+      # origin/<base branch> available; the task fails if it is missing.
       - name: Scan the files changed by the PR, warnings included
         if: github.event_name == 'pull_request'
         env:
           BASE_REF: origin/${{ github.base_ref }}
-        run: make lint-rules-changed
+        run: uv run poe lint-rules-changed
 
       # Includes test_every_invalid_fixture_is_caught: each file in
       # fixtures/invalid/ must still be flagged, so the checks can't go silent.
       - name: Tests
-        run: make test
+        run: uv run poe test
 
-  # The CLI and the checks must behave the same on every OS. `make` is a
-  # contributor convenience (bash), so this job calls pytest and rulepack directly.
+  # The CLI and the checks must behave the same on every OS: the same poe tasks
+  # run on macOS and Windows.
   portability:
     name: Portability (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -75,13 +75,10 @@ jobs:
           python-version: "3.12"
 
       - name: Tests
-        run: uv run pytest -q
+        run: uv run poe test
 
-      - name: rulepack lint
-        run: uv run rulepack lint
-
-      - name: mstack coverage
-        run: uv run mstack coverage --rules-dir rules
+      - name: Lint rules
+        run: uv run poe lint-rules
 
   security:
     name: Dependency vulnerability scan

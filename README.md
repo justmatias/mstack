@@ -125,17 +125,19 @@ A repo that also selected packs (`packs = [...]`):
 ## Working on mstack
 
 ```bash
-make setup                # dev dependencies
-uv run pre-commit install   # installs the pre-commit hooks
-make lint                 # every pre-commit hook on every file
-make lint-rules           # rulepack lint: check tests, full scan and guards
-make lint-rules-changed   # rulepack lint --changed: the scan covers only changed files and warnings fail
-make test                 # pytest
+uv sync                          # dev dependencies
+uv run pre-commit install        # installs the pre-commit hooks
+uv run poe lint                  # every pre-commit hook on every file
+uv run poe lint-rules            # rulepack lint: check tests, full scan and guards
+uv run poe lint-rules-changed    # rulepack lint --changed: the scan covers only changed files and warnings fail
+uv run poe test                  # pytest
 ```
+
+The tasks are in `[tool.poe.tasks]` in `pyproject.toml`; `uv run poe` lists them.
 
 The `rulepack` that lints this repo is a dev dependency, pinned in `pyproject.toml`. It brings ast-grep and import-linter.
 
-Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `make lint-rules` fails when:
+Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `poe lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
 - a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
@@ -148,6 +150,6 @@ Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation 
 
 ## CI and releases
 
-`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the tests and `rulepack lint` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+`.github/workflows/ci.yml` runs the `lint`, `lint-rules`, `lint-rules-changed` (on pull requests) and `test` poe tasks on Python 3.12 and 3.13, `test` and `lint-rules` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
 On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).

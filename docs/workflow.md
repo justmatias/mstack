@@ -20,7 +20,7 @@ flowchart LR
 - An `.mdc` file gives agents guidance for decisions that automated checks leave open.
 - Each rule ends with a `## Checks` section that names how it is enforced: `enforced-by: <id>` (an ast-grep rule or an import-linter contract), `enforced-by-hook: <id>` (a pre-commit hook such as gitleaks), or `enforcement: llm-review` (a judgment call that only a reviewer can check).
 - A check can stand on its own. If an ast-grep check declares `metadata.source`, `mstack coverage` verifies the prose file exists and lists the check.
-- `rulepack lint` runs the checks' own tests, the scan and import-linter, and `mstack coverage` checks that prose and checks agree. `make lint-rules` runs both, the same way locally, in pre-commit and in CI.
+- `rulepack lint` runs the checks' own tests, the scan and import-linter, and `mstack coverage` checks that prose and checks agree. In this repo, `uv run poe lint-rules` runs both, the same way locally, in pre-commit and in CI.
 
 ## 1. Set up a machine (once per machine)
 
@@ -69,7 +69,7 @@ flowchart TD
 ```
 
 1. **Write.** The agent follows the rules installed in its user folder, plus the repo's own rules: point to them from `AGENTS.md` (or `CLAUDE.md`), as this repo does, because Claude Code never reads `.mdc` files by itself.
-2. **Check locally.** `rulepack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files.
+2. **Check locally.** `rulepack lint --changed` (or `uv run poe lint-rules-changed` in this repo) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files.
 3. **Open the pull request.** CI runs the full scan and the changed-files scan. Commit messages follow Conventional Commits.
 4. **Review.** `/diff-review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
 5. **Simplify, if needed.** `/declutter` makes working code easier to read without changing what it does, one tested change at a time.
@@ -108,10 +108,10 @@ Many exceptions to one rule mean the rule is wrong; `/correct` looks for that.
 ## 5. Work on mstack itself
 
 ```bash
-make setup                 # dev dependencies
-uv run pre-commit install  # pre-commit hooks
-make lint-rules-changed    # what every change must pass (AGENTS.md)
-make test                  # pytest
+uv sync                          # dev dependencies
+uv run pre-commit install        # pre-commit hooks
+uv run poe lint-rules-changed    # what every change must pass (AGENTS.md)
+uv run poe test                  # pytest
 ```
 
 - **Add a rule to mstack.** Put review guidance in `rules/<name>.mdc`. Put a new automated check and its cases under `lint/`. Add a sample that breaks the check under `fixtures/invalid/`. Code in `fixtures/valid/` must stay clean.

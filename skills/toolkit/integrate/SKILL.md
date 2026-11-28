@@ -99,7 +99,7 @@ Follow [drafting.md](references/drafting.md): the credit frontmatter, the skill 
 3. Show `diff -ru` against the upstream item and, for a merge or rebase, against the current target; for a long diff, the parts that matter.
 4. After explicit approval, move anything you would overwrite or remove to `<target>/.mstack-backups/<UTC timestamp>/<name>`, with the timestamp as `YYYYMMDD-HHMMSS` (never `<name>.bak` beside the skills or rules, or tools would load it). A rule goes beside the rules folder instead, to `<the target's parent>/.mstack-backups/<UTC timestamp>/rules/<name>`: the tools and `mstack coverage` read every file under a rules folder, however deep. Then `cp -R <tmp>/draft/<name> <target>/<name>`.
 5. **Rules:** run `sync` on the target so each written rule gets its proven check.
-6. Verify: `mstack skills-check <target>` passes (principles header also in every written reference and template, which `skills-check` does not check); for rules, `mstack coverage` passes with each credit complete. In the mstack checkout also add confirmed overlaps to `known-overlaps.json`, update the `README.md` Skills row if the set changed, and run `make test` and `make lint-rules-changed`.
+6. Verify: `mstack skills-check <target>` passes (principles header also in every written reference and template, which `skills-check` does not check); for rules, `mstack coverage` passes with each credit complete. In the mstack checkout also add confirmed overlaps to `known-overlaps.json`, update the `README.md` Skills row if the set changed, and run `uv run poe test` and `uv run poe lint-rules-changed`.
 
 Delete the temp clone and drafts when done.
 
@@ -111,4 +111,4 @@ A short list; leave out empty lines:
 - Skills and rules added / merged / rebased / skipped (with the reason for skips; for rules, bullets per file, conflicts and who won, and the check each got).
 - Adapted: translated, abstracted or dropped (including `dropped: domain-dependent`), and scripts kept or dropped.
 - Backups: `<target>/.mstack-backups/<timestamp>/` (rules: `<the target's parent>/.mstack-backups/<timestamp>/rules/`) if any.
-- Checks: `make test` and `make lint-rules-changed` results.
+- Checks: `uv run poe test` and `uv run poe lint-rules-changed` results.

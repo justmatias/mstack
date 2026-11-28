@@ -24,7 +24,7 @@ COMMAND_REFERENCE_FILES = sorted(
     if path.is_file() and "__pycache__" not in path.parts
 ) + [
     REPOSITORY_ROOT / name
-    for name in ("Makefile", "README.md", "AGENTS.md", "src/mstack/README.md")
+    for name in ("pyproject.toml", "README.md", "AGENTS.md", "src/mstack/README.md")
 ]
 
 

@@ -79,8 +79,8 @@ repos:
   - repo: local
     hooks:
       - id: lint-rules
-        name: lint-rules (make lint-rules-changed on staged files)
-        entry: make lint-rules-changed STAGED=1
+        name: lint-rules (poe lint-rules-staged)
+        entry: uv run poe lint-rules-staged
         language: system
         pass_filenames: false
         always_run: true
