@@ -20,7 +20,7 @@ flowchart LR
 - An `.mdc` file gives agents guidance for decisions that automated checks leave open.
 - Each rule ends with a `## Checks` section that names how it is enforced: `enforced-by: <id>` (an ast-grep rule or an import-linter contract), `enforced-by-hook: <id>` (a pre-commit hook such as gitleaks), or `enforcement: llm-review` (a judgment call that only a reviewer can check).
 - A check can stand on its own. If an ast-grep check declares `metadata.source`, `mstack coverage` verifies the prose file exists and lists the check.
-- `rulepack lint` runs everything: the checks' own tests, the scan, import-linter and the guards. The same command runs locally, in pre-commit and in CI.
+- `rulepack lint` runs the checks' own tests, the scan and import-linter, and `mstack coverage`, `mstack exceptions` and `mstack domain-check` run the guards. `make lint-rules` runs both, the same way locally, in pre-commit and in CI.
 
 ## 1. Set up a machine (once per machine)
 
