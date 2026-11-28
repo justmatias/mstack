@@ -10,16 +10,13 @@ The `mstack` command installs and checks mstack's content on this machine: `clea
 | `mstack render-rule <file.mdc>` | `render.py` | Print an `.mdc` rule converted into a Claude Code user rule (no frontmatter, an `Applies to` line from `globs`, no `## Checks`, and the upstream credit, if any, as its last lines). |
 | `mstack render-rule --combined <checkout>` | `render.py` | Print the managed Codex instructions block with the rendered rules and optional `instructions/global.md`. |
 | `mstack rule-tests-check [--sgconfig FILE] [--json]` | `guards/check_rule_tests.py` | Every ast-grep rule under the sgconfig's `ruleDirs` (default `lint/sgconfig.yml`, nested folders included) has a rule test under `testConfigs` with at least one `valid` and one `invalid` case, every rule test names a rule, and no rule id repeats. Exits 2 when the sgconfig or a rule file cannot be read. |
+| `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
 | `mstack coverage [--rules-dir DIR] [--config FILE] [--importlinter FILE] [--pre-commit-config FILE] [--root DIR] [--json]` | `guards/coverage.py` | Every prose rule has a `## Checks` section whose `enforced-by:` ids exist as ast-grep rules or import-linter contracts and whose `enforced-by-hook:` ids are configured pre-commit hooks, every `metadata.source` link is valid, and rule credit is complete. |
 | `mstack exceptions [PATH ...] [--json] [--today DATE]` | `guards/exceptions.py` | Every `ast-grep-ignore` names its rule ids and carries a `rule-exception` with reason, a future expiry and a `@handle` approval. |
 | `mstack domain-check [PATH ...] [--repo DIR] [--exclude DIR]` | `guards/domain_check.py` | Generated rules and checks hold no identifiers of the analyzed repo, URLs, hosts, IP addresses or emails. |
 | `mstack commit-msg <file>` | `guards/commit_msg.py` | A commit message has a Conventional Commits subject with an allowed type, at most 72 characters, no trailing period, and a blank line before the body. |
 
 The guards read `rules_dir`, `pre_commit_config`, `[domain_check]` and `[commits]` from `.mstack.toml`, and `sgconfig`, `importlinter` and `[scan]` from `.rulepack.toml`. Both are found from the current folder up to the git root. A config error exits 2.
-
-| Command | Module | What it does |
-| --- | --- | --- |
-| `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
 
 `mstack skills-check [DIR ...] [--profile mstack|generic] [--json]` takes folders of skills, or a single skill folder. Relative links resolve as if the skills were installed side by side, so a link to a sibling skill (`../<name>/...`) works whichever group the checkout keeps it in, and a link out of the skills folder fails.
 

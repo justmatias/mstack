@@ -126,6 +126,7 @@ Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.
 Every repo:
 
 - Move `sgconfig`, `importlinter`, `[scan]`, `[hooks]` and `[changed]` from `.mstack.toml` to a new `.rulepack.toml`, and keep `rules_dir`, `pre_commit_config`, `[domain_check]` and `[commits]` in `.mstack.toml` (rulepack `v0.7.0` rejects them). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids rulepack still ships from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Keep the commit-msg hook as the local `mstack-commit-msg` hook above. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+
 A repo that also selected packs (`packs = [...]`):
 
 - Change `python-core` and `testing` to `mstack/python-core` and `mstack/testing`, and drop `git`, which had no checks and is gone.
