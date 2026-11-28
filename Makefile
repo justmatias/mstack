@@ -7,7 +7,7 @@ RULEPACK := uv run rulepack
 # The paths come from .rulepack.toml (sgconfig, scan excludes).
 SGCONFIG := lint/sgconfig.yml
 
-.PHONY: setup lint-rules lint-rules-changed guards repo-guards demo test lint
+.PHONY: setup lint-rules lint-rules-changed repo-guards demo test lint
 
 # Dev dependencies only. To install the skills and rules into your user folders, ask
 # your agent to set up mstack (.agents/skills/setup-mstack/SKILL.md).
@@ -31,13 +31,8 @@ lint-rules-changed:
 	$(RULEPACK) lint --changed $(if $(BASE_REF),--base-ref $(BASE_REF)) $(if $(STAGED),--staged)
 	@$(MAKE) --no-print-directory repo-guards
 
-guards:
-	$(RULEPACK) lint --only imports
-	@$(MAKE) --no-print-directory repo-guards
-
-# Guards for what only this repo has: agent config folders, skills, and a rule test
-# for every check in lint/. The coverage guard runs here too, since rulepack lint no
-# longer runs it.
+# Guards rulepack lint does not run: prose rules match their checks (coverage), skills
+# are valid, and every check in lint/ has a rule test.
 repo-guards:
 	$(MSTACK) coverage --rules-dir rules
 	$(MSTACK) skills-check skills .agents/skills
