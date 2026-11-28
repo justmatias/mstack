@@ -14,8 +14,6 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
 | `agents/` | Optional subagent definitions ([format and install behavior](docs/setup/agent-assets.md)). |
-| `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
-| `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `settings/` | Hook settings for Claude Code, Cursor and Codex ([format and install behavior](docs/setup/agent-assets.md)). |
 | `src/mstack/` | The `mstack` CLI, which installs this content and checks the machine: `doctor`, `platform`, `cleanup`, `render-rule`, `skills-check` and `rule-tests-check`. The checks run through [rulepack](https://github.com/justmatias/rulepack), which setup installs next to it. |
 
@@ -33,11 +31,11 @@ claude "set up mstack"
 
 The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` and `rulepack` CLIs, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`, and a rule beside its rules folder, where no tool loads it.
 
-| You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
-| --- | --- | --- | --- | --- |
-| Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/`, a managed block in `~/.claude/CLAUDE.md` | `claude mcp add-json --scope user` | merged into `~/.claude/settings.json` |
-| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | merged into `~/.cursor/hooks.json` |
-| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/config.toml` | merged into `~/.codex/hooks.json` |
+| You use | Skills and agents go to | Rules go to | Settings |
+| --- | --- | --- | --- |
+| Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/` | merged into `~/.claude/settings.json` |
+| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/hooks.json` |
+| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/hooks.json` |
 
 When tools share a home, Cursor can use the skills from Claude Code or Codex and the agents from Claude Code. If all three share a home, doctor warns about the two skill copies Cursor can see. On WSL, Cursor reads the Windows profile, so setup gives Cursor its own copies. `mstack platform` prints the tool folders, including the `CODEX_HOME` override for `~/.codex`.
 

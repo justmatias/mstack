@@ -233,7 +233,7 @@ def test_codex_doctor_passes_when_the_shared_skills_and_block_match(
     assert report["tool"] == "codex"
     assert all(result["status"] == "ok" for result in report["results"])
     text = (codex_install / "AGENTS.md").read_text(encoding="utf-8")
-    assert "Global guidance." in text
+    assert "Explain recovery decisions." in text
     assert "Applies to files matching" in text
     assert "## Checks" not in text
 
@@ -254,7 +254,8 @@ def test_codex_rule_drift_warns_when_the_managed_block_differs(codex_install, co
     path = codex_install / "AGENTS.md"
     text = path.read_text(encoding="utf-8")
     path.write_text(
-        text.replace("Global guidance.", "Edited guidance."), encoding="utf-8"
+        text.replace("Explain recovery decisions.", "Edited guidance."),
+        encoding="utf-8",
     )
 
     assert collect_drift_rows(check_drift(context(tool="codex"))) == [
