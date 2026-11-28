@@ -242,7 +242,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Validate check references in prose and any declared ast-grep source links.",
     )
     parser.add_argument(
-        "--rules-dir", type=Path, help="Prose rules folder (default: from config)."
+        "--rules-dir", type=Path, help="Prose rules folder (default: .cursor/rules)."
     )
     parser.add_argument(
         "--config", type=Path, help="ast-grep sgconfig.yml (default: from config)."
@@ -253,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--pre-commit-config",
         type=Path,
-        help="pre-commit config whose hook ids count as checks (default: from config).",
+        help="pre-commit config whose hook ids count as checks (default: .pre-commit-config.yaml).",
     )
     parser.add_argument(
         "--root",

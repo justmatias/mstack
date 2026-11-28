@@ -101,13 +101,12 @@ GUARD_SAMPLE_PATHS = (
     "lint",
     ".pre-commit-config.yaml",
     ".rulepack.toml",
-    ".mstack.toml",
 )
 
 
 @pytest.fixture
 def rules_sandbox(tmp_path: Path) -> Path:
-    """A repo with this repo's prose rules, checks and both config files."""
+    """A repo with this repo's prose rules, checks and config files."""
     sandbox = tmp_path / "sandbox"
     (sandbox / ".git").mkdir(parents=True)
     for name in GUARD_SAMPLE_PATHS:
@@ -129,7 +128,13 @@ def coverage_issues(run_mstack, rules_sandbox: Path):
     """Run coverage --json in the sandbox: its exit code and (kind, check) pairs."""
 
     def run() -> tuple[int, list[tuple[str, str | None]]]:
-        completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+        completed = run_mstack(
+            "coverage",
+            "--rules-dir",
+            "rules",
+            "--json",
+            working_directory=rules_sandbox,
+        )
         issues = json.loads(completed.stdout)["issues"]
         return completed.returncode, [
             (issue["kind"], issue.get("check")) for issue in issues
@@ -259,5 +264,5 @@ def layout_coverage(run_mstack, import_linter_layout: Path):
 
 
 @pytest.fixture
-def _write_invalid_guard_config(rules_sandbox: Path) -> None:
-    (rules_sandbox / ".mstack.toml").write_text("rules_dir = [\n", encoding="utf-8")
+def _write_invalid_rulepack_config(rules_sandbox: Path) -> None:
+    (rules_sandbox / ".rulepack.toml").write_text("sgconfig = [\n", encoding="utf-8")

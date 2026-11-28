@@ -1,3 +1,0 @@
-# Settings for `mstack coverage`, which rulepack does not run. It reads sgconfig
-# and importlinter from .rulepack.toml.
-rules_dir = "rules"

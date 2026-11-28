@@ -2,12 +2,13 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ValidationError
 
-# rulepack's config: the guards read the paths rulepack also checks.
 RULEPACK_CONFIG_FILE_NAME = ".rulepack.toml"
-# The guards' own settings, which rulepack does not accept.
-CONFIG_FILE_NAME = ".mstack.toml"
+# Where the prose rules and the pre-commit config live, relative to the root.
+# rulepack does not accept these keys, so a repo that moves them passes a flag.
+DEFAULT_RULES_DIR = Path(".cursor/rules")
+DEFAULT_PRE_COMMIT_CONFIG = Path(".pre-commit-config.yaml")
 
 
 class ConfigError(Exception):
@@ -21,15 +22,8 @@ class RulepackSettings(BaseModel):
     importlinter: Path = Path(".importlinter")
 
 
-class GuardSettings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    rules_dir: Path = Path(".cursor/rules")
-    pre_commit_config: Path = Path(".pre-commit-config.yaml")
-
-
 class GuardConfig(BaseModel):
-    """Both files resolved. Every path is absolute."""
+    """The resolved paths. Every path is absolute."""
 
     root: Path
     rules_dir: Path
@@ -49,15 +43,19 @@ def find_git_root(start: Path) -> Path | None:
     )
 
 
-def find_config_path(start: Path, git_root: Path | None, name: str) -> Path | None:
-    """Find the nearest config file without looking above the git root."""
+def find_config_path(start: Path, git_root: Path | None) -> Path | None:
+    """Find the nearest .rulepack.toml without looking above the git root."""
     directories = [start]
     if git_root is not None:
         directories.extend(
             parent for parent in start.parents if parent.is_relative_to(git_root)
         )
     return next(
-        (directory / name for directory in directories if (directory / name).is_file()),
+        (
+            directory / RULEPACK_CONFIG_FILE_NAME
+            for directory in directories
+            if (directory / RULEPACK_CONFIG_FILE_NAME).is_file()
+        ),
         None,
     )
 
@@ -71,35 +69,25 @@ def read_toml(path: Path | None) -> dict[str, Any]:
         raise ConfigError(f"{path}: invalid TOML ({error})") from error
 
 
-def validate_settings[Settings: BaseModel](
-    model: type[Settings], path: Path | None
-) -> Settings:
-    try:
-        return model.model_validate(read_toml(path))
-    except ValidationError as error:
-        raise ConfigError(f"{path}: {error}") from error
-
-
 def absolute(path: Path, base: Path) -> Path:
     path = path.expanduser()
     return path if path.is_absolute() else base / path
 
 
 def resolve_config(start: Path | None = None) -> GuardConfig:
-    """Read .mstack.toml and .rulepack.toml, each relative to its own folder."""
+    """Read .rulepack.toml; its paths and the defaults resolve against its folder."""
     start = (start or Path.cwd()).resolve()
     git_root = find_git_root(start)
-    guard_file = find_config_path(start, git_root, CONFIG_FILE_NAME)
-    rulepack_file = find_config_path(start, git_root, RULEPACK_CONFIG_FILE_NAME)
-    guard_settings = validate_settings(GuardSettings, guard_file)
-    rulepack_settings = validate_settings(RulepackSettings, rulepack_file)
-    fallback_root = git_root or start
-    guard_root = guard_file.parent if guard_file else fallback_root
-    rulepack_root = rulepack_file.parent if rulepack_file else fallback_root
+    config_file = find_config_path(start, git_root)
+    try:
+        settings = RulepackSettings.model_validate(read_toml(config_file))
+    except ValidationError as error:
+        raise ConfigError(f"{config_file}: {error}") from error
+    root = config_file.parent if config_file else git_root or start
     return GuardConfig(
-        root=guard_root,
-        rules_dir=absolute(guard_settings.rules_dir, guard_root),
-        sgconfig=absolute(rulepack_settings.sgconfig, rulepack_root),
-        importlinter=absolute(rulepack_settings.importlinter, rulepack_root),
-        pre_commit_config=absolute(guard_settings.pre_commit_config, guard_root),
+        root=root,
+        rules_dir=root / DEFAULT_RULES_DIR,
+        sgconfig=absolute(settings.sgconfig, root),
+        importlinter=absolute(settings.importlinter, root),
+        pre_commit_config=root / DEFAULT_PRE_COMMIT_CONFIG,
     )

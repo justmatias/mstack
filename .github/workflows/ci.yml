@@ -81,7 +81,7 @@ jobs:
         run: uv run rulepack lint
 
       - name: mstack coverage
-        run: uv run mstack coverage
+        run: uv run mstack coverage --rules-dir rules
 
   security:
     name: Dependency vulnerability scan

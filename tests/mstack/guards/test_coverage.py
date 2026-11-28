@@ -5,15 +5,9 @@ import pytest
 
 
 def test_coverage_passes_when_repository_rules_are_complete(run_mstack):
-    completed = run_mstack("coverage")
+    completed = run_mstack("coverage", "--rules-dir", "rules")
 
     assert completed.returncode == 0, completed.stderr
-
-
-def test_coverage_reads_rules_dir_when_mstack_config_sets_it(coverage_issues):
-    exit_code, issues = coverage_issues()
-
-    assert (exit_code, issues) == (0, [])
 
 
 def test_coverage_passes_when_a_check_has_no_prose_source(
@@ -36,7 +30,9 @@ def test_coverage_fails_when_rules_and_checks_disagree(
 def test_coverage_counts_hook_as_check_when_it_is_configured(
     run_mstack, rules_sandbox: Path, configured_hook_id: str
 ):
-    completed = run_mstack("coverage", "--json", working_directory=rules_sandbox)
+    completed = run_mstack(
+        "coverage", "--rules-dir", "rules", "--json", working_directory=rules_sandbox
+    )
 
     assert completed.returncode == 0, completed.stdout
     naming = next(
@@ -110,8 +106,8 @@ def test_coverage_fails_when_rule_credit_has_no_upstream_commit(
     assert coverage_issues() == (1, [("credit", None)])
 
 
-@pytest.mark.usefixtures("_write_invalid_guard_config")
-def test_coverage_exits_with_config_error_when_mstack_config_is_invalid(
+@pytest.mark.usefixtures("_write_invalid_rulepack_config")
+def test_coverage_exits_with_config_error_when_rulepack_config_is_invalid(
     run_mstack, rules_sandbox: Path
 ):
     completed = run_mstack("coverage", working_directory=rules_sandbox)

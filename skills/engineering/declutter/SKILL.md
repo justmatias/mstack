@@ -34,7 +34,7 @@ This skill edits files. It does not commit unless the user asks.
 
 ## 1. Collect the conventions
 
-1. Read every `.mdc` in the `rules_dir` set in `.mstack.toml` (default `.cursor/rules/`), plus `AGENTS.md`, `CLAUDE.md` and `.claude/rules/*.md` when they exist (see [../sync/references/discovery.md](../sync/references/discovery.md)). Keep the rules whose `globs` match a file in scope.
+1. Read every `.mdc` in the repo's rules folder (default `.cursor/rules/`), plus `AGENTS.md`, `CLAUDE.md` and `.claude/rules/*.md` when they exist (see [../sync/references/discovery.md](../sync/references/discovery.md)). Keep the rules whose `globs` match a file in scope.
 2. Read the code next to the target: how it orders imports, declares functions, names things, handles errors and annotates types. Match that.
 
 ## 2. Understand before touching

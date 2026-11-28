@@ -51,7 +51,7 @@ Rules reach Claude Code as `~/.claude/rules/<name>.md`, in the form `mstack rend
 3. **Pick the severity.** A new check with no existing violations ships as `error`. A check that existing code still breaks ships as `warning`: the full scan tolerates the old instances, while the changed-files scan fails on new or touched code.
 4. **Wire it in.** With `--pre-commit`, every commit scans the staged files; with `--ci github`, every push to `main` runs the full scan, and every pull request runs both the full and the changed-files scan. Any other CI can run `uvx --from git+https://github.com/justmatias/rulepack@<tag> rulepack lint`.
 
-Run `rulepack config` to see the check paths the repo uses, from `.rulepack.toml`. `mstack coverage` reads `rules_dir` and `pre_commit_config` from `.mstack.toml`.
+Run `rulepack config` to see the check paths the repo uses, from `.rulepack.toml`. `mstack coverage` reads the prose rules from `.cursor/rules/` unless `--rules-dir` names another folder (`rules/` in this repo).
 
 ## 3. The daily loop
 

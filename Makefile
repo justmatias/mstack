@@ -4,7 +4,7 @@ SHELL := /usr/bin/env bash
 AST_GREP := uv run ast-grep
 MSTACK := uv run mstack
 RULEPACK := uv run rulepack
-# The paths come from .rulepack.toml (sgconfig, scan excludes) and .mstack.toml (rules).
+# The paths come from .rulepack.toml (sgconfig, scan excludes).
 SGCONFIG := lint/sgconfig.yml
 
 .PHONY: setup lint-rules lint-rules-changed guards repo-guards demo test lint
@@ -39,7 +39,7 @@ guards:
 # for every check in lint/. The coverage guard runs here too, since rulepack lint no
 # longer runs it.
 repo-guards:
-	$(MSTACK) coverage
+	$(MSTACK) coverage --rules-dir rules
 	$(MSTACK) skills-check skills .agents/skills
 	$(MSTACK) rule-tests-check --sgconfig $(SGCONFIG)
 
