@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Set up mstack
 
-> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim code taken from the user's version. Details: `skills/sync/references/principles.md` in this checkout.
+> **Principles (always apply):** (1) **English only**: everything you write or generate is in English, including your replies and any combined skill or rule. (2) **Practices, not domain**: a combined skill or rule keeps coding practices only, never business names, rules, values, URLs or verbatim code taken from the user's version. Details: `skills/toolkit/sync/references/principles.md` in this checkout.
 
 This skill runs from the mstack checkout (`<mstack>`, the folder with `skills/` and `rules/`), and is never installed. It lives in `.agents/skills/`, which Codex, Cursor and opencode load as project skills; Claude Code reaches it through `CLAUDE.md`, which imports `AGENTS.md`. Installing and updating are the same run: the user pulls the repo and runs it again.
 
