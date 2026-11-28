@@ -117,5 +117,5 @@ uv run poe test                  # pytest
 - **Add a rule to mstack.** Put review guidance in `rules/<name>.mdc`. Put a new automated check and its cases under `lint/`. Add a sample that breaks the check under `fixtures/invalid/`. Code in `fixtures/valid/` must stay clean.
 - **Add a skill:** a folder in a topic group, `skills/<group>/<name>/` (`toolkit`, `engineering`, `shipping`, `learning` or `productivity`), with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
 - **Agents, MCP servers, settings and global instructions** go in `agents/`, `mcp/`, `settings/` and `instructions/`; each folder's README gives the format. Secrets are always `${VAR}` placeholders.
-- **Planned work** is in [`docs/specs/`](specs/README.md). When a spec ships, delete it in the same pull request.
+- **Planned work** is tracked in GitHub issues.
 - **Releases** are automatic: every push to `main` runs semantic-release, which reads the Conventional Commits types (`feat` is a minor release, `fix` and `perf` a patch, `!` a major).

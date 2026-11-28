@@ -146,7 +146,7 @@ Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check 
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
-Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into next and future.
+Planned work is tracked in [GitHub issues](https://github.com/justmatias/mstack/issues).
 
 ## CI and releases
 
