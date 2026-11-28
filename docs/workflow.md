@@ -118,4 +118,4 @@ uv run poe test                  # pytest
 - **Add a skill:** a folder in a topic group, `skills/<group>/<name>/` (`toolkit`, `engineering`, `shipping`, `learning` or `productivity`), with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
 - **Agents and settings** go in `agents/` and `settings/`; [agent-assets.md](setup/agent-assets.md) gives the format. Secrets are always `${VAR}` placeholders.
 - **Planned work** is tracked in GitHub issues.
-- **Releases** are automatic: every push to `main` runs semantic-release, which reads the Conventional Commits types (`feat` is a minor release, `fix` and `perf` a patch, `!` a major).
+- **Releases** are automatic: each pull request gets a release commit from semantic-release, based on its title's Conventional Commits type (`feat` is a minor release, `fix` and `perf` a patch, `!` a major), and merging it tags the release.
