@@ -27,7 +27,7 @@ def checkout(tmp_path: Path) -> Path:
     """A committed copy of the skills and rules, so tests can change upstream."""
     checkout = tmp_path / "checkout"
     ignore = shutil.ignore_patterns("__pycache__")
-    for folder in ("skills", "rules", "agents", "mcp", "settings", "instructions"):
+    for folder in ("skills", "rules", "agents", "settings"):
         source = REPOSITORY_ROOT / folder
         destination = checkout / folder
         if source.is_dir():
@@ -71,9 +71,6 @@ def codex_install(capsys, home, checkout, monkeypatch):
     monkeypatch.setenv("CODEX_HOME", str(folder))
     for name, source in skill_sources(checkout).items():
         shutil.copytree(source, home / ".agents" / "skills" / name)
-    (checkout / "instructions" / "global.md").write_text(
-        "Global guidance.\n", encoding="utf-8"
-    )
     assert render_main(["--combined", str(checkout)]) == 0
     block = capsys.readouterr().out
     (folder / "AGENTS.md").write_text(

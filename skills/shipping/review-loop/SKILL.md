@@ -89,7 +89,7 @@ Start another round only when budget remains and a blocker or should finding is 
 - **Agreed:** APPROVE on the current behavior diff, no blocker or should open, and no concern of your own.
 - **Stuck:** two replies leave a finding unresolved, or the budget ended. Show both sides in two or three lines each and let the user decide. The end of the budget is not approval.
 
-Do not push during the loop. Once the review is approved, push only when the user asked to push, ship or update the PR. When you push to a PR, add above the model attribution line: `Reviewed with review-loop: <N> rounds with <reviewer>. Verdict: approved`.
+Do not push during the loop. Once the review is approved, push only when the user asked to push, ship or update the PR. When you push to a PR, add this line to its description: `Reviewed with review-loop: <N> rounds with <reviewer>. Verdict: approved`.
 
 ## Report
 

@@ -36,7 +36,7 @@ The setup skill (`.agents/skills/setup-mstack/`) runs from the checkout and is n
 
 1. installs the `mstack` CLI (`uv tool install --editable <checkout>`) and `rulepack` at the pinned tag, which brings its own ast-grep and import-linter;
 2. asks which tools you use, and runs `mstack platform` to find their folders (on WSL, Cursor reads the Windows profile);
-3. compares every skill, rule, agent, MCP server, setting and global instruction with what you already have, and shows one plan;
+3. compares every skill, rule, agent and setting with what you already have, and shows one plan;
 4. asks only where your own setup differs, backs up anything it replaces to `<folder>/.mstack-backups/<timestamp>/` (a rule beside its rules folder, where no tool loads it), and applies the plan;
 5. runs `mstack doctor` until it reports no errors.
 
@@ -116,6 +116,6 @@ uv run poe test                  # pytest
 
 - **Add a rule to mstack.** Put review guidance in `rules/<name>.mdc`. Put a new automated check and its cases under `lint/`. Add a sample that breaks the check under `fixtures/invalid/`. Code in `fixtures/valid/` must stay clean.
 - **Add a skill:** a folder in a topic group, `skills/<group>/<name>/` (`toolkit`, `engineering`, `shipping`, `learning` or `productivity`), with a `SKILL.md` that starts with the principles header; `mstack skills-check` validates it. An adapted skill carries its upstream credit in the frontmatter.
-- **Agents, MCP servers, settings and global instructions** go in `agents/`, `mcp/`, `settings/` and `instructions/`; each folder's README gives the format. Secrets are always `${VAR}` placeholders.
-- **Planned work** is in [`docs/specs/`](specs/README.md). When a spec ships, delete it in the same pull request.
-- **Releases** are automatic: every push to `main` runs semantic-release, which reads the Conventional Commits types (`feat` is a minor release, `fix` and `perf` a patch, `!` a major).
+- **Agents and settings** go in `agents/` and `settings/`; [agent-assets.md](setup/agent-assets.md) gives the format. Secrets are always `${VAR}` placeholders.
+- **Planned work** is tracked in GitHub issues.
+- **Releases** are automatic: each pull request gets a release commit from semantic-release, based on its title's Conventional Commits type (`feat` is a minor release, `fix` and `perf` a patch, `!` a major), and merging it tags the release.

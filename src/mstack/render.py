@@ -83,15 +83,11 @@ def render_rule(mdc_text: str) -> str:
 
 def render_combined_rules(checkout: Path) -> str:
     """Render the managed block for Codex's global instructions."""
-    instructions = checkout / "instructions" / "global.md"
-    sections = [BLOCK_START]
-    if instructions.is_file():
-        sections.append(instructions.read_text(encoding="utf-8").strip())
-    sections.extend(
+    rules = [
         render_rule(rule.read_text(encoding="utf-8")).rstrip()
         for rule in sorted((checkout / "rules").glob("*.mdc"))
-    )
-    sections.append(BLOCK_END)
+    ]
+    sections = [BLOCK_START, *rules, BLOCK_END]
     return "\n\n".join(sections) + "\n"
 
 

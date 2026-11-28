@@ -14,8 +14,6 @@ Agents follow what they are told and what is checked. So every rule that can be 
 | `lint/` | The checks that enforce those rules (ast-grep). |
 | `skills/` | Agent skills, grouped by topic (`skills/<group>/<name>/`). Installed flat, one folder per skill. |
 | `agents/` | Optional subagent definitions ([format and install behavior](docs/setup/agent-assets.md)). |
-| `mcp/` | Optional MCP server definitions ([format and install behavior](docs/setup/agent-assets.md)). |
-| `instructions/` | Optional global agent instructions ([format and install behavior](docs/setup/agent-assets.md)). |
 | `settings/` | Hook settings for Claude Code, Cursor and Codex ([format and install behavior](docs/setup/agent-assets.md)). |
 | `src/mstack/` | The `mstack` CLI, which installs this content and checks the machine: `doctor`, `platform`, `cleanup`, `render-rule`, `skills-check` and `rule-tests-check`. The checks run through [rulepack](https://github.com/justmatias/rulepack), which setup installs next to it. |
 
@@ -33,11 +31,11 @@ claude "set up mstack"
 
 The setup skill lives in `.agents/skills/setup-mstack/`, the project skills folder Codex, Cursor and opencode load: there, run `/setup-mstack` (`$setup-mstack` in Codex). Claude Code only loads `.claude/skills/`, so it finds the skill through `CLAUDE.md`, which imports `AGENTS.md`; ask it to *"set up mstack"*. Any other agent that reads `AGENTS.md` works the same way. The agent installs the `mstack` and `rulepack` CLIs, asks which tools you use, compares every skill, rule and setting with what you already have, shows one plan, and asks only where your own setup differs. Anything it replaces is backed up to `<folder>/.mstack-backups/<timestamp>/`, and a rule beside its rules folder, where no tool loads it.
 
-| You use | Skills and agents go to | Rules and instructions go to | MCP servers | Settings |
-| --- | --- | --- | --- | --- |
-| Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/`, a managed block in `~/.claude/CLAUDE.md` | `claude mcp add-json --scope user` | merged into `~/.claude/settings.json` |
-| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/mcp.json` | merged into `~/.cursor/hooks.json` |
-| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/config.toml` | merged into `~/.codex/hooks.json` |
+| You use | Skills and agents go to | Rules go to | Settings |
+| --- | --- | --- | --- |
+| Claude Code | `~/.claude/skills/`, `~/.claude/agents/` | `~/.claude/rules/` | merged into `~/.claude/settings.json` |
+| Cursor | `~/.cursor/skills/`, `~/.cursor/agents/` | Cursor Settings → Rules (the skill prints them for you to paste) | merged into `~/.cursor/hooks.json` |
+| Codex | `~/.agents/skills/`, `~/.codex/agents/` | a managed block in `~/.codex/AGENTS.md` | merged into `~/.codex/hooks.json` |
 
 When tools share a home, Cursor can use the skills from Claude Code or Codex and the agents from Claude Code. If all three share a home, doctor warns about the two skill copies Cursor can see. On WSL, Cursor reads the Windows profile, so setup gives Cursor its own copies. `mstack platform` prints the tool folders, including the `CODEX_HOME` override for `~/.codex`.
 
@@ -53,7 +51,7 @@ Skills live in five groups, which setup flattens on install:
 | `engineering/` | `diff-review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
 | `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
-| `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `ketchup`, `grill-me`, `handoff` |
+| `productivity/` | `bro`, `unslop`, `sharpen`, `ketchup`, `grill-me`, `handoff` |
 
 | Skill | Use it to |
 | --- | --- |
@@ -82,7 +80,6 @@ Skills live in five groups, which setup flattens on install:
 | `show-me` | Show the current topic visually: pseudocode, call or file trees, Mermaid, diffs, or one focused HTML page. |
 | `unslop` | Cut AI tells from any writing, by numbered rules. |
 | `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
-| `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
 | `ketchup` | Catch you up on what changed in this chat since your last message, and list every call waiting on you with a recommended pick. |
 | `grill-me` | Interview you about a plan in rounds, with a recommended answer for each question, until every decision is settled. |
 | `handoff` | Write a handoff document in the temp directory so a fresh agent can continue the work, with suggested skills and secrets redacted. |
@@ -146,10 +143,10 @@ Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check 
 
 `fixtures/valid/` is sample code that follows every rule; `fixtures/invalid/` breaks each one on purpose, and the tests prove every file there is still caught.
 
-Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation plan per feature, grouped into next and future.
+Planned work is tracked in [GitHub issues](https://github.com/justmatias/mstack/issues).
 
 ## CI and releases
 
 `.github/workflows/ci.yml` runs the `lint`, `lint-rules`, `lint-rules-changed` (on pull requests) and `test` poe tasks on Python 3.12 and 3.13, `test` and `lint-rules` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
-On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).
+The release is prepared in the pull request: `release-prepare.yml` reads the PR title and runs [python-semantic-release](https://python-semantic-release.readthedocs.io/), which commits the version bump, `CHANGELOG.md` and `uv.lock` to the PR branch (`feat` is a minor bump, `fix` and `perf` a patch, `!` a major; other types release nothing). After the merge, the `Versioning` job in `ci.yml` tags that version on `main` and creates the GitHub release.
