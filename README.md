@@ -49,7 +49,7 @@ Skills live in five groups, which setup flattens on install:
 | --- | --- |
 | `toolkit/` | `sync`, `reflect`, `correct`, `integrate`, `repair` |
 | `engineering/` | `diff-review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
-| `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work` |
+| `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work`, `to-issues` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
 | `productivity/` | `bro`, `unslop`, `sharpen`, `ketchup`, `grill-me`, `handoff` |
 
@@ -68,6 +68,7 @@ Skills live in five groups, which setup flattens on install:
 | `full-send` | Take a task to a merged PR unattended: prove the change, run the review loop, open and babysit the PR, merge once the gate passes. Only when you say "full send". |
 | `full-stop` | The same as `full-send`, but stop with the PR ready for you to merge and never merge it. Only when you say "full stop". |
 | `show-me-your-work` | Keep an append-only decision log for unattended work, audit it against the transcript, and have another model flag what you should look at. |
+| `to-issues` | Move Markdown specs from the repo into GitHub issues, one per spec, with a permalink to the source and dependencies as issue references, then delete the files. Also splits an issue that bundles several specs. |
 | `declutter` | Simplify working code without changing what it does, one tested change at a time, following the repo's rules. |
 | `modernize` | Bring an old pull request up to date and say honestly whether it should stay open: check what landed on the base since, pick MODERNIZE, REWORK or CLOSE, then rebase and push with `--force-with-lease`. |
 | `architect` | Sketch types, signatures and module boundaries before code, compare two shapes, and pick the one with the clearest ownership. |

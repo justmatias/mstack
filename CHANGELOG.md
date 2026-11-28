@@ -2,6 +2,51 @@
 
 <!-- version list -->
 
+## v8.1.0 (2026-11-28)
+
+### Bug Fixes
+
+- **setup**: Point the principles header at the grouped sync skill
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+- **skills**: Stop review-loop from assuming an attribution line
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+- **skills**: Trigger declutter with /declutter
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+### Documentation
+
+- **readme**: Describe the release as prepared in the pull request
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+- **specs**: Track planned work in an issue instead of docs/specs
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+### Features
+
+- **skills**: Add to-issues to move Markdown specs into GitHub issues
+  ([`ee04496`](https://github.com/justmatias/mstack/commit/ee04496ebf75dc68203d0c0b550ad9318ca33edb))
+
+### Refactoring
+
+- Remove unused setup assets, specs and the recall skill
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+- **setup**: Drop the mcp/ and instructions/ asset folders
+  ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+- **skills**: Remove the recall skill ([#85](https://github.com/justmatias/mstack/pull/85),
+  [`9ba045d`](https://github.com/justmatias/mstack/commit/9ba045da834e075dc1d8f2c8cab7fa926532598a))
+
+
 ## v8.0.0 (2026-11-28)
 
 ### Build System
