@@ -51,7 +51,7 @@ Skills live in five groups, which setup flattens on install:
 | `engineering/` | `diff-review`, `blast-radius`, `architect`, `tdd`, `declutter`, `no-comments`, `modernize`, `research` |
 | `shipping/` | `open-pr`, `leave-pr-comments`, `review-loop`, `babysit-pr`, `full-send`, `full-stop`, `show-me-your-work` |
 | `learning/` | `how`, `why`, `teach`, `show-me` |
-| `productivity/` | `bro`, `unslop`, `sharpen`, `recall`, `ketchup`, `grill-me`, `handoff` |
+| `productivity/` | `bro`, `unslop`, `sharpen`, `ketchup`, `grill-me`, `handoff` |
 
 | Skill | Use it to |
 | --- | --- |
@@ -80,7 +80,6 @@ Skills live in five groups, which setup flattens on install:
 | `show-me` | Show the current topic visually: pseudocode, call or file trees, Mermaid, diffs, or one focused HTML page. |
 | `unslop` | Cut AI tells from any writing, by numbered rules. |
 | `sharpen` | Make a task deeper, not bigger, and rewrite the prompt to ask for it. |
-| `recall` | Rebuild your recent working context from chats, git and the shared record, and return a short brief with the next move. |
 | `ketchup` | Catch you up on what changed in this chat since your last message, and list every call waiting on you with a recommended pick. |
 | `grill-me` | Interview you about a plan in rounds, with a recommended answer for each question, until every decision is settled. |
 | `handoff` | Write a handoff document in the temp directory so a fresh agent can continue the work, with suggested skills and secrets redacted. |

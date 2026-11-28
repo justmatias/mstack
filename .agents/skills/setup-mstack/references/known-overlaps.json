@@ -55,12 +55,6 @@
       "reason": "mstack no-comments is adapted from pstack no-comments, under the same name: users who installed pstack already have a skill with this name"
     },
     {
-      "skill": "recall",
-      "other": "recall",
-      "origin": "pstack",
-      "reason": "mstack recall is adapted from pstack recall, under the same name: users who installed pstack already have a skill with this name"
-    },
-    {
       "skill": "sharpen",
       "other": "sharpen",
       "origin": "pstack",
