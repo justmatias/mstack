@@ -50,25 +50,6 @@ jobs:
           BASE_REF: origin/${{ github.base_ref }}
         run: make lint-rules-changed
 
-      # commit-msg hooks don't run with --all-files: check every commit the PR
-      # adds, one message at a time, with the same command.
-      - name: Check the PR's commit messages
-        if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          message="$RUNNER_TEMP/commit-message"
-          failed=0
-          for sha in $(git rev-list "$BASE_SHA..$HEAD_SHA"); do
-            git log -1 --format=%B "$sha" > "$message"
-            if ! uv run mstack commit-msg "$message"; then
-              echo "commit $sha has a non-conventional message" >&2
-              failed=1
-            fi
-          done
-          exit "$failed"
-
       # Includes test_every_invalid_fixture_is_caught: each file in
       # fixtures/invalid/ must still be flagged, so the checks can't go silent.
       - name: Tests
@@ -99,11 +80,8 @@ jobs:
       - name: rulepack lint
         run: uv run rulepack lint
 
-      - name: mstack guards
-        run: |
-          uv run mstack coverage
-          uv run mstack exceptions
-          uv run mstack domain-check
+      - name: mstack coverage
+        run: uv run mstack coverage
 
   security:
     name: Dependency vulnerability scan

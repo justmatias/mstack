@@ -80,8 +80,7 @@ A legitimate exception goes on the offending line, with a reason, an expiry date
 print(banner)
 ```
 
-- `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule and is rejected.
+- `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule; never write one.
 - The trailing form (`code  # ast-grep-ignore: <id>`) is allowed; the `rule-exception` then goes on the line above the code.
-- `mstack exceptions` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
 - Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct` looks for this).

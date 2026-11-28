@@ -95,7 +95,7 @@ Follow [drafting.md](references/drafting.md): the credit frontmatter, the skill 
 ## 7. Review, apply and verify
 
 1. **Skills:** `mstack skills-check <tmp>/draft` (add `--profile generic` outside the mstack checkout), fixing every error. A link to a sibling skill only resolves when that skill is in the draft folder too. **Rules:** `mstack render-rule <tmp>/draft/rules/<name>.mdc` must convert, with the credit at its end.
-2. `mstack domain-check <tmp>/draft --repo <tmp>/upstream`. Only the upstream names in the frontmatter credit keys may remain; rewrite or drop anything else.
+2. Reread `<tmp>/draft` for the upstream repo's identifiers, URLs, hosts and emails. Only the upstream names in the frontmatter credit keys may remain; rewrite or drop anything else.
 3. Show `diff -ru` against the upstream item and, for a merge or rebase, against the current target; for a long diff, the parts that matter.
 4. After explicit approval, move anything you would overwrite or remove to `<target>/.mstack-backups/<UTC timestamp>/<name>`, with the timestamp as `YYYYMMDD-HHMMSS` (never `<name>.bak` beside the skills or rules, or tools would load it). A rule goes beside the rules folder instead, to `<the target's parent>/.mstack-backups/<UTC timestamp>/rules/<name>`: the tools and `mstack coverage` read every file under a rules folder, however deep. Then `cp -R <tmp>/draft/<name> <target>/<name>`.
 5. **Rules:** run `sync` on the target so each written rule gets its proven check.

@@ -41,7 +41,7 @@ A machine that uses more than one agent can opt into Engram as a shared memory, 
 
 ## Tests
 
-- `mcp/engram.json` holds no secret or machine-specific path (gitleaks and `domain-check` already cover `mcp/`).
+- `mcp/engram.json` holds no secret or machine-specific path (gitleaks already covers `mcp/`).
 
 ## Acceptance criteria
 

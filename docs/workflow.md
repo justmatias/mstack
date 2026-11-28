@@ -20,7 +20,7 @@ flowchart LR
 - An `.mdc` file gives agents guidance for decisions that automated checks leave open.
 - Each rule ends with a `## Checks` section that names how it is enforced: `enforced-by: <id>` (an ast-grep rule or an import-linter contract), `enforced-by-hook: <id>` (a pre-commit hook such as gitleaks), or `enforcement: llm-review` (a judgment call that only a reviewer can check).
 - A check can stand on its own. If an ast-grep check declares `metadata.source`, `mstack coverage` verifies the prose file exists and lists the check.
-- `rulepack lint` runs the checks' own tests, the scan and import-linter, and `mstack coverage`, `mstack exceptions` and `mstack domain-check` run the guards. `make lint-rules` runs both, the same way locally, in pre-commit and in CI.
+- `rulepack lint` runs the checks' own tests, the scan and import-linter, and `mstack coverage` checks that prose and checks agree. `make lint-rules` runs both, the same way locally, in pre-commit and in CI.
 
 ## 1. Set up a machine (once per machine)
 
@@ -51,7 +51,7 @@ Rules reach Claude Code as `~/.claude/rules/<name>.md`, in the form `mstack rend
 3. **Pick the severity.** A new check with no existing violations ships as `error`. A check that existing code still breaks ships as `warning`: the full scan tolerates the old instances, while the changed-files scan fails on new or touched code.
 4. **Wire it in.** With `--pre-commit`, every commit scans the staged files; with `--ci github`, every push to `main` runs the full scan, and every pull request runs both the full and the changed-files scan. Any other CI can run `uvx --from git+https://github.com/justmatias/rulepack@<tag> rulepack lint`.
 
-Run `rulepack config` to see the check paths the repo uses, from `.rulepack.toml`. The mstack guards read `rules_dir`, `pre_commit_config`, `[domain_check]` and `[commits]` from `.mstack.toml`.
+Run `rulepack config` to see the check paths the repo uses, from `.rulepack.toml`. `mstack coverage` reads `rules_dir` and `pre_commit_config` from `.mstack.toml`.
 
 ## 3. The daily loop
 
@@ -69,7 +69,7 @@ flowchart TD
 ```
 
 1. **Write.** The agent follows the rules installed in its user folder, plus the repo's own rules: point to them from `AGENTS.md` (or `CLAUDE.md`), as this repo does, because Claude Code never reads `.mdc` files by itself.
-2. **Check locally.** `rulepack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files, and the `mstack-commit-msg` hook, if you add it, checks the message.
+2. **Check locally.** `rulepack lint --changed` (or `make lint-rules-changed`) scans only what you changed, and warnings fail. The pre-commit hooks do the same on staged files.
 3. **Open the pull request.** CI runs the full scan and the changed-files scan. Commit messages follow Conventional Commits.
 4. **Review.** `/diff-review <base>` reviews the diff on two separate axes: **Standards** (the repo's rules, above all the `llm-review` ones no check covers, plus a baseline of code smells) and **Spec** (does it do what the issue or spec asked?).
 5. **Simplify, if needed.** `/declutter` makes working code easier to read without changing what it does, one tested change at a time.
@@ -92,12 +92,12 @@ When a check is wrong for one line, suppress it on that line only, with a reason
 # ast-grep-ignore: no-manual-init-boilerplate
 ```
 
-`mstack exceptions` fails when the reason, the expiry or the approver is missing, or the date has passed. Many exceptions to one rule mean the rule is wrong; `/correct` looks for that.
+Many exceptions to one rule mean the rule is wrong; `/correct` looks for that.
 
 ### Two principles every skill follows
 
 - **English only:** everything generated is in English, even when the source is not.
-- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. `mstack domain-check` flags anything that looks like the analyzed repo's identifiers, and any URL, host or email. Secrets are gitleaks' job: add its pre-commit hook.
+- **Practices, not domain:** rules and checks hold coding practices, never business names, values, URLs or copied code. Secrets are gitleaks' job: add its pre-commit hook.
 
 ## 4. Keep machines up to date
 
@@ -109,7 +109,7 @@ When a check is wrong for one line, suppress it on that line only, with a reason
 
 ```bash
 make setup                 # dev dependencies
-uv run pre-commit install  # pre-commit and commit-msg hooks
+uv run pre-commit install  # pre-commit hooks
 make lint-rules-changed    # what every change must pass (AGENTS.md)
 make test                  # pytest
 make demo                  # fixtures/invalid/ must fail the scan

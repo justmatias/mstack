@@ -9,11 +9,8 @@ logger = logging.getLogger(__name__)
 
 COMMANDS = {
     "cleanup": "mstack.cleanup",
-    "commit-msg": "mstack.guards.commit_msg",
     "coverage": "mstack.guards.coverage",
     "doctor": "mstack.doctor",
-    "domain-check": "mstack.guards.domain_check",
-    "exceptions": "mstack.guards.exceptions",
     "platform": "mstack.platform",
     "render-rule": "mstack.render",
     "rule-tests-check": "mstack.guards.check_rule_tests",

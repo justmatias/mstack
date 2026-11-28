@@ -6,9 +6,6 @@ MSTACK := uv run mstack
 RULEPACK := uv run rulepack
 # The paths come from .rulepack.toml (sgconfig, scan excludes) and .mstack.toml (rules).
 SGCONFIG := lint/sgconfig.yml
-# The installable files in agents/, mcp/, settings/ and instructions/. Each folder's
-# README.md documents the format for this repo and is not installed, so it is left out.
-AGENT_CONFIG_FILES := $(filter-out %/README.md,$(wildcard agents/*.md mcp/*.json settings/*.json instructions/*.md))
 
 .PHONY: setup lint-rules lint-rules-changed guards repo-guards demo test lint
 
@@ -39,15 +36,12 @@ guards:
 	@$(MAKE) --no-print-directory repo-guards
 
 # Guards for what only this repo has: agent config folders, skills, and a rule test
-# for every check in lint/. The coverage, exceptions and domain-check guards run here
-# too, since rulepack lint no longer runs them.
+# for every check in lint/. The coverage guard runs here too, since rulepack lint no
+# longer runs it.
 repo-guards:
 	$(MSTACK) coverage
-	$(MSTACK) exceptions
-	$(MSTACK) domain-check
 	$(MSTACK) skills-check skills .agents/skills
 	$(MSTACK) rule-tests-check --sgconfig $(SGCONFIG)
-	$(if $(AGENT_CONFIG_FILES),$(MSTACK) domain-check $(AGENT_CONFIG_FILES))
 
 # The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
 demo:

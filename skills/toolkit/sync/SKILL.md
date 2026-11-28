@@ -93,7 +93,7 @@ rulepack lint
 make demo          # when the repo has fixtures/invalid/
 ```
 
-Run `mstack domain-check` over every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
+Verify every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
 
 ## 8. Reply
 

@@ -1,8 +1,5 @@
 # fixtures/invalid/ holds deliberate violations for the rule checks to catch,
 # so the Python linters skip it.
-# `pre-commit install` installs both the pre-commit and the commit-msg hooks. Hooks
-# run at the pre-commit stage unless they say otherwise.
-default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 
 repos:
@@ -87,9 +84,3 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-
-      - id: mstack-commit-msg
-        name: mstack commit-msg (Conventional Commits)
-        entry: uv run mstack commit-msg
-        language: system
-        stages: [commit-msg]

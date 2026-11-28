@@ -14,64 +14,28 @@ class ConfigError(Exception):
     pass
 
 
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
-class RulepackScanSettings(BaseModel):
-    exclude: list[str] = []
-
-
 class RulepackSettings(BaseModel):
     """The keys of .rulepack.toml the guards read. Others belong to rulepack alone."""
 
     sgconfig: Path = Path("lint/sgconfig.yml")
     importlinter: Path = Path(".importlinter")
-    scan: RulepackScanSettings = RulepackScanSettings()
 
 
-class DomainCheckSettings(StrictModel):
-    paths: list[Path] = [Path("lint"), Path(".cursor/rules")]
-    exclude: list[Path] = []
+class GuardSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-
-class CommitsSettings(StrictModel):
-    # The Conventional Commits types `mstack commit-msg` accepts.
-    types: list[str] = [
-        "build",
-        "chore",
-        "ci",
-        "docs",
-        "feat",
-        "fix",
-        "perf",
-        "refactor",
-        "style",
-        "test",
-    ]
-
-
-class GuardSettings(StrictModel):
     rules_dir: Path = Path(".cursor/rules")
     pre_commit_config: Path = Path(".pre-commit-config.yaml")
-    domain_check: DomainCheckSettings = DomainCheckSettings()
-    commits: CommitsSettings = CommitsSettings()
 
 
 class GuardConfig(BaseModel):
     """Both files resolved. Every path is absolute."""
 
     root: Path
-    git_root: Path | None
     rules_dir: Path
     sgconfig: Path
     importlinter: Path
     pre_commit_config: Path
-    scan_exclude: list[str]
-    # The folder scan_exclude globs are relative to.
-    scan_root: Path
-    domain_check: DomainCheckSettings
-    commit_types: list[str]
 
 
 def find_git_root(start: Path) -> Path | None:
@@ -132,19 +96,10 @@ def resolve_config(start: Path | None = None) -> GuardConfig:
     fallback_root = git_root or start
     guard_root = guard_file.parent if guard_file else fallback_root
     rulepack_root = rulepack_file.parent if rulepack_file else fallback_root
-    domain_check = guard_settings.domain_check
     return GuardConfig(
         root=guard_root,
-        git_root=git_root,
         rules_dir=absolute(guard_settings.rules_dir, guard_root),
         sgconfig=absolute(rulepack_settings.sgconfig, rulepack_root),
         importlinter=absolute(rulepack_settings.importlinter, rulepack_root),
         pre_commit_config=absolute(guard_settings.pre_commit_config, guard_root),
-        scan_exclude=rulepack_settings.scan.exclude,
-        scan_root=rulepack_root,
-        domain_check=DomainCheckSettings(
-            paths=[absolute(path, guard_root) for path in domain_check.paths],
-            exclude=[absolute(path, guard_root) for path in domain_check.exclude],
-        ),
-        commit_types=guard_settings.commits.types,
     )

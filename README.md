@@ -109,23 +109,13 @@ ref = "vX.Y.Z"
 
 Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.toml) lists each pack's checks.
 
-**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Move those keys to `.mstack.toml` next to it, where the guards now read them. The guards themselves moved to mstack, and `rulepack lint`, its hooks and its GitHub Action no longer run them: call `mstack coverage`, `mstack exceptions` and `mstack domain-check` in your own CI step or Makefile target. rulepack no longer ships the `rulepack-commit-msg` hook; replace it with a local hook, which needs `mstack` on `PATH`:
-
-```yaml
-- repo: local
-  hooks:
-    - id: mstack-commit-msg
-      name: mstack commit-msg
-      entry: mstack commit-msg
-      language: system
-      stages: [commit-msg]
-```
+**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Move `rules_dir` and `pre_commit_config` to `.mstack.toml` next to it, and delete `[domain_check]` and `[commits]`. The coverage guard moved to mstack, and `rulepack lint`, its hooks and its GitHub Action no longer run it: call `mstack coverage` in your own CI step or Makefile target. The `exceptions`, `domain-check` and `commit-msg` guards are gone, so remove any CI step that runs them and the `rulepack-commit-msg` hook.
 
 **Migrating from mstack `v6.x`:**
 
 Every repo:
 
-- Move `sgconfig`, `importlinter`, `[scan]`, `[hooks]` and `[changed]` from `.mstack.toml` to a new `.rulepack.toml`, and keep `rules_dir`, `pre_commit_config`, `[domain_check]` and `[commits]` in `.mstack.toml` (rulepack `v0.7.0` rejects them). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids rulepack still ships from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Keep the commit-msg hook as the local `mstack-commit-msg` hook above. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+- Move `sgconfig`, `importlinter`, `[scan]`, `[hooks]` and `[changed]` from `.mstack.toml` to a new `.rulepack.toml`, keep `rules_dir` and `pre_commit_config` in `.mstack.toml` (rulepack `v0.7.0` rejects them), and delete `[domain_check]` and `[commits]`. In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids rulepack still ships from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Remove the commit-msg hook. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
 
 A repo that also selected packs (`packs = [...]`):
 
@@ -136,7 +126,7 @@ A repo that also selected packs (`packs = [...]`):
 
 ```bash
 make setup                # dev dependencies
-uv run pre-commit install   # installs the pre-commit and the commit-msg hooks
+uv run pre-commit install   # installs the pre-commit hooks
 make lint                 # every pre-commit hook on every file
 make lint-rules           # rulepack lint: check tests, full scan and guards
 make lint-rules-changed   # rulepack lint --changed: the scan covers only changed files and warnings fail
@@ -150,15 +140,6 @@ Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check 
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
 - a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
-- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
-
-  ```python
-  # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-  # ast-grep-ignore: no-manual-init-boilerplate
-  ```
-
-- rules or checks contain repo identifiers, URLs, hosts or emails (`mstack domain-check`); secrets are gitleaks' job;
-- a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`);
 - a check in `lint/rules/` has no rule test with both `valid` and `invalid` cases, a rule test names no check, or two checks share an id (`mstack rule-tests-check`). `ast-grep test` alone passes when a check has no test.
 
