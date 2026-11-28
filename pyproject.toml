@@ -1,6 +1,6 @@
 [project]
 name = "mstack"
-version = "7.4.0"
+version = "8.0.0"
 description = "Logbook of agent skills, rules, checks and tools that guide AI coding agents."
 readme = "README.md"
 license = { text = "MIT" }
@@ -23,11 +23,45 @@ repository = "https://github.com/justmatias/mstack"
 # rulepack lints this repo and brings ast-grep for the checks' tests. mstack's
 # code never imports it.
 dev = [
+    "poethepoet>=0.49.0",
     "pre-commit>=4",
     "pytest",
-    "rulepack @ git+https://github.com/justmatias/rulepack@b48c6c08ce8f0522634227b52ed6da3dd2d8db25",
+    "rulepack @ git+https://github.com/justmatias/rulepack@v0.7.0",
     "types-pyyaml",
 ]
+
+# The repo's commands, the same on every OS: `uv run poe <task>`. pre-commit and CI
+# call lint-rules, lint-rules-changed or lint-rules-staged and nothing else.
+[tool.poe.tasks]
+lint = { cmd = "pre-commit run --all-files", help = "Every pre-commit hook on every file" }
+test = { cmd = "pytest -q", help = "The test suite" }
+
+[tool.poe.tasks.repo-guards]
+default_item_type = "cmd"
+help = "Guards rulepack lint does not run: rules match checks, skills, rule tests"
+sequence = [
+    "mstack coverage --rules-dir rules",
+    "mstack skills-check skills .agents/skills",
+    "mstack rule-tests-check --sgconfig lint/sgconfig.yml",
+]
+
+[tool.poe.tasks.lint-rules]
+default_item_type = "cmd"
+help = "rulepack lint (check tests, full scan, import-linter) and the guards"
+sequence = ["rulepack lint", { ref = "repo-guards" }]
+
+# On changed files every rule fails, warnings included: only new or touched code has
+# to follow new rules. CI sets BASE_REF=origin/<base branch> on pull requests.
+[tool.poe.tasks.lint-rules-changed]
+default_item_type = "cmd"
+help = "Like lint-rules, but the scan only covers files changed from BASE_REF"
+sequence = ["rulepack lint --changed --base-ref ${BASE_REF}", { ref = "repo-guards" }]
+env.BASE_REF.default = "origin/main"
+
+[tool.poe.tasks.lint-rules-staged]
+default_item_type = "cmd"
+help = "Like lint-rules-changed, on the staged files (the pre-commit hook)"
+sequence = ["rulepack lint --changed --staged", { ref = "repo-guards" }]
 
 [build-system]
 requires = ["hatchling>=1.27,<2"]
@@ -51,7 +85,7 @@ norecursedirs = ["fixtures"]
 
 # The rulepack version that setup-mstack installs and doctor names in its fix.
 [tool.mstack]
-rulepack = "v0.1.0"
+rulepack = "v0.7.0"
 
 ##################################
 # ruff configuration             #

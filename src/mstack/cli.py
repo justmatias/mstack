@@ -3,8 +3,13 @@ import importlib
 import logging
 import sys
 
+from mstack.guards.config import ConfigError
+
+logger = logging.getLogger(__name__)
+
 COMMANDS = {
     "cleanup": "mstack.cleanup",
+    "coverage": "mstack.guards.coverage",
     "doctor": "mstack.doctor",
     "platform": "mstack.platform",
     "render-rule": "mstack.render",
@@ -33,4 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])
     command = importlib.import_module(COMMANDS[parsed.command])
-    return int(command.main(arguments[1:]))
+    try:
+        return int(command.main(arguments[1:]))
+    except ConfigError as error:
+        logger.error("mstack: %s", error)
+        return 2

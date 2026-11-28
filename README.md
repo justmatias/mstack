@@ -109,11 +109,14 @@ ref = "vX.Y.Z"
 
 Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.toml) lists each pack's checks.
 
+**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Delete them. The coverage guard moved to mstack, and `rulepack lint`, its hooks and its GitHub Action no longer run it: call `mstack coverage` in your own CI step or Makefile target, with `--rules-dir` and `--pre-commit-config` when those files are not at `.cursor/rules/` and `.pre-commit-config.yaml`. The `exceptions`, `domain-check` and `commit-msg` guards are gone, so remove any CI step that runs them and the `rulepack-commit-msg` hook.
+
 **Migrating from mstack `v6.x`:**
 
 Every repo:
 
-- Rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+- Move `sgconfig`, `importlinter`, `[scan]`, `[hooks]` and `[changed]` from `.mstack.toml` to a new `.rulepack.toml`, and delete `.mstack.toml`. A `rules_dir` or `pre_commit_config` it set becomes a `mstack coverage` flag, as above. In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids rulepack still ships from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Remove the commit-msg hook. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+
 A repo that also selected packs (`packs = [...]`):
 
 - Change `python-core` and `testing` to `mstack/python-core` and `mstack/testing`, and drop `git`, which had no checks and is gone.
@@ -122,30 +125,22 @@ A repo that also selected packs (`packs = [...]`):
 ## Working on mstack
 
 ```bash
-make setup                # dev dependencies
-uv run pre-commit install   # installs the pre-commit and the commit-msg hooks
-make lint                 # every pre-commit hook on every file
-make lint-rules           # rulepack lint: check tests, full scan and guards
-make lint-rules-changed   # rulepack lint --changed: the scan covers only changed files and warnings fail
-make test                 # pytest
-make demo                 # scans fixtures/invalid/, which must fail
+uv sync                          # dev dependencies
+uv run pre-commit install        # installs the pre-commit hooks
+uv run poe lint                  # every pre-commit hook on every file
+uv run poe lint-rules            # rulepack lint: check tests, full scan and guards
+uv run poe lint-rules-changed    # rulepack lint --changed: the scan covers only changed files and warnings fail
+uv run poe test                  # pytest
 ```
+
+The tasks are in `[tool.poe.tasks]` in `pyproject.toml`; `uv run poe` lists them.
 
 The `rulepack` that lints this repo is a dev dependency, pinned in `pyproject.toml`. It brings ast-grep and import-linter.
 
-Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `make lint-rules` fails when:
+Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `poe lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
-- a prose rule lacks a valid Checks section or a declared source link is invalid (`rulepack coverage`);
-- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`rulepack exceptions`):
-
-  ```python
-  # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
-  # ast-grep-ignore: no-manual-init-boilerplate
-  ```
-
-- rules or checks contain repo identifiers, URLs, hosts or emails (`rulepack domain-check`); secrets are gitleaks' job;
-- a commit message doesn't follow Conventional Commits (`rulepack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
+- a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`);
 - a check in `lint/rules/` has no rule test with both `valid` and `invalid` cases, a rule test names no check, or two checks share an id (`mstack rule-tests-check`). `ast-grep test` alone passes when a check has no test.
 
@@ -155,6 +150,6 @@ Planned work lives in [`docs/specs/`](docs/specs/README.md): one implementation 
 
 ## CI and releases
 
-`.github/workflows/ci.yml` runs `make lint`, `make lint-rules`, `make lint-rules-changed` (on pull requests) and `make test` on Python 3.12 and 3.13, the tests and `rulepack lint` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
+`.github/workflows/ci.yml` runs the `lint`, `lint-rules`, `lint-rules-changed` (on pull requests) and `test` poe tasks on Python 3.12 and 3.13, `test` and `lint-rules` on macOS and Windows, plus pip-audit on the dependencies in `uv.lock`. `pr-title.yml` checks that PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). To block merges on them, add both `Static checks` jobs as required status checks for `main`.
 
 On every push to `main`, [python-semantic-release](https://python-semantic-release.readthedocs.io/) bumps the version, updates `CHANGELOG.md`, tags and publishes the release (`feat` is a minor bump, `fix` and `perf` a patch).

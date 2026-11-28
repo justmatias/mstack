@@ -4,7 +4,7 @@
 
 The recipe for turning one checkable prose rule into a check. `sync`, `reflect` and `correct` all follow it.
 
-The checks run through the `rulepack` command on `PATH`: `rulepack lint` runs every step (ast-grep tests and scan, import-linter, and the `coverage`, `exceptions` and `domain-check` guards), and `rulepack <command> --help` lists the options. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `rulepack` is not found, ask the user to rerun the mstack setup, which installs it; do not look for the scripts on disk. The commands read the repo's paths from `.rulepack.toml` when it exists; run `rulepack config` to see them. Paths below use the defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint-rules/sgconfig.yml`), and `.cursor/rules/` with the configured `rules_dir`. Pass paths in the work repo as absolute paths or relative to the current directory.
+The checks run through the `rulepack` command on `PATH`: `rulepack lint` runs the ast-grep tests and scan and import-linter, and `rulepack <command> --help` lists the options. The `coverage` guard runs through `mstack coverage`, which mstack setup installs too. It works from any repo and needs nothing installed in the repo's own environment: ast-grep and import-linter ship with it. If `rulepack` is not found, ask the user to rerun the mstack setup, which installs it; do not look for the scripts on disk. The commands read the repo's paths from `.rulepack.toml` (`sgconfig`, `importlinter`, `[scan]`) when it exists; run `rulepack config` to see them. `mstack coverage` takes the rules folder from `--rules-dir` (default `.cursor/rules/`). Paths below use older defaults: replace `lint-rules/` with the folder of the configured sgconfig (default `lint/sgconfig.yml`), and `.cursor/rules/` with the repo's rules folder. Pass paths in the work repo as absolute paths or relative to the current directory.
 
 ## 0. Static check or LLM review?
 
@@ -107,18 +107,13 @@ If the check declares `metadata.source`, add `- enforced-by: <id>` to that `.mdc
 
 ## 8. Verify what you generated
 
-```bash
-rulepack domain-check <every file you generated> --repo .
-```
-
-`--repo` defaults to the git root, and `[domain_check].exclude` in `.rulepack.toml` lists tooling folders that are not analyzed code; in the mstack repo itself, a bare `rulepack domain-check` checks the right paths. If it flags anything, rewrite it as a generic practice or drop it. Then reread everything you generated and confirm it is entirely in English.
+Reread everything you generated. Rewrite any identifier of the analyzed repo, URL, host or email as a generic practice, or drop it, and confirm it is entirely in English.
 
 ## 9. Run the single command
 
 ```bash
 rulepack lint
 rulepack lint --changed   # only the changed files, warnings included
-make demo               # only in repos that have fixtures/invalid/
 ```
 
 A repo with `make lint-rules` targets may call them instead; they run the same command.

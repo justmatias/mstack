@@ -6,14 +6,14 @@ for the selected editors.
 Keep `rulepack` on the editor's PATH. The hooks run only in projects with
 `.rulepack.toml`.
 
-- Claude Code's `PostToolUse` runs the scan and exception checks on each file
+- Claude Code's `PostToolUse` runs the ast-grep scan on each file
   written by `Edit` or `Write`. Claude receives the findings immediately.
-- Claude Code's `Stop` scans changed files and checks rule coverage. It reports
+- Claude Code's `Stop` scans changed files. It reports
   findings once per session until they change or a clean stop clears them.
 - Cursor's `afterFileEdit` runs the same file checks. Findings appear in Cursor's
   Hooks output channel. [Cursor hooks reference](https://cursor.com/docs/hooks)
 - Codex's `PostToolUse` checks every file added, updated or moved by
-  `apply_patch`. Codex's `Stop` runs the changed-file scan and coverage check,
+  `apply_patch`. Codex's `Stop` runs the changed-file scan,
   which also catches changes made through shell commands. Review and trust the
   installed hooks through `/hooks` in the CLI or Settings → Hooks in the app.
   [Codex hooks reference](https://learn.chatgpt.com/docs/hooks)

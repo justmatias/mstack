@@ -1,14 +1,8 @@
-# Where this repo keeps its rules and checks. Every `rulepack` command reads this file;
+# Where this repo keeps its checks. Every `rulepack` command reads this file;
 # flags still override it. Run `rulepack config` to see the resolved values.
-rules_dir = "rules"
 sgconfig = "lint/sgconfig.yml"
 
 [scan]
-# fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
+# fixtures/invalid/ breaks every rule on purpose; the tests scan each file and expect findings.
 exclude = ["fixtures/invalid/**"]
 extensions = [".py"]
-
-[domain_check]
-paths = ["lint", "rules"]
-# Tooling folders, not the analyzed code.
-exclude = ["src", "tests", "fixtures/invalid"]

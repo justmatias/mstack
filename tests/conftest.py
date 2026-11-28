@@ -8,6 +8,32 @@ from tests.helpers import run_command
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 SGCONFIG = REPOSITORY_ROOT / "lint" / "sgconfig.yml"
+# The files that tell users or agents which commands to run.
+COMMAND_REFERENCE_FOLDERS = (
+    "skills",
+    "settings",
+    "docs",
+    ".agents",
+    ".github",
+    "hooks",
+)
+COMMAND_REFERENCE_FILES = sorted(
+    path
+    for folder in COMMAND_REFERENCE_FOLDERS
+    for path in (REPOSITORY_ROOT / folder).rglob("*")
+    if path.is_file() and "__pycache__" not in path.parts
+) + [
+    REPOSITORY_ROOT / name
+    for name in ("pyproject.toml", "README.md", "AGENTS.md", "src/mstack/README.md")
+]
+
+
+@pytest.fixture(
+    params=COMMAND_REFERENCE_FILES,
+    ids=lambda path: path.relative_to(REPOSITORY_ROOT).as_posix(),
+)
+def command_reference_file(request) -> Path:
+    return request.param
 
 
 @pytest.fixture

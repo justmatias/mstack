@@ -31,7 +31,7 @@ Why: one sentence on why the team follows the rule.
 - `alwaysApply`: `true` only for rules that apply to every request.
 - One bullet per atomic rule: one verifiable statement each.
 - A `Why:` line for the guidance that a reviewer needs.
-- A rule adapted from another repo (through `integrate`) also carries its credit in the frontmatter: `license`, and `metadata.adapted-from`, `upstream-commit` (a 40-character sha) and `upstream-license`, the same keys as a skill. `rulepack coverage` reports `credit` when they are incomplete, and `mstack render-rule` keeps the credit as the last lines of the installed rule.
+- A rule adapted from another repo (through `integrate`) also carries its credit in the frontmatter: `license`, and `metadata.adapted-from`, `upstream-commit` (a 40-character sha) and `upstream-license`, the same keys as a skill. `mstack coverage` reports `credit` when they are incomplete, and `mstack render-rule` keeps the credit as the last lines of the installed rule.
 
 ## The `## Checks` section
 
@@ -43,9 +43,9 @@ Every `.mdc` ends with a `## Checks` section. Each line is one of:
 | `- enforced-by-hook: <id>` | A pre-commit hook with `id: <id>` in `.pre-commit-config.yaml` (any repo, `local` ones included), for a rule an existing linter enforces: shellcheck, gitleaks, `no-commit-to-branch`, a commit-message check. |
 | `- enforcement: llm-review` | Judgment rule: no deterministic check. The LLM reviewer on the PR comments on it. |
 
-Use `enforced-by-hook:` only when no ast-grep rule or import-linter contract can express the rule and a pinned linter already does; it is its own keyword, so a hook and an ast-grep rule may share an id. `rulepack coverage` reports `unknown-hook` when the id is not configured (or there is no `.pre-commit-config.yaml`; the path is `pre_commit_config` in `.rulepack.toml`). Hooks have no `metadata.source`, so only rule → hook is checked, and a hook skipped with `SKIP` still counts as configured.
+Use `enforced-by-hook:` only when no ast-grep rule or import-linter contract can express the rule and a pinned linter already does; it is its own keyword, so a hook and an ast-grep rule may share an id. `mstack coverage` reports `unknown-hook` when the id is not configured (or there is no `.pre-commit-config.yaml`; `--pre-commit-config` names another file). Hooks have no `metadata.source`, so only rule → hook is checked, and a hook skipped with `SKIP` still counts as configured.
 
-A file may mix these when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `rulepack coverage` fails on it.
+A file may mix these when some bullets are checkable and others are judgment. A rule with no Checks section is drift: `mstack coverage` fails on it.
 
 ## `metadata.source` in the YAML
 
@@ -66,7 +66,7 @@ rule:
   pattern: print($$$ARGS)
 ```
 
-When an ast-grep check declares `metadata.source`, `rulepack coverage` verifies that the file exists and lists the id in its Checks section.
+When an ast-grep check declares `metadata.source`, `mstack coverage` verifies that the file exists and lists the id in its Checks section.
 
 Path-matching facts (ast-grep 0.51): `files`/`ignores` globs match the path exactly as it was passed to `ast-grep scan`. Write them as `**/<folder>/**` so relative and absolute paths both match.
 
@@ -80,8 +80,7 @@ A legitimate exception goes on the offending line, with a reason, an expiry date
 print(banner)
 ```
 
-- `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule and is rejected.
+- `ast-grep-ignore` always names the rule ids (`# ast-grep-ignore: id-a, id-b`). A bare `# ast-grep-ignore` silences every rule; never write one.
 - The trailing form (`code  # ast-grep-ignore: <id>`) is allowed; the `rule-exception` then goes on the line above the code.
-- `rulepack exceptions` fails if the `rule-exception` is missing, a field is missing, `expires` is not a `YYYY-MM-DD` date in the future, or `approved-by` is not a `@handle`.
 - Never add an exception on your own. Propose it, and write it only after a human approves; the `approved-by` handle is theirs.
 - Many exceptions to the same rule mean the rule is wrong or an architecture change is missing (`correct` looks for this).

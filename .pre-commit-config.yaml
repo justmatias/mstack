@@ -1,8 +1,5 @@
 # fixtures/invalid/ holds deliberate violations for the rule checks to catch,
 # so the Python linters skip it.
-# `pre-commit install` installs both the pre-commit and the commit-msg hooks. Hooks
-# run at the pre-commit stage unless they say otherwise.
-default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 
 repos:
@@ -82,14 +79,8 @@ repos:
   - repo: local
     hooks:
       - id: lint-rules
-        name: lint-rules (make lint-rules-changed on staged files)
-        entry: make lint-rules-changed STAGED=1
+        name: lint-rules (poe lint-rules-staged)
+        entry: uv run poe lint-rules-staged
         language: system
         pass_filenames: false
         always_run: true
-
-      - id: rulepack-commit-msg
-        name: rulepack commit-msg (Conventional Commits)
-        entry: uv run rulepack commit-msg
-        language: system
-        stages: [commit-msg]

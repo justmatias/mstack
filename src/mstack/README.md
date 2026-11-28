@@ -1,6 +1,6 @@
 # mstack (package)
 
-The `mstack` command installs and checks mstack's content on this machine: `cleanup`, `doctor`, `platform`, `render-rule`, `rule-tests-check` and `skills-check`. The checks themselves run through [rulepack](https://github.com/justmatias/rulepack). Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
+The `mstack` command installs and checks mstack's content on this machine: `cleanup`, `doctor`, `platform`, `render-rule`, `rule-tests-check` and `skills-check`, and the `coverage` guard. The ast-grep and import-linter checks run through [rulepack](https://github.com/justmatias/rulepack). Install it on your `PATH` with `uv tool install --editable <checkout>`; inside this repo, `uv run mstack` uses the dev environment.
 
 | Command | Module | What it does |
 | --- | --- | --- |
@@ -11,6 +11,9 @@ The `mstack` command installs and checks mstack's content on this machine: `clea
 | `mstack render-rule --combined <checkout>` | `render.py` | Print the managed Codex instructions block with the rendered rules and optional `instructions/global.md`. |
 | `mstack rule-tests-check [--sgconfig FILE] [--json]` | `guards/check_rule_tests.py` | Every ast-grep rule under the sgconfig's `ruleDirs` (default `lint/sgconfig.yml`, nested folders included) has a rule test under `testConfigs` with at least one `valid` and one `invalid` case, every rule test names a rule, and no rule id repeats. Exits 2 when the sgconfig or a rule file cannot be read. |
 | `mstack skills-check` | `guards/check_skills.py` | Every skill (a folder with a `SKILL.md`, default `skills/`, which may group skills in topic folders) passes the checks below. Errors fail the command; warnings only print. |
+| `mstack coverage [--rules-dir DIR] [--config FILE] [--importlinter FILE] [--pre-commit-config FILE] [--root DIR] [--json]` | `guards/coverage.py` | Every prose rule has a `## Checks` section whose `enforced-by:` ids exist as ast-grep rules or import-linter contracts and whose `enforced-by-hook:` ids are configured pre-commit hooks, every `metadata.source` link is valid, and rule credit is complete. |
+
+`mstack coverage` reads `sgconfig` and `importlinter` from the nearest `.rulepack.toml`, from the current folder up to the git root. The rules folder (`.cursor/rules`) and the pre-commit config (`.pre-commit-config.yaml`) default to that file's folder; the flags override them. A config error exits 2.
 
 `mstack skills-check [DIR ...] [--profile mstack|generic] [--json]` takes folders of skills, or a single skill folder. Relative links resolve as if the skills were installed side by side, so a link to a sibling skill (`../<name>/...`) works whichever group the checkout keeps it in, and a link out of the skills folder fails.
 

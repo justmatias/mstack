@@ -9,7 +9,7 @@ description: "Sync the team's prose rules (.cursor/rules, AGENTS.md, CLAUDE.md, 
 
 Keep `.cursor/rules/` focused on judgment guidance. Enforce checkable standards with existing linters or checks in `lint-rules/`. Remove prose a check already enforces. Checks can stand alone. Verify any links either side declares.
 
-The paths here are the defaults; a repo may move them in `.rulepack.toml`. Run `rulepack config` to see the configured `rules_dir` and `sgconfig` (default `lint-rules/sgconfig.yml`), and use those.
+The paths here are the defaults; a repo may move them. Run `rulepack config` to see the configured `sgconfig` (default `lint/sgconfig.yml`), and find the rules folder (default `.cursor/rules/`). Use those, and pass a non-default rules folder to `mstack coverage --rules-dir`.
 
 References: [rule format](references/rule-format.md), [authoring a check](references/authoring-a-check.md), [discovery](references/discovery.md). The guards run as `rulepack <command>` (see the authoring reference).
 
@@ -49,7 +49,7 @@ Apply the static-check criteria in step 0 of [authoring-a-check](references/auth
 Run the mechanical part:
 
 ```bash
-rulepack coverage --json
+mstack coverage --json
 ```
 
 It reports `missing-checks-section`, `unknown-check`, `unknown-hook` (an `enforced-by-hook:` id that `.pre-commit-config.yaml` does not configure), `missing-source` and `unlisted-check`. Then compare semantically: for each rule with checks, read the YAML and its tests and decide whether they still enforce what the prose says. Put every rule in one category:
@@ -90,10 +90,9 @@ One commit per synced rule (include its check and tests when they change), with 
 
 ```bash
 rulepack lint
-make demo          # when the repo has fixtures/invalid/
 ```
 
-Run `rulepack domain-check` over every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
+Verify every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
 
 ## 8. Reply
 

@@ -50,17 +50,17 @@ Classify each coding convention as pattern, architecture, judgment or borderline
 
 Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog. Before preparing a check, apply step 0 of [authoring-a-check.md](../sync/references/authoring-a-check.md): only a concrete construct that one simple rule denies from the file alone gets a static check; anything else becomes a rule with `enforcement: llm-review`. For borderline rows, prepare both options and let the user pick in step 4. For each Accepted `rule:` row, prepare the full change now, without writing it yet:
 
-1. **Find the related rule.** Search the `rules_dir` for a rule on the same topic. Prefer editing it over adding a duplicate.
+1. **Find the related rule.** Search the rules folder for a rule on the same topic. Prefer editing it over adding a duplicate.
 2. **Write prose for judgment**: the bullet, its `Why:` line, and `## Checks`, following [rule-format.md](../sync/references/rule-format.md).
 3. **Enforce checkable standards.** Use an existing linter when it covers the standard. For other pattern and architecture rows that passed step 0, follow [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
-5. **Verify** with `rulepack domain-check` over the prepared files, and reread them for English.
+5. **Verify** by rereading the prepared files for the repo's identifiers, URLs, hosts and emails, and for English.
 
 Only what no available tool can check, or what needs a large architecture change, stays in Backlog.
 
 ## 4. Approve, then apply
 
-Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's `rules_dir` and sgconfig folder (`rulepack config` prints them; the defaults are `.cursor/rules/` and `lint-rules/`).
+Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's rules folder and sgconfig folder (`rulepack config` prints the sgconfig. The defaults are `.cursor/rules/` and `lint/`).
 
 Rules and skills change what every future agent does. Do not auto-apply.
 
@@ -91,4 +91,4 @@ After the local action is complete or the user chooses to skip it, offer to cont
 
 Work in a checkout of `justmatias/mstack` on a contribution branch. Read its `AGENTS.md` and related rules and checks. Reuse or extend existing coverage and skip duplicates. Put shared `.mdc` guidance in `rules/`, ast-grep checks and synthetic cases in `lint/rules/` and `lint/rule-tests/`. Follow the [check authoring guide](../sync/references/authoring-a-check.md). Keep project-specific contracts and settings in the source repo.
 
-Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `make lint-rules` and `make lint-rules-changed` in mstack. For an approved mstack contribution, use `open-pr` to push the branch and open a pull request. Report the PR link and verification. If the user asked to keep the contribution local, report the branch and verification.
+Use generic examples throughout the contribution, including its commit and PR text. Leave out source-repo names, links, transcript excerpts, and code. Run `uv run poe lint-rules` and `uv run poe lint-rules-changed` in mstack. For an approved mstack contribution, use `open-pr` to push the branch and open a pull request. Report the PR link and verification. If the user asked to keep the contribution local, report the branch and verification.
