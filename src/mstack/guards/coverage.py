@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from mstack.guards.config import ConfigError, GuardConfig, resolve_config
+from mstack.guards.config import ConfigError, GuardConfig, absolute, resolve_config
 from mstack.guards.credit import credit_problems
 from mstack.render import FrontmatterError, split_frontmatter
 
@@ -127,11 +127,6 @@ def frontmatter_issues(mdc_path: Path, mdc: str) -> list[dict]:
     ]
 
 
-def resolve_source(source: str, root: Path) -> Path:
-    path = Path(source).expanduser()
-    return path if path.is_absolute() else root / path
-
-
 def display(path: Path, root: Path) -> str:
     try:
         return str(path.resolve().relative_to(root.resolve()))
@@ -143,11 +138,9 @@ def prose_rule_issues(
     prose_paths: list[Path],
     known_checks: set[str],
     root: Path,
-    pre_commit_config: Path | None,
+    pre_commit_config: Path,
 ) -> tuple[list[dict], list[dict], dict[Path, set[str]]]:
-    configured_hooks = (
-        load_pre_commit_hooks(pre_commit_config) if pre_commit_config else None
-    )
+    configured_hooks = load_pre_commit_hooks(pre_commit_config)
     issues: list[dict] = []
     rules: list[dict] = []
     listed_by_mdc: dict[Path, set[str]] = {}
@@ -172,17 +165,16 @@ def prose_rule_issues(
         entry["checks"] = sorted(section["enforced_by"])
         entry["hooks"] = sorted(section["hooks"])
         entry["llm_review"] = section["llm_review"]
-        if pre_commit_config:
-            issues.extend(
-                unknown_hook_issues(
-                    mdc, section["hooks"], configured_hooks, pre_commit_config.name
-                )
+        issues.extend(
+            unknown_hook_issues(
+                mdc, section["hooks"], configured_hooks, pre_commit_config.name
             )
+        )
         listed_by_mdc[mdc_path.resolve()] = set(section["enforced_by"])
         issues.extend(
             {
                 "kind": "unknown-check",
-                "file": f"{display(mdc_path, root)}:{line_number}",
+                "file": f"{mdc}:{line_number}",
                 "check": check_id,
                 "detail": (
                     f"'enforced-by: {check_id}' has no YAML rule and no "
@@ -204,7 +196,7 @@ def check_source_issues(
         if source is None:
             continue
         rule_file = display(rule["path"], root)
-        source_path = resolve_source(source, root) if isinstance(source, str) else None
+        source_path = absolute(Path(source), root) if isinstance(source, str) else None
         if source_path is None or not source_path.is_file():
             issues.append({
                 "kind": "missing-source",
@@ -217,7 +209,7 @@ def check_source_issues(
                 "kind": "unlisted-check",
                 "file": rule_file,
                 "check": check_id,
-                "detail": (f"{source!r} does not list 'enforced-by: {check_id}'"),
+                "detail": f"{source!r} does not list 'enforced-by: {check_id}'",
             })
     return issues
 

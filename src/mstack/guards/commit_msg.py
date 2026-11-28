@@ -34,6 +34,10 @@ def clean_message(text: str) -> str:
     return "\n".join(lines).strip("\n")
 
 
+def pick_fallback_type(types: list[str]) -> str:
+    return "chore" if "chore" in types else types[0]
+
+
 def suggested_type(written: str, types: list[str]) -> str:
     lowered = written.lower()
     if lowered in types:
@@ -41,7 +45,7 @@ def suggested_type(written: str, types: list[str]) -> str:
     close = difflib.get_close_matches(lowered, types, n=1)
     if close:
         return close[0]
-    return "chore" if "chore" in types else types[0]
+    return pick_fallback_type(types)
 
 
 def suggestion(subject: str, types: list[str]) -> str:
@@ -53,7 +57,7 @@ def suggestion(subject: str, types: list[str]) -> str:
         breaking = "!" if loose["breaking"] else ""
         summary = loose["summary"]
     else:
-        commit_type = "chore" if "chore" in types else types[0]
+        commit_type = pick_fallback_type(types)
         scope, breaking, summary = "", "", subject
     summary = summary.strip().rstrip(".").strip() or "describe the change"
     scope_text = f"({scope})" if scope else ""
