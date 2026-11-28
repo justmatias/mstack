@@ -54,13 +54,13 @@ Unlike pstack's `reflect`, a finding a lint could enforce does not go to Backlog
 2. **Write prose for judgment**: the bullet, its `Why:` line, and `## Checks`, following [rule-format.md](../sync/references/rule-format.md).
 3. **Enforce checkable standards.** Use an existing linter when it covers the standard. For other pattern and architecture rows that passed step 0, follow [authoring-a-check.md](../sync/references/authoring-a-check.md): YAML, tests with a **synthetic invalid case that reproduces the structure of the chat's code, never the code itself**, then `ast-grep test`, and `scan` to measure existing violations and choose the severity. Judgment rows, and rows that failed step 0, get `enforcement: llm-review` and no check.
 4. **Conflicts.** If the learning contradicts an existing rule, show both side by side (path and line of the existing rule, and the proposed one) and ask which one wins. Never resolve it on your own.
-5. **Verify** with `rulepack domain-check` over the prepared files, and reread them for English.
+5. **Verify** with `mstack domain-check` over the prepared files, and reread them for English.
 
 Only what no available tool can check, or what needs a large architecture change, stays in Backlog.
 
 ## 4. Approve, then apply
 
-Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's `rules_dir` and sgconfig folder (`rulepack config` prints them; the defaults are `.cursor/rules/` and `lint-rules/`).
+Present the full Accepted / Rejected / Backlog output from step 2, with the prepared rule and check for each `rule:` row, the enforcement chosen for it (static check or llm-review) and why, and **wait for explicit approval** before applying anything. The user picks the subset, may redirect routings, and may switch any row between static check and llm-review. Rules and checks are written to the current repo's `rules_dir` and sgconfig folder (`rules_dir` in `.mstack.toml` and `sgconfig` in `.rulepack.toml`; `rulepack config` prints the sgconfig. The defaults are `.cursor/rules/` and `lint/`).
 
 Rules and skills change what every future agent does. Do not auto-apply.
 

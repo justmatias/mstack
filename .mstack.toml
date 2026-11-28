@@ -1,0 +1,8 @@
+# Settings for the guards in `mstack coverage`, `domain-check` and `commit-msg`,
+# which rulepack does not run. They read sgconfig and [scan] from .rulepack.toml.
+rules_dir = "rules"
+
+[domain_check]
+paths = ["lint", "rules"]
+# Tooling folders, not the analyzed code.
+exclude = ["src", "tests", "fixtures/invalid"]

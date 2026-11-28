@@ -3,9 +3,17 @@ import importlib
 import logging
 import sys
 
+from mstack.guards.config import ConfigError
+
+logger = logging.getLogger(__name__)
+
 COMMANDS = {
     "cleanup": "mstack.cleanup",
+    "commit-msg": "mstack.guards.commit_msg",
+    "coverage": "mstack.guards.coverage",
     "doctor": "mstack.doctor",
+    "domain-check": "mstack.guards.domain_check",
+    "exceptions": "mstack.guards.exceptions",
     "platform": "mstack.platform",
     "render-rule": "mstack.render",
     "rule-tests-check": "mstack.guards.check_rule_tests",
@@ -33,4 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=COMMANDS)
     parsed = parser.parse_args(arguments[:1])
     command = importlib.import_module(COMMANDS[parsed.command])
-    return int(command.main(arguments[1:]))
+    try:
+        return int(command.main(arguments[1:]))
+    except ConfigError as error:
+        logger.error("mstack: %s", error)
+        return 2

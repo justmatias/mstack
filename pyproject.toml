@@ -25,7 +25,7 @@ repository = "https://github.com/justmatias/mstack"
 dev = [
     "pre-commit>=4",
     "pytest",
-    "rulepack @ git+https://github.com/justmatias/rulepack@b48c6c08ce8f0522634227b52ed6da3dd2d8db25",
+    "rulepack @ git+https://github.com/justmatias/rulepack@v0.7.0",
     "types-pyyaml",
 ]
 
@@ -51,7 +51,7 @@ norecursedirs = ["fixtures"]
 
 # The rulepack version that setup-mstack installs and doctor names in its fix.
 [tool.mstack]
-rulepack = "v0.1.0"
+rulepack = "v0.7.0"
 
 ##################################
 # ruff configuration             #

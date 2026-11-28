@@ -109,6 +109,8 @@ ref = "vX.Y.Z"
 
 Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.toml) lists each pack's checks.
 
+**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Move those keys to `.mstack.toml` next to it, where the guards now read them. The guards themselves moved to mstack: run `mstack coverage`, `mstack exceptions`, `mstack domain-check` and `mstack commit-msg` where you ran the `rulepack` commands, and rename a `rulepack-commit-msg` hook id.
+
 **Migrating from mstack `v6.x`:**
 
 Every repo:
@@ -136,16 +138,16 @@ The `rulepack` that lints this repo is a dev dependency, pinned in `pyproject.to
 Prose rules use `## Checks` to declare how they are reviewed. An ast-grep check can stand alone or declare a link to a prose rule with `metadata.source`. `make lint-rules` fails when:
 
 - a check's own valid or invalid cases fail (`ast-grep test`), or the code breaks a check (`ast-grep scan`);
-- a prose rule lacks a valid Checks section or a declared source link is invalid (`rulepack coverage`);
-- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`rulepack exceptions`):
+- a prose rule lacks a valid Checks section or a declared source link is invalid (`mstack coverage`);
+- an `ast-grep-ignore` has no `rule-exception` with reason, expiry and approval (`mstack exceptions`):
 
   ```python
   # rule-exception: reason="third-party legacy API" expires=2027-03-31 approved-by=@user
   # ast-grep-ignore: no-manual-init-boilerplate
   ```
 
-- rules or checks contain repo identifiers, URLs, hosts or emails (`rulepack domain-check`); secrets are gitleaks' job;
-- a commit message doesn't follow Conventional Commits (`rulepack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
+- rules or checks contain repo identifiers, URLs, hosts or emails (`mstack domain-check`); secrets are gitleaks' job;
+- a commit message doesn't follow Conventional Commits (`mstack commit-msg`, as a commit-msg hook and in CI for every commit of a pull request);
 - a skill in `skills/` has a broken frontmatter, a name that doesn't match its folder, a broken relative link, or is missing the principles header or its upstream credit (`mstack skills-check`);
 - a check in `lint/rules/` has no rule test with both `valid` and `invalid` cases, a rule test names no check, or two checks share an id (`mstack rule-tests-check`). `ast-grep test` alone passes when a check has no test.
 

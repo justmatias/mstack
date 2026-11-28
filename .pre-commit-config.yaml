@@ -88,8 +88,8 @@ repos:
         pass_filenames: false
         always_run: true
 
-      - id: rulepack-commit-msg
-        name: rulepack commit-msg (Conventional Commits)
-        entry: uv run rulepack commit-msg
+      - id: mstack-commit-msg
+        name: mstack commit-msg (Conventional Commits)
+        entry: uv run mstack commit-msg
         language: system
         stages: [commit-msg]

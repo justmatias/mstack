@@ -24,7 +24,7 @@ Shared references: [rule format](../sync/references/rule-format.md), [authoring 
 First, read recent commits, reverts, review comments, agent instruction files, and comments that explain workarounds. Also read:
 
 - **PR review comments:** `gh pr list --state merged --limit 50 --json number,title` and `gh api repos/{owner}/{repo}/pulls/<number>/comments --jq '.[].body'`.
-- **Existing exceptions:** `rulepack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
+- **Existing exceptions:** `mstack exceptions --json`. Many exceptions to the same rule mean the rule is wrong or an architecture change is missing.
 - **Accumulated warnings:** `rulepack lint --only scan --json`, whose `scan.findings` list every finding with its `rule` and `severity`, counted per rule id.
 - **Optionally, recent agent transcripts** for this workspace only (see discovery).
 - **Search helpers:** `git log --oneline -n 200`, `git log --grep='revert\|fix' -i`, `git log -S '<construct>'`, `rg -n 'workaround|HACK|XXX|do not|don.t use'`.
@@ -46,7 +46,7 @@ Keep the fix and its rationale with the enforcement. When a check covers a prose
 
 Then fix the most frequent classes now, one commit each, most frequent first, with Conventional Commits messages (`feat(rules): add <id> check`). Prove each new check fails on a real past mistake: read it with `git show <sha>`, rewrite it as a synthetic snippet with generic names (`Foo`, `Item`, `do_work`) that keeps its structure, and make it an `invalid` case. Cite the sha in your reply, never in the test. Run the same command locally and in CI (`rulepack lint`). Exceptions go on the offending line with a reason, an expiry date, and a human's approval, in the `rule-exception` format from the rule-format reference. Never invent the approval.
 
-Run `rulepack domain-check` over every generated file before committing, and reread everything for English.
+Run `mstack domain-check` over every generated file before committing, and reread everything for English.
 
 ## Repeats
 
