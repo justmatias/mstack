@@ -114,7 +114,6 @@ Reread everything you generated. Rewrite any identifier of the analyzed repo, UR
 ```bash
 rulepack lint
 rulepack lint --changed   # only the changed files, warnings included
-make demo               # only in repos that have fixtures/invalid/
 ```
 
 A repo with `make lint-rules` targets may call them instead; they run the same command.

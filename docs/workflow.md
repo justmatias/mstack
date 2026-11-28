@@ -112,7 +112,6 @@ make setup                 # dev dependencies
 uv run pre-commit install  # pre-commit hooks
 make lint-rules-changed    # what every change must pass (AGENTS.md)
 make test                  # pytest
-make demo                  # fixtures/invalid/ must fail the scan
 ```
 
 - **Add a rule to mstack.** Put review guidance in `rules/<name>.mdc`. Put a new automated check and its cases under `lint/`. Add a sample that breaks the check under `fixtures/invalid/`. Code in `fixtures/valid/` must stay clean.

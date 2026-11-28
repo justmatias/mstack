@@ -131,7 +131,6 @@ make lint                 # every pre-commit hook on every file
 make lint-rules           # rulepack lint: check tests, full scan and guards
 make lint-rules-changed   # rulepack lint --changed: the scan covers only changed files and warnings fail
 make test                 # pytest
-make demo                 # scans fixtures/invalid/, which must fail
 ```
 
 The `rulepack` that lints this repo is a dev dependency, pinned in `pyproject.toml`. It brings ast-grep and import-linter.

@@ -3,6 +3,6 @@
 sgconfig = "lint/sgconfig.yml"
 
 [scan]
-# fixtures/invalid/ breaks every rule on purpose; it is only scanned by `make demo`.
+# fixtures/invalid/ breaks every rule on purpose; the tests scan each file and expect findings.
 exclude = ["fixtures/invalid/**"]
 extensions = [".py"]

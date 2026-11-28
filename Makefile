@@ -7,7 +7,7 @@ RULEPACK := uv run rulepack
 # The paths come from .rulepack.toml (sgconfig, scan excludes).
 SGCONFIG := lint/sgconfig.yml
 
-.PHONY: setup lint-rules lint-rules-changed repo-guards demo test lint
+.PHONY: setup lint-rules lint-rules-changed repo-guards test lint
 
 # Dev dependencies only. To install the skills and rules into your user folders, ask
 # your agent to set up mstack (.agents/skills/setup-mstack/SKILL.md).
@@ -37,14 +37,6 @@ repo-guards:
 	$(MSTACK) coverage --rules-dir rules
 	$(MSTACK) skills-check skills .agents/skills
 	$(MSTACK) rule-tests-check --sgconfig $(SGCONFIG)
-
-# The scan over fixtures/invalid/ MUST fail: it proves the checks still catch real mistakes.
-demo:
-	@if $(AST_GREP) scan -c $(SGCONFIG) fixtures/invalid; then \
-		echo "demo: the scan found no errors in fixtures/invalid/; the checks are broken" >&2; exit 1; \
-	else \
-		echo "demo: OK, the scan failed on fixtures/invalid/ as expected"; \
-	fi
 
 test:
 	uv run pytest -q

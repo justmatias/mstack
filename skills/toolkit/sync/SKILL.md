@@ -90,7 +90,6 @@ One commit per synced rule (include its check and tests when they change), with 
 
 ```bash
 rulepack lint
-make demo          # when the repo has fixtures/invalid/
 ```
 
 Verify every generated file before committing (authoring step 8). Running the skill a second time in a row must find everything `ok` and change nothing.
