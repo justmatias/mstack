@@ -1,6 +1,6 @@
 ---
 name: declutter
-description: "Simplify code that already works without changing what it does: understand why each piece exists first, look for concrete complexity signals (deep nesting, long functions, nested ternaries, flag parameters, dead code, needless wrappers), apply one change at a time with the tests run after each, and compare before and after. The repo's own rules always win over a signal. Use for /code-simplification, simplify this, clean up this function, reduce the nesting, make this easier to read, or after a feature works but its code is heavier than it needs to be."
+description: "Simplify code that already works without changing what it does: understand why each piece exists first, look for concrete complexity signals (deep nesting, long functions, nested ternaries, flag parameters, dead code, needless wrappers), apply one change at a time with the tests run after each, and compare before and after. The repo's own rules always win over a signal. Use for /declutter, simplify this, clean up this function, reduce the nesting, make this easier to read, or after a feature works but its code is heavier than it needs to be."
 disable-model-invocation: true
 license: MIT
 metadata:
