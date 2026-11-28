@@ -107,6 +107,15 @@ def read_toml(path: Path | None) -> dict[str, Any]:
         raise ConfigError(f"{path}: invalid TOML ({error})") from error
 
 
+def validate_settings[Settings: BaseModel](
+    model: type[Settings], path: Path | None
+) -> Settings:
+    try:
+        return model.model_validate(read_toml(path))
+    except ValidationError as error:
+        raise ConfigError(f"{path}: {error}") from error
+
+
 def absolute(path: Path, base: Path) -> Path:
     path = path.expanduser()
     return path if path.is_absolute() else base / path
@@ -118,11 +127,8 @@ def resolve_config(start: Path | None = None) -> GuardConfig:
     git_root = find_git_root(start)
     guard_file = find_config_path(start, git_root, CONFIG_FILE_NAME)
     rulepack_file = find_config_path(start, git_root, RULEPACK_CONFIG_FILE_NAME)
-    try:
-        guard_settings = GuardSettings.model_validate(read_toml(guard_file))
-        rulepack_settings = RulepackSettings.model_validate(read_toml(rulepack_file))
-    except ValidationError as error:
-        raise ConfigError(str(error)) from error
+    guard_settings = validate_settings(GuardSettings, guard_file)
+    rulepack_settings = validate_settings(RulepackSettings, rulepack_file)
     fallback_root = git_root or start
     guard_root = guard_file.parent if guard_file else fallback_root
     rulepack_root = rulepack_file.parent if rulepack_file else fallback_root

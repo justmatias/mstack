@@ -4,6 +4,9 @@ from pathlib import Path
 # coverage, domain-check, exceptions and commit-msg moved back: rulepack v0.7.0
 # dropped them, and they run as `mstack <command>`.
 MOVED_COMMAND = re.compile(r"(\bmstack|\$\(MSTACK\)) (lint|hook|init|config|packs)\b")
+MOVED_BACK_COMMAND = re.compile(
+    r"(\brulepack|\$\(RULEPACK\)) (coverage|domain-check|exceptions|commit-msg)\b"
+)
 
 
 def test_file_runs_moved_commands_through_rulepack_when_it_names_one(
@@ -12,3 +15,4 @@ def test_file_runs_moved_commands_through_rulepack_when_it_names_one(
     text = command_reference_file.read_text(encoding="utf-8", errors="replace")
 
     assert MOVED_COMMAND.findall(text) == []
+    assert MOVED_BACK_COMMAND.findall(text) == []

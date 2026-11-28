@@ -1,4 +1,4 @@
-# Generic names that `rulepack domain-check` never reports, even when the analyzed
+# Generic names that `mstack domain-check` never reports, even when the analyzed
 # repo defines them. One name per line; lines with a dot are allowed public hosts.
 # Keep this list generic: never add a business, client, product or team name here.
 

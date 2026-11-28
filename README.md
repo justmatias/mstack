@@ -109,13 +109,23 @@ ref = "vX.Y.Z"
 
 Then run `rulepack packs lock` and commit `rulepack.lock`. [`packs.toml`](packs.toml) lists each pack's checks.
 
-**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Move those keys to `.mstack.toml` next to it, where the guards now read them. The guards themselves moved to mstack: run `mstack coverage`, `mstack exceptions`, `mstack domain-check` and `mstack commit-msg` where you ran the `rulepack` commands, and rename a `rulepack-commit-msg` hook id.
+**Moving to rulepack `v0.7.0`:** it no longer accepts `rules_dir`, `pre_commit_config`, `[domain_check]` or `[commits]` in `.rulepack.toml`, and the agent hooks stop with a config error until they are gone. Move those keys to `.mstack.toml` next to it, where the guards now read them. The guards themselves moved to mstack, and `rulepack lint`, its hooks and its GitHub Action no longer run them: call `mstack coverage`, `mstack exceptions` and `mstack domain-check` in your own CI step or Makefile target. rulepack no longer ships the `rulepack-commit-msg` hook; replace it with a local hook, which needs `mstack` on `PATH`:
+
+```yaml
+- repo: local
+  hooks:
+    - id: mstack-commit-msg
+      name: mstack commit-msg
+      entry: mstack commit-msg
+      language: system
+      stages: [commit-msg]
+```
 
 **Migrating from mstack `v6.x`:**
 
 Every repo:
 
-- Rename `.mstack.toml` to `.rulepack.toml` (rulepack fails with a rename message until you do). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
+- Move `sgconfig`, `importlinter`, `[scan]`, `[hooks]` and `[changed]` from `.mstack.toml` to a new `.rulepack.toml`, and keep `rules_dir`, `pre_commit_config`, `[domain_check]` and `[commits]` in `.mstack.toml` (rulepack `v0.7.0` rejects them). In `.pre-commit-config.yaml`, change `repo:` to `https://github.com/justmatias/rulepack`, pin a rulepack tag and rename the hook ids rulepack still ships from `mstack-*` to `rulepack-*`, also in any `enforced-by-hook:` line of the prose rules. Keep the commit-msg hook as the local `mstack-commit-msg` hook above. Replace `uses: justmatias/mstack@...` with `uses: justmatias/rulepack@...` (the `mstack-version` input becomes `rulepack-version`). Rerun the mstack setup so the agent hooks run `rulepack hook`.
 A repo that also selected packs (`packs = [...]`):
 
 - Change `python-core` and `testing` to `mstack/python-core` and `mstack/testing`, and drop `git`, which had no checks and is gone.
